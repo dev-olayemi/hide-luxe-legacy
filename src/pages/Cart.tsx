@@ -1,29 +1,14 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useCart } from "@/contexts/CartContext";
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState<any[]>([]);
+  const { cartItems, removeFromCart, updateQuantity } = useCart();
   const WHATSAPP_NUMBER = "+2348144977227";
-
-  const updateQuantity = (id: string, change: number) => {
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + change) }
-          : item
-      )
-    );
-  };
-
-  const removeItem = (id: string) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-  };
-
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const handleWhatsAppCheckout = () => {
@@ -77,7 +62,7 @@ const Cart = () => {
                       <Button
                         size="icon"
                         variant="ghost"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeFromCart(item.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -86,7 +71,7 @@ const Cart = () => {
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8"
-                          onClick={() => updateQuantity(item.id, -1)}
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
@@ -95,7 +80,7 @@ const Cart = () => {
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8"
-                          onClick={() => updateQuantity(item.id, 1)}
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
                         >
                           <Plus className="h-3 w-3" />
                         </Button>

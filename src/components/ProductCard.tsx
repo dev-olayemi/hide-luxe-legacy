@@ -2,6 +2,8 @@ import { Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useCart } from "@/contexts/CartContext";
+import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
   id: string;
@@ -13,6 +15,19 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ id, name, price, image, category, isNew }: ProductCardProps) => {
+  const { addToCart, toggleWishlist, isInWishlist } = useCart();
+  const inWishlist = isInWishlist(id);
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    addToCart({ id, name, price, image, category: category || "" });
+  };
+
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    toggleWishlist(id);
+  };
+
   return (
     <Card className="group overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300">
       <Link to={`/product/${id}`}>
@@ -30,13 +45,13 @@ export const ProductCard = ({ id, name, price, image, category, isNew }: Product
           <Button
             size="icon"
             variant="secondary"
-            className="absolute top-3 right-3 h-9 w-9 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={(e) => {
-              e.preventDefault();
-              // Add to wishlist logic
-            }}
+            className={cn(
+              "absolute top-3 right-3 h-9 w-9 rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
+              inWishlist && "opacity-100"
+            )}
+            onClick={handleToggleWishlist}
           >
-            <Heart className="h-4 w-4" />
+            <Heart className={cn("h-4 w-4", inWishlist && "fill-accent text-accent")} />
           </Button>
         </div>
       </Link>
@@ -56,10 +71,7 @@ export const ProductCard = ({ id, name, price, image, category, isNew }: Product
             size="sm" 
             variant="outline"
             className="text-xs"
-            onClick={(e) => {
-              e.preventDefault();
-              // Add to cart logic
-            }}
+            onClick={handleAddToCart}
           >
             Add to Cart
           </Button>

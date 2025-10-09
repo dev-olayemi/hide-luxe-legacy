@@ -1,12 +1,15 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { ProductCard } from "@/components/ProductCard";
+import { useCart } from "@/contexts/CartContext";
+import { products as allProducts } from "@/lib/products";
 
 const Wishlist = () => {
-  const [wishlistItems] = useState<any[]>([]);
+  const { wishlistItems } = useCart();
+  const wishlistProducts = allProducts.filter(p => wishlistItems.includes(p.id));
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -17,7 +20,7 @@ const Wishlist = () => {
           Wishlist
         </h1>
 
-        {wishlistItems.length === 0 ? (
+        {wishlistProducts.length === 0 ? (
           <div className="text-center py-16">
             <Heart className="h-24 w-24 mx-auto mb-4 text-muted-foreground" />
             <h2 className="font-playfair text-2xl font-bold mb-4">Your wishlist is empty</h2>
@@ -30,7 +33,9 @@ const Wishlist = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Wishlist items will be rendered here */}
+            {wishlistProducts.map((product) => (
+              <ProductCard key={product.id} {...product} />
+            ))}
           </div>
         )}
       </main>

@@ -4,45 +4,12 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
+import { products } from "@/lib/products";
 import heroImage from "@/assets/hero-leather-craft.jpg";
-import menOxford from "@/assets/products/men-oxford-black.jpg";
-import womenHeels from "@/assets/products/women-heels-brown.jpg";
 import menLoafers from "@/assets/products/men-loafers-brown.jpg";
 import womenBoots from "@/assets/products/women-boots-black.jpg";
 
 const Index = () => {
-  const featuredProducts = [
-    {
-      id: "1",
-      name: "Classic Oxford Black",
-      price: 125000,
-      image: menOxford,
-      category: "Men's Footwear",
-      isNew: true,
-    },
-    {
-      id: "2",
-      name: "Elegant Leather Heels",
-      price: 95000,
-      image: womenHeels,
-      category: "Women's Footwear",
-      isNew: true,
-    },
-    {
-      id: "3",
-      name: "Premium Brown Loafers",
-      price: 110000,
-      image: menLoafers,
-      category: "Men's Footwear",
-    },
-    {
-      id: "4",
-      name: "Sophisticated Ankle Boots",
-      price: 135000,
-      image: womenBoots,
-      category: "Women's Footwear",
-    },
-  ];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -98,7 +65,7 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {featuredProducts.map((product) => (
+            {products.map((product) => (
               <ProductCard key={product.id} {...product} />
             ))}
           </div>

@@ -1,27 +1,10 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
-import menOxford from "@/assets/products/men-oxford-black.jpg";
-import menLoafers from "@/assets/products/men-loafers-brown.jpg";
+import { getProductsByCategory } from "@/lib/products";
 
 const Men = () => {
-  const products = [
-    {
-      id: "1",
-      name: "Classic Oxford Black",
-      price: 125000,
-      image: menOxford,
-      category: "Men's Footwear",
-      isNew: true,
-    },
-    {
-      id: "3",
-      name: "Premium Brown Loafers",
-      price: 110000,
-      image: menLoafers,
-      category: "Men's Footwear",
-    },
-  ];
+  const products = getProductsByCategory("Men's Footwear");
 
   return (
     <div className="min-h-screen flex flex-col">

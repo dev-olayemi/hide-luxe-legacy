@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, Search, ShoppingCart, Heart, User, X } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -11,8 +12,9 @@ import logo from "@/assets/logo-icon.jpg";
 export const Header = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const cartCount = 0; // Will be managed by context later
-  const wishlistCount = 0;
+  const { cartItems, wishlistItems } = useCart();
+  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const wishlistCount = wishlistItems.length;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
@@ -146,6 +148,10 @@ export const Header = () => {
 };
 
 const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
+  const { cartItems, wishlistItems } = useCart();
+  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const wishlistCount = wishlistItems.length;
+  
   return (
     <div className="flex h-full flex-col">
       <div className="border-b p-4">
@@ -209,14 +215,14 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
           <Button variant="outline" className="w-full justify-start gap-2">
             <ShoppingCart className="h-4 w-4" />
             SHOPPING CART
-            <Badge className="ml-auto">0</Badge>
+            {cartCount > 0 && <Badge className="ml-auto">{cartCount}</Badge>}
           </Button>
         </Link>
         <Link to="/wishlist" onClick={onClose}>
           <Button variant="outline" className="w-full justify-start gap-2">
             <Heart className="h-4 w-4" />
             WISHLIST
-            <Badge className="ml-auto">0</Badge>
+            {wishlistCount > 0 && <Badge className="ml-auto">{wishlistCount}</Badge>}
           </Button>
         </Link>
         <Link to="/auth" onClick={onClose}>

@@ -1,27 +1,10 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
-import womenHeels from "@/assets/products/women-heels-brown.jpg";
-import womenBoots from "@/assets/products/women-boots-black.jpg";
+import { getProductsByCategory } from "@/lib/products";
 
 const Women = () => {
-  const products = [
-    {
-      id: "2",
-      name: "Elegant Leather Heels",
-      price: 95000,
-      image: womenHeels,
-      category: "Women's Footwear",
-      isNew: true,
-    },
-    {
-      id: "4",
-      name: "Sophisticated Ankle Boots",
-      price: 135000,
-      image: womenBoots,
-      category: "Women's Footwear",
-    },
-  ];
+  const products = getProductsByCategory("Women's Footwear");
 
   return (
     <div className="min-h-screen flex flex-col">
