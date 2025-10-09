@@ -1,24 +1,49 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Menu, Search, ShoppingCart, Heart, User, X } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  Menu,
+  Search,
+  ShoppingCart,
+  Heart,
+  User,
+  X,
+  LogOut,
+} from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/logo-icon.jpg";
+import { useAuth } from "@/contexts/AuthContext";
+import { signOut } from "firebase/auth";
+import { auth } from "@/firebase/firebaseUtils";
+
+// Helper for avatar initials
+const getInitials = (email?: string) => {
+  if (!email) return "U";
+  return email[0].toUpperCase();
+};
 
 export const Header = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { cartItems, wishlistItems } = useCart();
+  const { user } = useAuth();
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const wishlistCount = wishlistItems.length;
+  const navigate = useNavigate();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-2 sm:px-4">
         {/* Mobile Header */}
         <div className="flex h-16 items-center justify-between md:hidden">
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -33,11 +58,19 @@ export const Header = () => {
           </Sheet>
 
           <Link to="/" className="flex items-center">
-            <img src={logo} alt="28th Hide Luxe" className="h-10 w-10" />
+            <img
+              src={logo}
+              alt="28th Hide Luxe"
+              className="h-10 w-10 rounded-full"
+            />
           </Link>
 
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setSearchOpen(!searchOpen)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSearchOpen(!searchOpen)}
+            >
               <Search className="h-5 w-5" />
             </Button>
             <Link to="/cart">
@@ -50,6 +83,33 @@ export const Header = () => {
                 )}
               </Button>
             </Link>
+            {user ? (
+              <div className="relative group">
+                <button className="rounded-full bg-accent flex items-center justify-center h-9 w-9 text-lg font-bold text-white">
+                  {getInitials(user.email)}
+                </button>
+                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg p-2 opacity-0 group-hover:opacity-100 transition pointer-events-none group-hover:pointer-events-auto z-50">
+                  <div className="mb-2 text-xs text-gray-700">{user.email}</div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full flex gap-2 items-center"
+                    onClick={async () => {
+                      await signOut(auth);
+                      navigate("/auth");
+                    }}
+                  >
+                    <LogOut className="h-4 w-4" /> Logout
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Link to="/auth">
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -57,21 +117,38 @@ export const Header = () => {
         <div className="hidden md:flex md:h-20 md:items-center md:justify-between">
           <div className="flex items-center gap-8">
             <Link to="/" className="flex items-center gap-3">
-              <img src={logo} alt="28th Hide Luxe" className="h-12 w-12" />
+              <img
+                src={logo}
+                alt="28th Hide Luxe"
+                className="h-12 w-12 rounded-full"
+              />
               <div className="flex flex-col">
-                <span className="font-playfair text-xl font-bold tracking-tight">28TH HIDE LUXE</span>
-                <span className="text-xs tracking-widest text-muted-foreground">LUXURY. LEATHER. LEGACY.</span>
+                <span className="font-playfair text-xl font-bold tracking-tight">
+                  28TH HIDE LUXE
+                </span>
+                <span className="text-xs tracking-widest text-muted-foreground">
+                  LUXURY. LEATHER. LEGACY.
+                </span>
               </div>
             </Link>
 
             <nav className="flex items-center gap-6">
-              <Link to="/new-arrivals" className="text-sm font-medium hover:text-accent transition-colors">
+              <Link
+                to="/new-arrivals"
+                className="text-sm font-medium hover:text-accent transition-colors"
+              >
                 NEW ARRIVALS
               </Link>
-              <Link to="/men" className="text-sm font-medium hover:text-accent transition-colors">
+              <Link
+                to="/men"
+                className="text-sm font-medium hover:text-accent transition-colors"
+              >
                 MEN
               </Link>
-              <Link to="/women" className="text-sm font-medium hover:text-accent transition-colors">
+              <Link
+                to="/women"
+                className="text-sm font-medium hover:text-accent transition-colors"
+              >
                 WOMEN
               </Link>
             </nav>
@@ -121,11 +198,35 @@ export const Header = () => {
               </Button>
             </Link>
 
-            <Link to="/auth">
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-              </Button>
-            </Link>
+            {user ? (
+              <div className="relative group">
+                <button className="rounded-full bg-accent flex items-center justify-center h-10 w-10 text-lg font-bold text-white">
+                  {getInitials(user.email)}
+                </button>
+                <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg p-3 opacity-0 group-hover:opacity-100 transition pointer-events-none group-hover:pointer-events-auto z-50">
+                  <div className="mb-2 text-xs text-gray-700 font-semibold">
+                    {user.email}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full flex gap-2 items-center"
+                    onClick={async () => {
+                      await signOut(auth);
+                      navigate("/auth");
+                    }}
+                  >
+                    <LogOut className="h-4 w-4" /> Logout
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Link to="/auth">
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -151,7 +252,7 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
   const { cartItems, wishlistItems } = useCart();
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const wishlistCount = wishlistItems.length;
-  
+
   return (
     <div className="flex h-full flex-col">
       <div className="border-b p-4">
@@ -182,8 +283,10 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
 
       <div className="flex-1 overflow-y-auto">
         <div className="p-4">
-          <h2 className="font-playfair text-sm font-bold tracking-wide mb-4">28TH HIDE LUXE</h2>
-          
+          <h2 className="font-playfair text-sm font-bold tracking-wide mb-4">
+            28TH HIDE LUXE
+          </h2>
+
           <nav className="space-y-1">
             <Link
               to="/new-arrivals"
@@ -222,7 +325,9 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
           <Button variant="outline" className="w-full justify-start gap-2">
             <Heart className="h-4 w-4" />
             WISHLIST
-            {wishlistCount > 0 && <Badge className="ml-auto">{wishlistCount}</Badge>}
+            {wishlistCount > 0 && (
+              <Badge className="ml-auto">{wishlistCount}</Badge>
+            )}
           </Button>
         </Link>
         <Link to="/auth" onClick={onClose}>

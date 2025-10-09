@@ -14,7 +14,14 @@ interface ProductCardProps {
   isNew?: boolean;
 }
 
-export const ProductCard = ({ id, name, price, image, category, isNew }: ProductCardProps) => {
+export const ProductCard = ({
+  id,
+  name,
+  price,
+  image,
+  category,
+  isNew,
+}: ProductCardProps) => {
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const inWishlist = isInWishlist(id);
 
@@ -32,8 +39,8 @@ export const ProductCard = ({ id, name, price, image, category, isNew }: Product
     <Card className="group overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300">
       <Link to={`/product/${id}`}>
         <div className="relative aspect-square overflow-hidden bg-muted">
-          <img 
-            src={image} 
+          <img
+            src={image}
             alt={name}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
@@ -51,14 +58,18 @@ export const ProductCard = ({ id, name, price, image, category, isNew }: Product
             )}
             onClick={handleToggleWishlist}
           >
-            <Heart className={cn("h-4 w-4", inWishlist && "fill-accent text-accent")} />
+            <Heart
+              className={cn("h-4 w-4", inWishlist && "fill-accent text-accent")}
+            />
           </Button>
         </div>
       </Link>
 
       <div className="p-4">
         {category && (
-          <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wide">{category}</p>
+          <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wide">
+            {category}
+          </p>
         )}
         <Link to={`/product/${id}`}>
           <h3 className="font-playfair font-medium mb-2 hover:text-accent transition-colors line-clamp-2">
@@ -67,8 +78,8 @@ export const ProductCard = ({ id, name, price, image, category, isNew }: Product
         </Link>
         <div className="flex items-center justify-between">
           <p className="font-semibold">₦{price.toLocaleString()}</p>
-          <Button 
-            size="sm" 
+          <Button
+            size="sm"
             variant="outline"
             className="text-xs"
             onClick={handleAddToCart}

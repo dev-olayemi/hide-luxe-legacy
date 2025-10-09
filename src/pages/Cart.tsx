@@ -5,27 +5,47 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useCart } from "@/contexts/CartContext";
+import { v4 as uuidv4 } from "uuid";
 
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity } = useCart();
   const WHATSAPP_NUMBER = "+2348144977227";
-  const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
 
   const handleWhatsAppCheckout = () => {
     const cartDetails = cartItems
-      .map(item => `${item.name} (x${item.quantity}): ₦${(item.price * item.quantity).toLocaleString()}`)
+      .map(
+        (item) =>
+          `${item.name} (x${item.quantity}): ₦${(
+            item.price * item.quantity
+          ).toLocaleString()}`
+      )
       .join("\n");
-    
-    const message = `Hello, kindly confirm this order for me. I want to make payment.\n\nCart details:\n${cartDetails}\n\nTotal: ₦${total.toLocaleString()}`;
-    
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+
+    const message = `Hello, kindly confirm this order for me. I want to make payment.\n\nCart details:\n${cartDetails}\n\nTotal: ₦${total.toLocaleString()}\n\nCart link: ${cartLink}`;
+
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER.replace(
+      /[^0-9]/g,
+      ""
+    )}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
   };
+
+  // Generate or retrieve cartId from localStorage
+  let cartId = localStorage.getItem("cartId");
+  if (!cartId) {
+    cartId = uuidv4();
+    localStorage.setItem("cartId", cartId);
+  }
+  const cartLink = `${window.location.origin}/cart-details/${cartId}`;
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      
+
       <main className="flex-1 container mx-auto px-4 py-12">
         <h1 className="font-playfair text-4xl md:text-5xl font-bold mb-8">
           Shopping Cart
@@ -34,7 +54,9 @@ const Cart = () => {
         {cartItems.length === 0 ? (
           <div className="text-center py-16">
             <ShoppingBag className="h-24 w-24 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="font-playfair text-2xl font-bold mb-4">Your cart is empty</h2>
+            <h2 className="font-playfair text-2xl font-bold mb-4">
+              Your cart is empty
+            </h2>
             <p className="text-muted-foreground mb-8">
               Start shopping and add items to your cart
             </p>
@@ -54,9 +76,15 @@ const Cart = () => {
                       className="h-24 w-24 object-cover rounded"
                     />
                     <div className="flex-1">
-                      <h3 className="font-playfair font-medium mb-1">{item.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-2">{item.category}</p>
-                      <p className="font-semibold">₦{item.price.toLocaleString()}</p>
+                      <h3 className="font-playfair font-medium mb-1">
+                        {item.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {item.category}
+                      </p>
+                      <p className="font-semibold">
+                        ₦{item.price.toLocaleString()}
+                      </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <Button
@@ -71,16 +99,22 @@ const Cart = () => {
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() =>
+                            updateQuantity(item.id, item.quantity - 1)
+                          }
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
-                        <span className="w-8 text-center text-sm">{item.quantity}</span>
+                        <span className="w-8 text-center text-sm">
+                          {item.quantity}
+                        </span>
                         <Button
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() =>
+                            updateQuantity(item.id, item.quantity + 1)
+                          }
                         >
                           <Plus className="h-3 w-3" />
                         </Button>
@@ -93,7 +127,9 @@ const Cart = () => {
 
             <div>
               <Card className="p-6 sticky top-24">
-                <h2 className="font-playfair text-2xl font-bold mb-4">Order Summary</h2>
+                <h2 className="font-playfair text-2xl font-bold mb-4">
+                  Order Summary
+                </h2>
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
@@ -110,8 +146,8 @@ const Cart = () => {
                     <span>₦{total.toLocaleString()}</span>
                   </div>
                 </div>
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   size="lg"
                   onClick={handleWhatsAppCheckout}
                 >
@@ -120,6 +156,20 @@ const Cart = () => {
                 <p className="text-xs text-center text-muted-foreground mt-4">
                   You'll be redirected to WhatsApp to complete your order
                 </p>
+                {/* Cart link for seller */}
+                <div className="mt-6 text-center">
+                  <p className="text-sm mb-2">
+                    Share this cart link with the seller:
+                  </p>
+                  <div className="bg-muted rounded px-3 py-2 break-all inline-block">
+                    <a
+                      href={`/cart-details/${cartId}`}
+                      className="text-blue-600 underline"
+                    >
+                      {cartLink}
+                    </a>
+                  </div>
+                </div>
               </Card>
             </div>
           </div>

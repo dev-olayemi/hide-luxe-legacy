@@ -15,33 +15,45 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import ProductDetail from "./pages/ProductDetail";
 import NotFound from "./pages/NotFound";
+import CartDetails from "@/pages/CartDetails";
+import { AuthProvider } from "@/contexts/AuthContext";
+import AdminAuth from "@/admin/AdminAuth";
+import AdminDashboard from "@/admin/AdminDashboard";
+import AdminProducts from "@/admin/AdminProducts";
+import ProjectDetail from "@/pages/ProjectDetail";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <CartProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/new-arrivals" element={<NewArrivals />} />
-          <Route path="/men" element={<Men />} />
-          <Route path="/women" element={<Women />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/wishlist" element={<Wishlist />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/new-arrivals" element={<NewArrivals />} />
+              <Route path="/men" element={<Men />} />
+              <Route path="/women" element={<Women />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/cart-details/:cartId" element={<CartDetails />} />
+              <Route path="/admin/auth" element={<AdminAuth />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/products" element={<AdminProducts />} />
+              <Route path="/project/:id" element={<ProjectDetail />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </CartProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

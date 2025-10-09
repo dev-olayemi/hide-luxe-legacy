@@ -1,4 +1,5 @@
-import { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Heart, ShoppingCart, ArrowLeft } from "lucide-react";
 import { Header } from "@/components/Header";
@@ -8,17 +9,38 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useCart } from "@/contexts/CartContext";
-import { getProductById } from "@/lib/products";
+import { getProductById } from "@/firebase/firebaseUtils";
 import { cn } from "@/lib/utils";
 import NotFound from "./NotFound";
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const product = id ? getProductById(id) : undefined;
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
-  
+
+  const [product, setProduct] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
+
+  useEffect(() => {
+    if (!id) return;
+    getProductById(id).then((data) => {
+      setProduct(data || null);
+      setLoading(false);
+    });
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-gray-400">Loading product...</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!product) {
     return <NotFound />;
@@ -35,7 +57,10 @@ const ProductDetail = () => {
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.image,
+      image:
+        Array.isArray(product.images) && product.images.length > 0
+          ? product.images[0]
+          : "",
       category: product.category,
     });
   };
@@ -43,9 +68,12 @@ const ProductDetail = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      
+
       <main className="flex-1 container mx-auto px-4 py-12">
-        <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-accent mb-8 transition-colors">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-accent mb-8 transition-colors"
+        >
           <ArrowLeft className="h-4 w-4" />
           Back to Home
         </Link>
@@ -55,7 +83,11 @@ const ProductDetail = () => {
           <div className="space-y-4">
             <div className="aspect-square bg-muted rounded-lg overflow-hidden">
               <img
-                src={product.image}
+                src={
+                  Array.isArray(product.images) && product.images.length > 0
+                    ? product.images[0]
+                    : "/placeholder.png"
+                }
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
@@ -63,8 +95,15 @@ const ProductDetail = () => {
             {product.images && product.images.length > 1 && (
               <div className="grid grid-cols-4 gap-4">
                 {product.images.map((img, idx) => (
-                  <div key={idx} className="aspect-square bg-muted rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-accent transition-colors">
-                    <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-cover" />
+                  <div
+                    key={idx}
+                    className="aspect-square bg-muted rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-accent transition-colors"
+                  >
+                    <img
+                      src={img}
+                      alt={`${product.name} ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 ))}
               </div>
@@ -80,9 +119,7 @@ const ProductDetail = () => {
               <h1 className="font-playfair text-4xl font-bold mb-4">
                 {product.name}
               </h1>
-              {product.isNew && (
-                <Badge className="mb-4">New Arrival</Badge>
-              )}
+              {product.isNew && <Badge className="mb-4">New Arrival</Badge>}
               <p className="text-3xl font-semibold mb-6">
                 ₦{product.price.toLocaleString()}
               </p>
@@ -96,11 +133,18 @@ const ProductDetail = () => {
             {product.colors.length > 0 && (
               <div className="space-y-3">
                 <Label className="text-base font-medium">Color</Label>
-                <RadioGroup value={selectedColor} onValueChange={setSelectedColor}>
+                <RadioGroup
+                  value={selectedColor}
+                  onValueChange={setSelectedColor}
+                >
                   <div className="flex gap-3">
                     {product.colors.map((color) => (
                       <div key={color} className="flex items-center">
-                        <RadioGroupItem value={color} id={`color-${color}`} className="sr-only" />
+                        <RadioGroupItem
+                          value={color}
+                          id={`color-${color}`}
+                          className="sr-only"
+                        />
                         <Label
                           htmlFor={`color-${color}`}
                           className={cn(
@@ -123,11 +167,18 @@ const ProductDetail = () => {
             {product.sizes.length > 0 && (
               <div className="space-y-3">
                 <Label className="text-base font-medium">Size</Label>
-                <RadioGroup value={selectedSize} onValueChange={setSelectedSize}>
+                <RadioGroup
+                  value={selectedSize}
+                  onValueChange={setSelectedSize}
+                >
                   <div className="grid grid-cols-6 gap-2">
                     {product.sizes.map((size) => (
                       <div key={size}>
-                        <RadioGroupItem value={size} id={`size-${size}`} className="sr-only" />
+                        <RadioGroupItem
+                          value={size}
+                          id={`size-${size}`}
+                          className="sr-only"
+                        />
                         <Label
                           htmlFor={`size-${size}`}
                           className={cn(
@@ -148,11 +199,7 @@ const ProductDetail = () => {
 
             {/* Action Buttons */}
             <div className="flex gap-4 pt-4">
-              <Button
-                size="lg"
-                className="flex-1"
-                onClick={handleAddToCart}
-              >
+              <Button size="lg" className="flex-1" onClick={handleAddToCart}>
                 <ShoppingCart className="mr-2 h-5 w-5" />
                 Add to Cart
               </Button>
@@ -162,7 +209,12 @@ const ProductDetail = () => {
                 onClick={() => toggleWishlist(product.id)}
                 className={cn(inWishlist && "border-accent")}
               >
-                <Heart className={cn("h-5 w-5", inWishlist && "fill-accent text-accent")} />
+                <Heart
+                  className={cn(
+                    "h-5 w-5",
+                    inWishlist && "fill-accent text-accent"
+                  )}
+                />
               </Button>
             </div>
 
