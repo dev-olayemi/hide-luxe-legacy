@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { SearchDialog } from "@/components/SearchDialog";
 import {
   Menu,
   Search,
@@ -35,6 +36,7 @@ const getInitials = (email?: string) => {
 export const Header = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { cartItems, wishlistItems } = useCart();
   const { user } = useAuth();
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -61,7 +63,7 @@ export const Header = () => {
             <img
               src={logo}
               alt="28th Hide Luxe"
-              className="h-10 w-10 rounded-full"
+              className="h-14 w-14 rounded-full"
             />
           </Link>
 
@@ -120,7 +122,7 @@ export const Header = () => {
               <img
                 src={logo}
                 alt="28th Hide Luxe"
-                className="h-12 w-12 rounded-full"
+                className="h-16 w-16 rounded-full"
               />
               <div className="flex flex-col">
                 <span className="font-playfair text-xl font-bold tracking-tight">
@@ -181,13 +183,8 @@ export const Header = () => {
               </SelectContent>
             </Select>
 
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search products..."
-                className="w-64 pl-10"
-              />
+            <div className="w-64">
+              <SearchDialog searchQuery={searchQuery} onSearchChange={setSearchQuery} />
             </div>
 
             <Link to="/wishlist">
@@ -247,14 +244,7 @@ export const Header = () => {
         {/* Mobile Search Bar */}
         {searchOpen && (
           <div className="pb-4 md:hidden">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search products..."
-                className="w-full pl-10"
-              />
-            </div>
+            <SearchDialog searchQuery={searchQuery} onSearchChange={setSearchQuery} />
           </div>
         )}
       </div>
@@ -265,6 +255,7 @@ export const Header = () => {
 const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
   const { cartItems, wishlistItems } = useCart();
   const { user } = useAuth();
+  const [searchQuery, setSearchQuery] = useState("");
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const wishlistCount = wishlistItems.length;
 
@@ -290,10 +281,7 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
       </div>
 
       <div className="border-b p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input type="search" placeholder="Search" className="w-full pl-10" />
-        </div>
+        <SearchDialog searchQuery={searchQuery} onSearchChange={setSearchQuery} />
       </div>
 
       <div className="flex-1 overflow-y-auto">

@@ -8,6 +8,11 @@ import Index from "./pages/Index";
 import NewArrivals from "./pages/NewArrivals";
 import Men from "./pages/Men";
 import Women from "./pages/Women";
+import Accessories from "./pages/Accessories";
+import Apparel from "./pages/Apparel";
+import Furniture from "./pages/Furniture";
+import Automotive from "./pages/Automotive";
+import Specialty from "./pages/Specialty";
 import Cart from "./pages/Cart";
 import Wishlist from "./pages/Wishlist";
 import Auth from "./pages/Auth";
@@ -36,9 +41,14 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/new-arrivals" element={<NewArrivals />} />
-              <Route path="/men" element={<Men />} />
-              <Route path="/women" element={<Women />} />
+            <Route path="/new-arrivals" element={<NewArrivals />} />
+            <Route path="/men" element={<Men />} />
+            <Route path="/women" element={<Women />} />
+            <Route path="/accessories" element={<Accessories />} />
+            <Route path="/apparel" element={<Apparel />} />
+            <Route path="/furniture" element={<Furniture />} />
+            <Route path="/automotive" element={<Automotive />} />
+            <Route path="/specialty" element={<Specialty />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/auth" element={<Auth />} />
