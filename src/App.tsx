@@ -14,6 +14,8 @@ import Auth from "./pages/Auth";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import ProductDetail from "./pages/ProductDetail";
+import Bespoke from "./pages/Bespoke";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import CartDetails from "@/pages/CartDetails";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -43,6 +45,8 @@ const App = () => (
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/bespoke" element={<Bespoke />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/cart-details/:cartId" element={<CartDetails />} />
               <Route path="/admin/auth" element={<AdminAuth />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />

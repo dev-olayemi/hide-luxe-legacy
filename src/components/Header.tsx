@@ -151,6 +151,20 @@ export const Header = () => {
               >
                 WOMEN
               </Link>
+              <Link
+                to="/bespoke"
+                className="text-sm font-medium hover:text-accent transition-colors"
+              >
+                BESPOKE
+              </Link>
+              {user && (
+                <Link
+                  to="/dashboard"
+                  className="text-sm font-medium hover:text-accent transition-colors"
+                >
+                  DASHBOARD
+                </Link>
+              )}
             </nav>
           </div>
 
@@ -250,6 +264,7 @@ export const Header = () => {
 
 const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
   const { cartItems, wishlistItems } = useCart();
+  const { user } = useAuth();
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const wishlistCount = wishlistItems.length;
 
@@ -309,6 +324,13 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
             >
               WOMEN
             </Link>
+            <Link
+              to="/bespoke"
+              className="block py-3 text-sm font-medium hover:text-accent transition-colors border-b"
+              onClick={onClose}
+            >
+              BESPOKE
+            </Link>
           </nav>
         </div>
       </div>
@@ -330,12 +352,21 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
             )}
           </Button>
         </Link>
-        <Link to="/auth" onClick={onClose}>
-          <Button variant="outline" className="w-full justify-start gap-2">
-            <User className="h-4 w-4" />
-            LOGIN
-          </Button>
-        </Link>
+        {user ? (
+          <Link to="/dashboard" onClick={onClose}>
+            <Button variant="outline" className="w-full justify-start gap-2">
+              <User className="h-4 w-4" />
+              DASHBOARD
+            </Button>
+          </Link>
+        ) : (
+          <Link to="/auth" onClick={onClose}>
+            <Button variant="outline" className="w-full justify-start gap-2">
+              <User className="h-4 w-4" />
+              LOGIN
+            </Button>
+          </Link>
+        )}
       </div>
     </div>
   );

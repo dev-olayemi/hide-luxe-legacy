@@ -11,15 +11,36 @@ import heroImage from "@/assets/hero-leather-craft.jpg";
 import menLoafers from "@/assets/products/men-loafers-brown.jpg";
 import womenBoots from "@/assets/products/women-boots-black.jpg";
 
+const HERO_SLIDES = [
+  { title: "Luxury Leather Footwear", subtitle: "Handcrafted Excellence" },
+  { title: "Bespoke Leather Jackets", subtitle: "Tailored to Perfection" },
+  { title: "Premium Leather Accessories", subtitle: "Timeless Elegance" },
+  { title: "Custom Leather Furniture", subtitle: "Artisan Craftsmanship" },
+  { title: "Luxury Automotive Interiors", subtitle: "Drive in Style" },
+  { title: "Exclusive Leather Bags", subtitle: "Sophisticated Design" },
+  { title: "Handmade Leather Belts", subtitle: "Classic Refinement" },
+  { title: "Artisan Leather Goods", subtitle: "Made to Last" },
+  { title: "Designer Leather Apparel", subtitle: "Fashion Redefined" },
+  { title: "Specialty Leather Pieces", subtitle: "One of a Kind" },
+];
+
 const Index = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     getAllProducts().then((data) => {
       setProducts(data);
       setLoading(false);
     });
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -43,9 +64,13 @@ const Index = () => {
               <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold mb-4">
                 Luxury. Leather. Legacy.
               </h1>
-              <p className="text-lg md:text-xl mb-8 text-white/90">
-                Discover handcrafted leather footwear that defines
-                sophistication. Every piece tells a story of timeless elegance.
+              <div className="h-16 flex items-center mb-4">
+                <p className="text-xl md:text-3xl font-semibold transition-all duration-500">
+                  {HERO_SLIDES[currentSlide].title}
+                </p>
+              </div>
+              <p className="text-lg md:text-xl mb-8 text-accent font-medium">
+                {HERO_SLIDES[currentSlide].subtitle}
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/new-arrivals">
@@ -185,13 +210,15 @@ const Index = () => {
               Bespoke Leather Creations
             </h2>
             <p className="text-lg mb-6 max-w-2xl mx-auto opacity-90">
-              Coming soon: Custom-made leather footwear, belts, jackets, and
-              exclusive limited editions. Join our exclusive list for early
-              access.
+              Custom-made leather products across all categories - footwear, apparel, 
+              accessories, furniture, automotive, and specialty items. Create something 
+              uniquely yours.
             </p>
-            <Button size="lg" variant="secondary">
-              Notify Me
-            </Button>
+            <Link to="/bespoke">
+              <Button size="lg" variant="secondary">
+                Start Your Custom Order
+              </Button>
+            </Link>
           </div>
         </section>
       </main>
