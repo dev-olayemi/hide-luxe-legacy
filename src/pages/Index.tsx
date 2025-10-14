@@ -48,7 +48,7 @@ const Index = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 1000);
+    }, 5000); // Changed to 5 seconds for better viewing
     return () => clearInterval(interval);
   }, []);
 
@@ -60,33 +60,51 @@ const Index = () => {
         {/* Hero Section */}
         <section className="relative h-[70vh] md:h-[80vh] overflow-hidden">
           <div className="absolute inset-0">
-            <img
-              src={HERO_SLIDES[currentSlide].image}
-              alt={HERO_SLIDES[currentSlide].title}
-              className="h-full w-full object-cover transition-opacity duration-1000"
-              key={currentSlide}
-            />
+            {HERO_SLIDES.map((slide, index) => (
+              <div
+                key={index}
+                className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+                  index === currentSlide
+                    ? "opacity-100 scale-100"
+                    : "opacity-0 scale-105"
+                }`}
+              >
+                <img
+                  src={slide.image}
+                  alt={slide.title}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ))}
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/40" />
           </div>
 
           <div className="relative h-full container mx-auto px-4 flex items-center">
             <div className="max-w-2xl text-white">
-              <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold mb-4">
+              <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold mb-4 animate-fade-in">
                 Luxury. Leather. Legacy.
               </h1>
-              <div className="h-16 flex items-center mb-4">
-                <p className="text-xl md:text-3xl font-semibold transition-opacity duration-500 opacity-100 animate-fade-in" key={`title-${currentSlide}`}>
+              <div className="h-16 flex items-center mb-4 overflow-hidden">
+                <p 
+                  className="text-xl md:text-3xl font-semibold animate-fade-in"
+                  key={`title-${currentSlide}`}
+                  style={{ animationDuration: '800ms' }}
+                >
                   {HERO_SLIDES[currentSlide].title}
                 </p>
               </div>
-              <p className="text-lg md:text-xl mb-8 text-accent font-medium transition-opacity duration-500 opacity-100 animate-fade-in" key={`subtitle-${currentSlide}`}>
+              <p 
+                className="text-lg md:text-xl mb-8 text-accent font-medium animate-fade-in" 
+                key={`subtitle-${currentSlide}`}
+                style={{ animationDuration: '800ms', animationDelay: '200ms' }}
+              >
                 {HERO_SLIDES[currentSlide].subtitle}
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{ animationDelay: '400ms' }}>
                 <Link to="/new-arrivals">
                   <Button
                     size="lg"
-                    className="bg-accent hover:bg-accent/90 text-accent-foreground"
+                    className="bg-accent hover:bg-accent/90 text-accent-foreground transition-all duration-300 hover:scale-105"
                   >
                     Shop New Arrivals
                     <ArrowRight className="ml-2 h-5 w-5" />
@@ -96,7 +114,7 @@ const Index = () => {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-white text-black hover:bg-yellow-700 hover:text-black"
+                    className="border-white text-black hover:bg-yellow-700 hover:text-black transition-all duration-300 hover:scale-105"
                   >
                     Our Story
                   </Button>
