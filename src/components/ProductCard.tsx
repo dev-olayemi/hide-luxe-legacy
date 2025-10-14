@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useCart } from "@/contexts/CartContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
@@ -23,6 +24,7 @@ export const ProductCard = ({
   isNew,
 }: ProductCardProps) => {
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
+  const { formatPrice } = useCurrency();
   const inWishlist = isInWishlist(id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -77,7 +79,7 @@ export const ProductCard = ({
           </h3>
         </Link>
         <div className="flex items-center justify-between">
-          <p className="font-semibold">₦{price.toLocaleString()}</p>
+          <p className="font-semibold">{formatPrice(price)}</p>
           <Button
             size="sm"
             variant="outline"

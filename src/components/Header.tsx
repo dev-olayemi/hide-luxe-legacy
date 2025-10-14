@@ -9,8 +9,11 @@ import {
   User,
   X,
   LogOut,
+  LayoutDashboard,
+  ChevronDown,
 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -21,6 +24,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/logo-icon.jpg";
 import { useAuth } from "@/contexts/AuthContext";
@@ -39,6 +50,7 @@ export const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { cartItems, wishlistItems } = useCart();
   const { user } = useAuth();
+  const { currency, setCurrency } = useCurrency();
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const wishlistCount = wishlistItems.length;
   const navigate = useNavigate();
@@ -86,29 +98,44 @@ export const Header = () => {
               </Button>
             </Link>
             {user ? (
-              <div className="relative group">
-                <button className="rounded-full bg-accent flex items-center justify-center h-9 w-9 text-lg font-bold text-white">
-                  {getInitials(user.email)}
-                </button>
-                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg p-2 opacity-0 group-hover:opacity-100 transition pointer-events-none group-hover:pointer-events-auto z-50">
-                  <div className="mb-2 text-xs text-gray-700">{user.email}</div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full flex gap-2 items-center"
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center text-accent-foreground font-bold shadow-md">
+                      {getInitials(user.email)}
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">My Account</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/dashboard")} className="cursor-pointer">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
                     onClick={async () => {
                       await signOut(auth);
                       navigate("/auth");
                     }}
+                    className="cursor-pointer text-destructive"
                   >
-                    <LogOut className="h-4 w-4" /> Logout
-                  </Button>
-                </div>
-              </div>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <Link to="/auth">
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
+                <Button variant="default" size="sm" className="gap-2">
+                  <User className="h-4 w-4" />
+                  <span className="hidden sm:inline">Sign In</span>
                 </Button>
               </Link>
             )}
@@ -171,15 +198,13 @@ export const Header = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <Select defaultValue="NGN">
-              <SelectTrigger className="w-24">
+            <Select value={currency} onValueChange={(value: 'NGN' | 'USD') => setCurrency(value)}>
+              <SelectTrigger className="w-24 font-semibold">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="NGN">NGN</SelectItem>
-                <SelectItem value="USD">USD</SelectItem>
-                <SelectItem value="GBP">GBP</SelectItem>
-                <SelectItem value="EUR">EUR</SelectItem>
+                <SelectItem value="NGN">₦ NGN</SelectItem>
+                <SelectItem value="USD">$ USD</SelectItem>
               </SelectContent>
             </Select>
 
@@ -210,31 +235,48 @@ export const Header = () => {
             </Link>
 
             {user ? (
-              <div className="relative group">
-                <button className="rounded-full bg-accent flex items-center justify-center h-10 w-10 text-lg font-bold text-white">
-                  {getInitials(user.email)}
-                </button>
-                <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg p-3 opacity-0 group-hover:opacity-100 transition pointer-events-none group-hover:pointer-events-auto z-50">
-                  <div className="mb-2 text-xs text-gray-700 font-semibold">
-                    {user.email}
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full flex gap-2 items-center"
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="gap-2 h-10 px-3">
+                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center text-accent-foreground font-bold shadow-md">
+                      {getInitials(user.email)}
+                    </div>
+                    <span className="hidden lg:inline-block font-medium max-w-[100px] truncate">
+                      {user.email?.split('@')[0]}
+                    </span>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">My Account</p>
+                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/dashboard")} className="cursor-pointer">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
                     onClick={async () => {
                       await signOut(auth);
                       navigate("/auth");
                     }}
+                    className="cursor-pointer text-destructive"
                   >
-                    <LogOut className="h-4 w-4" /> Logout
-                  </Button>
-                </div>
-              </div>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <Link to="/auth">
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
+                <Button variant="default" className="gap-2">
+                  <User className="h-4 w-4" />
+                  <span>Sign In</span>
                 </Button>
               </Link>
             )}
