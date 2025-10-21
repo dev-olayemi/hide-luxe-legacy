@@ -56,140 +56,53 @@ export const Header = () => {
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background">
-      <div className="container mx-auto px-2 sm:px-4">
-        {/* Mobile Header */}
-        <div className="flex h-16 items-center justify-between md:hidden">
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-64 p-0">
-              <MobileSidebar onClose={() => setMobileMenuOpen(false)} />
-            </SheetContent>
-          </Sheet>
-
-          <Link to="/" className="flex items-center">
-            <img
-              src={logo}
-              alt="28th Hide Luxe"
-              className="h-14 w-14 rounded-full"
-            />
-          </Link>
-
+    <header className="sticky top-0 z-50 w-full border-b bg-background/70 backdrop-blur-lg backdrop-saturate-180">
+      <div className="container mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
+        {/* responsive grid: left/menu | center/logo | right/actions */}
+        <div className="grid grid-cols-3 items-center h-16 md:flex md:h-24 md:items-center md:justify-between">
+          {/* left: mobile menu trigger + (desktop: nav hidden here) */}
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSearchOpen(!searchOpen)}
-            >
-              <Search className="h-5 w-5" />
-            </Button>
-            <Link to="/cart">
-              <Button variant="ghost" size="icon" className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                {cartCount > 0 && (
-                  <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-accent text-accent-foreground text-xs">
-                    {cartCount}
-                  </Badge>
-                )}
-              </Button>
-            </Link>
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center text-accent-foreground font-bold shadow-md">
-                      {getInitials(user.email)}
-                    </div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium">My Account</p>
-                      <p className="text-xs text-muted-foreground">{user.email}</p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/dashboard")} className="cursor-pointer">
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Dashboard
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={async () => {
-                      await signOut(auth);
-                      navigate("/auth");
-                    }}
-                    className="cursor-pointer text-destructive"
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link to="/auth">
-                <Button variant="default" size="sm" className="gap-2">
-                  <User className="h-4 w-4" />
-                  <span className="hidden sm:inline">Sign In</span>
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                  <Menu className="h-5 w-5" />
                 </Button>
-              </Link>
-            )}
-          </div>
-        </div>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-72 p-0">
+                <MobileSidebar onClose={() => setMobileMenuOpen(false)} />
+              </SheetContent>
+            </Sheet>
 
-        {/* Desktop Header */}
-        <div className="hidden md:flex md:h-20 md:items-center md:justify-between">
-          <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center gap-3">
-              <img
-                src={logo}
-                alt="28th Hide Luxe"
-                className="h-16 w-16 rounded-full"
-              />
-              <div className="flex flex-col">
-                <span className="font-playfair text-xl font-bold tracking-tight">
-                  28TH HIDE LUXE
-                </span>
-                <span className="text-xs tracking-widest text-muted-foreground">
-                  LUXURY. LEATHER. LEGACY.
-                </span>
-              </div>
-            </Link>
-
-            <nav className="flex items-center gap-6">
+            {/* desktop nav left align on md+ */}
+            <nav className="hidden md:flex items-center gap-8">
               <Link
                 to="/new-arrivals"
-                className="text-sm font-medium hover:text-accent transition-colors"
+                className="text-base font-medium hover:text-accent transition-colors"
               >
                 NEW ARRIVALS
               </Link>
               <Link
                 to="/men"
-                className="text-sm font-medium hover:text-accent transition-colors"
+                className="text-base font-medium hover:text-accent transition-colors"
               >
                 MEN
               </Link>
               <Link
                 to="/women"
-                className="text-sm font-medium hover:text-accent transition-colors"
+                className="text-base font-medium hover:text-accent transition-colors"
               >
                 WOMEN
               </Link>
               <Link
                 to="/bespoke"
-                className="text-sm font-medium hover:text-accent transition-colors"
+                className="text-base font-medium hover:text-accent transition-colors"
               >
                 BESPOKE
               </Link>
               {user && (
                 <Link
                   to="/dashboard"
-                  className="text-sm font-medium hover:text-accent transition-colors"
+                  className="text-base font-medium hover:text-accent transition-colors"
                 >
                   DASHBOARD
                 </Link>
@@ -197,65 +110,108 @@ export const Header = () => {
             </nav>
           </div>
 
-          <div className="flex items-center gap-4">
-            <Select value={currency} onValueChange={(value: 'NGN' | 'USD') => setCurrency(value)}>
-              <SelectTrigger className="w-24 font-semibold">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="NGN">₦ NGN</SelectItem>
-                <SelectItem value="USD">$ USD</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* center: logo (centered on mobile, left on desktop due to grid->flex behavior) */}
+          <div className="flex justify-center md:justify-start">
+            <Link to="/" className="flex items-center gap-2">
+              <img
+                src={logo}
+                alt="28th Hide Luxe"
+                className="h-10 w-10 sm:h-12 sm:w-12 md:h-20 md:w-20 rounded-full object-cover"
+              />
+              <div className="hidden sm:flex flex-col">
+                <span className="font-playfair text-sm md:text-base font-bold tracking-tight whitespace-nowrap">
+                  28TH HIDE LUXE
+                </span>
+                <span className="text-[10px] sm:text-xs md:text-sm tracking-widest text-muted-foreground whitespace-nowrap">
+                  LUXURY. LEATHER. LEGACY.
+                </span>
+              </div>
+            </Link>
+          </div>
 
-            <div className="w-64">
-              <SearchDialog searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+          {/* right: actions */}
+          <div className="flex items-center justify-end gap-2 md:gap-4">
+            {/* currency selector - hidden on small screens */}
+            <div className="hidden md:block">
+              <Select
+                value={currency}
+                onValueChange={(value: "NGN" | "USD") => setCurrency(value)}
+              >
+                <SelectTrigger className="w-28 font-semibold">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NGN">₦ NGN</SelectItem>
+                  <SelectItem value="USD">$ USD</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            <Link to="/wishlist">
+            {/* search */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSearchOpen((s) => !s)}
+              aria-label="Search"
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+
+            {/* wishlist - show small icon on mobile, badge remains */}
+            <Link to="/wishlist" className="relative hidden md:inline-block">
               <Button variant="ghost" size="icon" className="relative">
                 <Heart className="h-5 w-5" />
                 {wishlistCount > 0 && (
-                  <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-accent text-accent-foreground text-xs">
+                  <Badge className="absolute -right-1 -top-1 h-4 w-4 rounded-full p-0 flex items-center justify-center bg-accent text-accent-foreground text-[10px]">
                     {wishlistCount}
                   </Badge>
                 )}
               </Button>
             </Link>
 
-            <Link to="/cart">
+            {/* cart */}
+            <Link to="/cart" className="relative">
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />
                 {cartCount > 0 && (
-                  <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-accent text-accent-foreground text-xs">
+                  <Badge className="absolute -right-1 -top-1 h-4 w-4 rounded-full p-0 flex items-center justify-center bg-accent text-accent-foreground text-[10px]">
                     {cartCount}
                   </Badge>
                 )}
               </Button>
             </Link>
 
+            {/* user / sign in */}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="gap-2 h-10 px-3">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center text-accent-foreground font-bold shadow-md">
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-2 h-9 px-2 md:h-10 md:px-3"
+                  >
+                    <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center text-accent-foreground font-bold text-sm">
                       {getInitials(user.email)}
                     </div>
-                    <span className="hidden lg:inline-block font-medium max-w-[100px] truncate">
-                      {user.email?.split('@')[0]}
+                    <span className="hidden lg:inline-block font-medium max-w-[100px] truncate text-sm">
+                      {user.email?.split("@")[0]}
                     </span>
-                    <ChevronDown className="h-4 w-4" />
+                    <ChevronDown className="h-4 w-4 hidden lg:block" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium">My Account</p>
-                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {user.email}
+                      </p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/dashboard")} className="cursor-pointer">
+                  <DropdownMenuItem
+                    onClick={() => navigate("/dashboard")}
+                    className="cursor-pointer"
+                  >
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     Dashboard
                   </DropdownMenuItem>
@@ -274,19 +230,26 @@ export const Header = () => {
               </DropdownMenu>
             ) : (
               <Link to="/auth">
-                <Button variant="default" className="gap-2">
-                  <User className="h-4 w-4" />
-                  <span>Sign In</span>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <User className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="hidden sm:inline">Sign In</span>
                 </Button>
               </Link>
             )}
           </div>
         </div>
 
-        {/* Mobile Search Bar */}
+        {/* mobile search appears full width below header */}
         {searchOpen && (
-          <div className="pb-4 md:hidden">
-            <SearchDialog searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+          <div className="pb-3 md:pb-4">
+            <SearchDialog
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            />
           </div>
         )}
       </div>
@@ -306,7 +269,7 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
       <div className="border-b p-4">
         <div className="flex items-center justify-between">
           <Select defaultValue="NGN">
-            <SelectTrigger className="w-24">
+            <SelectTrigger className="w-28">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -317,65 +280,77 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
             </SelectContent>
           </Select>
           <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-5 w-5" />
+            <X className="h-6 w-6" />
           </Button>
         </div>
       </div>
 
       <div className="border-b p-4">
-        <SearchDialog searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        <SearchDialog
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="p-4">
-          <h2 className="font-playfair text-sm font-bold tracking-wide mb-4">
+        <div className="p-6">
+          <h2 className="font-playfair text-lg font-bold tracking-wide mb-6">
             28TH HIDE LUXE
           </h2>
 
-          <nav className="space-y-1">
+          <nav className="space-y-2">
             <Link
               to="/new-arrivals"
-              className="block py-3 text-sm font-medium hover:text-accent transition-colors border-b"
+              className="block py-3 text-base font-medium hover:text-accent transition-colors border-b"
               onClick={onClose}
             >
               NEW ARRIVALS
             </Link>
             <Link
               to="/men"
-              className="block py-3 text-sm font-medium hover:text-accent transition-colors border-b"
+              className="block py-3 text-base font-medium hover:text-accent transition-colors border-b"
               onClick={onClose}
             >
               MEN
             </Link>
             <Link
               to="/women"
-              className="block py-3 text-sm font-medium hover:text-accent transition-colors border-b"
+              className="block py-3 text-base font-medium hover:text-accent transition-colors border-b"
               onClick={onClose}
             >
               WOMEN
             </Link>
             <Link
               to="/bespoke"
-              className="block py-3 text-sm font-medium hover:text-accent transition-colors border-b"
+              className="block py-3 text-base font-medium hover:text-accent transition-colors border-b"
               onClick={onClose}
             >
               BESPOKE
             </Link>
+            {user && (
+              <Link
+                to="/dashboard"
+                className="block py-3 text-base font-medium hover:text-accent transition-colors border-b"
+                onClick={onClose}
+              >
+                DASHBOARD
+              </Link>
+            )}
           </nav>
         </div>
       </div>
 
-      <div className="border-t p-4 space-y-2">
+      <div className="border-t p-6 space-y-3">
         <Link to="/cart" onClick={onClose}>
-          <Button variant="outline" className="w-full justify-start gap-2">
-            <ShoppingCart className="h-4 w-4" />
+          <Button variant="outline" className="w-full justify-start gap-3">
+            <ShoppingCart className="h-5 w-5" />
             SHOPPING CART
             {cartCount > 0 && <Badge className="ml-auto">{cartCount}</Badge>}
           </Button>
         </Link>
         <Link to="/wishlist" onClick={onClose}>
-          <Button variant="outline" className="w-full justify-start gap-2">
-            <Heart className="h-4 w-4" />
+          <Button variant="outline" className="w-full justify-start gap-3">
+            <Heart className="h-5 w-5" />
             WISHLIST
             {wishlistCount > 0 && (
               <Badge className="ml-auto">{wishlistCount}</Badge>
@@ -384,15 +359,15 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
         </Link>
         {user ? (
           <Link to="/dashboard" onClick={onClose}>
-            <Button variant="outline" className="w-full justify-start gap-2">
-              <User className="h-4 w-4" />
+            <Button variant="outline" className="w-full justify-start gap-3">
+              <User className="h-5 w-5" />
               DASHBOARD
             </Button>
           </Link>
         ) : (
           <Link to="/auth" onClick={onClose}>
-            <Button variant="outline" className="w-full justify-start gap-2">
-              <User className="h-4 w-4" />
+            <Button variant="outline" className="w-full justify-start gap-3">
+              <User className="h-5 w-5" />
               LOGIN
             </Button>
           </Link>

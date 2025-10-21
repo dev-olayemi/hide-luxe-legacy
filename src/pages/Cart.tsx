@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link } from "react-router-dom";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { Header } from "@/components/Header";
@@ -6,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useCart } from "@/contexts/CartContext";
 import { v4 as uuidv4 } from "uuid";
+import { useAuth } from "@/contexts/AuthContext"; // <- added
 
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity } = useCart();
+  const { user } = useAuth(); // <- added
   const WHATSAPP_NUMBER = "+2348144977227";
   const total = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -41,6 +44,91 @@ const Cart = () => {
     localStorage.setItem("cartId", cartId);
   }
   const cartLink = `${window.location.origin}/cart-details/${cartId}`;
+
+  // --- Flutterwave inline checkout (client-side) ---
+  const loadFlutterwaveScript = () =>
+    new Promise<void>((resolve, reject) => {
+      if ((window as any).FlutterwaveCheckout) return resolve();
+      const s = document.createElement("script");
+      s.src = "https://checkout.flutterwave.com/v3.js";
+      s.async = true;
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error("Flutterwave script failed to load"));
+      document.body.appendChild(s);
+    });
+
+  const handleInlinePay = async () => {
+    try {
+      await loadFlutterwaveScript();
+      const txRef = `hxl_${cartId}_${Date.now()}`;
+      (window as any).FlutterwaveCheckout({
+        public_key:
+          import.meta.env.VITE_FLW_PUBLIC_KEY ||
+          "FLWPUBK_TEST-fd5d2e18c86c2f1f86c82b49242b5d42-X",
+        tx_ref: txRef,
+        amount: total,
+        currency: "NGN",
+        payment_options: "card,ussd,banktransfer,qr",
+        customer: {
+          email: user?.email || "guest@hide-luxe.test",
+          phonenumber: user?.phoneNumber || "",
+          name: user?.displayName || "Guest",
+        },
+        meta: {
+          cartId,
+          items: cartItems.map((i) => ({ id: i.id, qty: i.quantity })),
+        },
+        customizations: {
+          title: "28th Hide Luxe",
+          description: "Order payment",
+        },
+        callback: function (data: any) {
+          // data contains payment result; verify on server ideally
+          console.log("Flutterwave callback:", data);
+          // You may want to POST data to your server to verify and record the order
+          alert("Payment finished. Please verify on the server.");
+        },
+        onclose: function () {
+          // user closed the modal
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Could not load payment gateway. Try again.");
+    }
+  };
+
+  // --- Create payment link via server (recommended for production) ---
+  // server endpoint will use FLW secret key to create a payment link and return it
+  const handleCreatePaymentLink = async () => {
+    try {
+      const resp = await fetch("/api/create-payment-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: total,
+          currency: "NGN",
+          tx_ref: `hxl_link_${cartId}_${Date.now()}`,
+          cartId,
+          customer: {
+            email: user?.email || "guest@hide-luxe.test",
+            phonenumber: user?.phoneNumber || "",
+            name: user?.displayName || "Guest",
+          },
+        }),
+      });
+      const data = await resp.json();
+      if (data && data.status === "success" && data.data && data.data.link) {
+        window.open(data.data.link, "_blank");
+      } else {
+        console.error("Create link error:", data);
+        alert("Could not create payment link.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Payment link request failed.");
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -146,16 +234,38 @@ const Cart = () => {
                     <span>₦{total.toLocaleString()}</span>
                   </div>
                 </div>
+
+                {/* Pay now (inline) */}
+                <Button
+                  className="w-full mb-3"
+                  size="lg"
+                  onClick={handleInlinePay}
+                >
+                  Pay Now
+                </Button>
+
+                {/* Alternative: create payment link (server) */}
+                <Button
+                  className="w-full mb-3"
+                  variant="outline"
+                  onClick={handleCreatePaymentLink}
+                >
+                  Get Pay Link
+                </Button>
+
+                {/* Ask seller via WhatsApp */}
                 <Button
                   className="w-full"
                   size="lg"
                   onClick={handleWhatsAppCheckout}
                 >
-                  Proceed to Checkout
+                  Ask Seller / Pay via WhatsApp
                 </Button>
+
                 <p className="text-xs text-center text-muted-foreground mt-4">
-                  You'll be redirected to WhatsApp to complete your order
+                  You'll be redirected to the payment gateway or WhatsApp.
                 </p>
+
                 {/* Cart link for seller */}
                 <div className="mt-6 text-center">
                   <p className="text-sm mb-2">
