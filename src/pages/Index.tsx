@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { useSwipeable } from "react-swipeable";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
@@ -18,19 +19,13 @@ import categoryAccessories from "@/assets/category-accessories.jpg";
 import categoryApparel from "@/assets/category-apparel.jpg";
 import categoryFurniture from "@/assets/category-furniture.jpg";
 import categoryAutomotive from "@/assets/category-automotive.jpg";
-import categorySpecialty from "@/assets/category-specialty.jpg";
 
 const HERO_SLIDES = [
-  { title: "Luxury Leather Footwear", subtitle: "Handcrafted Excellence", image: heroFootwear },
-  { title: "Bespoke Leather Jackets", subtitle: "Tailored to Perfection", image: heroJackets },
-  { title: "Premium Leather Accessories", subtitle: "Timeless Elegance", image: heroAccessories },
-  { title: "Custom Leather Furniture", subtitle: "Artisan Craftsmanship", image: heroFurniture },
-  { title: "Luxury Automotive Interiors", subtitle: "Drive in Style", image: heroAutomotive },
-  { title: "Exclusive Leather Bags", subtitle: "Sophisticated Design", image: heroAccessories },
-  { title: "Handmade Leather Belts", subtitle: "Classic Refinement", image: heroAccessories },
-  { title: "Artisan Leather Goods", subtitle: "Made to Last", image: heroFootwear },
-  { title: "Designer Leather Apparel", subtitle: "Fashion Redefined", image: heroJackets },
-  { title: "Specialty Leather Pieces", subtitle: "One of a Kind", image: heroAccessories },
+  { image: heroFootwear },
+  { image: heroJackets },
+  { image: heroAccessories },
+  { image: heroFurniture },
+  { image: heroAutomotive },
 ];
 
 const Index = () => {
@@ -57,7 +52,7 @@ const Index = () => {
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
     setIsPaused(true);
-    setTimeout(() => setIsPaused(false), 10000); // Resume after 10s
+    setTimeout(() => setIsPaused(false), 10000);
   };
 
   const nextSlide = () => {
@@ -72,103 +67,104 @@ const Index = () => {
     setTimeout(() => setIsPaused(false), 10000);
   };
 
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => nextSlide(),
+    onSwipedRight: () => prevSlide(),
+    trackMouse: true,
+  });
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative h-[70vh] md:h-[80vh] overflow-hidden">
-          <div className="absolute inset-0">
-            {HERO_SLIDES.map((slide, index) => (
-              <div
-                key={index}
-                className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-                  index === currentSlide
-                    ? "opacity-100 scale-100"
-                    : "opacity-0 scale-105"
-                }`}
-              >
-                <img
-                  src={slide.image}
-                  alt={slide.title}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            ))}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/40" />
-          </div>
+        {/* Hero Carousel */}
+        <section className="relative h-[75vh] md:h-[85vh] overflow-hidden bg-background" {...swipeHandlers}>
+          <div className="absolute inset-0 flex items-center justify-center">
+            {HERO_SLIDES.map((slide, index) => {
+              const offset = (index - currentSlide + HERO_SLIDES.length) % HERO_SLIDES.length;
+              const isCenter = offset === 0;
+              const isLeft = offset === HERO_SLIDES.length - 1;
+              const isRight = offset === 1;
 
-          {/* Navigation Arrows */}
-          <button
-            onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 hover:scale-110"
-            aria-label="Previous slide"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
-          <button
-            onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 hover:scale-110"
-            aria-label="Next slide"
-          >
-            <ChevronRight className="h-6 w-6" />
-          </button>
+              let transform = "translateX(0) scale(0.8)";
+              let opacity = 0;
+              let zIndex = 0;
 
-          <div className="relative h-full container mx-auto px-4 flex items-center">
-            <div className="max-w-2xl text-white">
-              <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold mb-4 animate-fade-in">
-                Luxury. Leather. Legacy.
-              </h1>
-              <div className="h-16 flex items-center mb-4 overflow-hidden">
-                <p 
-                  className="text-xl md:text-3xl font-semibold animate-fade-in"
-                  key={`title-${currentSlide}`}
-                  style={{ animationDuration: '800ms' }}
+              if (isCenter) {
+                transform = "translateX(0) scale(1)";
+                opacity = 1;
+                zIndex = 30;
+              } else if (isLeft) {
+                transform = "translateX(-85%) scale(0.85)";
+                opacity = 0.4;
+                zIndex = 20;
+              } else if (isRight) {
+                transform = "translateX(85%) scale(0.85)";
+                opacity = 0.4;
+                zIndex = 20;
+              }
+
+              return (
+                <div
+                  key={index}
+                  className="absolute transition-all duration-700 ease-out cursor-pointer"
+                  style={{
+                    transform,
+                    opacity,
+                    zIndex,
+                  }}
+                  onClick={() => {
+                    if (!isCenter) goToSlide(index);
+                  }}
                 >
-                  {HERO_SLIDES[currentSlide].title}
-                </p>
-              </div>
-              <p 
-                className="text-lg md:text-xl mb-8 text-accent font-medium animate-fade-in" 
-                key={`subtitle-${currentSlide}`}
-                style={{ animationDuration: '800ms', animationDelay: '200ms' }}
-              >
-                {HERO_SLIDES[currentSlide].subtitle}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{ animationDelay: '400ms' }}>
-                <Link to="/new-arrivals">
-                  <Button
-                    size="lg"
-                    className="bg-accent hover:bg-accent/90 text-accent-foreground transition-all duration-300 hover:scale-105"
-                  >
-                    Shop New Arrivals
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-                <Link to="/about">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-white text-black hover:bg-yellow-700 hover:text-black transition-all duration-300 hover:scale-105"
-                  >
-                    Our Story
-                  </Button>
-                </Link>
-              </div>
-            </div>
+                  <div className="relative w-[70vw] md:w-[50vw] h-[55vh] md:h-[65vh] rounded-3xl overflow-hidden shadow-2xl">
+                    <img
+                      src={slide.image}
+                      alt={`Slide ${index + 1}`}
+                      className="h-full w-full object-cover"
+                    />
+                    {isCenter && (
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-8 md:p-12">
+                        <div className="text-white w-full">
+                          <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold mb-4 animate-fade-in">
+                            Luxury. Leather. Legacy.
+                          </h1>
+                          <p className="text-lg md:text-2xl mb-8 text-accent font-medium">
+                            Handcrafted Excellence Since 1995
+                          </p>
+                          <div className="flex flex-col sm:flex-row gap-4">
+                            <Link to="/new-arrivals">
+                              <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                                Shop New Arrivals
+                                <ArrowRight className="ml-2 h-5 w-5" />
+                              </Button>
+                            </Link>
+                            <Link to="/bespoke">
+                              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-black">
+                                Bespoke Orders
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Slide Indicators */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+          {/* Circular Dot Indicators */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-40 flex gap-3">
             {HERO_SLIDES.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
                 className={`transition-all duration-300 rounded-full ${
                   index === currentSlide
-                    ? 'bg-accent w-8 h-2'
-                    : 'bg-white/50 hover:bg-white/80 w-2 h-2'
+                    ? 'bg-accent w-3 h-3 scale-125'
+                    : 'bg-white/60 hover:bg-white/90 w-3 h-3 hover:scale-110'
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
@@ -177,28 +173,27 @@ const Index = () => {
         </section>
 
         {/* Featured Products */}
-        <section className="container mx-auto px-4 py-16">
-          <div className="text-center mb-12">
-            <h2 className="font-playfair text-3xl md:text-4xl font-bold mb-4">
+        <section className="container mx-auto px-4 py-20">
+          <div className="text-center mb-16">
+            <h2 className="font-playfair text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Featured Collection
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Explore our curated selection of premium leather footwear, crafted
-              with precision and passion.
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+              Explore our curated selection of premium leather goods, crafted with precision and passion.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {loading ? (
-              <div className="col-span-full text-center text-gray-400">
-                Loading products...
+              <div className="col-span-full flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
               </div>
             ) : products.length === 0 ? (
-              <div className="col-span-full text-center text-gray-400">
+              <div className="col-span-full text-center text-muted-foreground py-20">
                 No products found.
               </div>
             ) : (
-              products.map((product) => (
+              products.slice(0, 8).map((product) => (
                 <ProductCard
                   key={product.id}
                   id={product.id}
@@ -218,45 +213,38 @@ const Index = () => {
 
           <div className="text-center">
             <Link to="/new-arrivals">
-              <Button variant="outline" size="lg">
+              <Button variant="outline" size="lg" className="group">
                 View All Products
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
           </div>
         </section>
 
         {/* Categories */}
-        <section className="bg-muted/30 py-16">
+        <section className="bg-muted/30 py-20">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="font-playfair text-3xl md:text-4xl font-bold mb-4">
+            <div className="text-center mb-16">
+              <h2 className="font-playfair text-4xl md:text-5xl font-bold mb-6">
                 Our Collections
               </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Discover our extensive range of premium leather products across all categories
+              <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+                Discover our extensive range of premium leather products
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Link
-                to="/men"
-                className="group relative h-80 overflow-hidden rounded-lg"
-              >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <Link to="/men" className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500">
                 <img
                   src={menLoafers}
                   alt="Men's Collection"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-8">
-                  <div className="text-white">
-                    <h3 className="font-playfair text-2xl font-bold mb-2">
-                      Men's Collection
-                    </h3>
-                    <p className="text-white/90 mb-4 text-sm">
-                      Timeless sophistication for the modern gentleman
-                    </p>
-                    <Button variant="secondary" size="sm">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-8">
+                  <div className="text-white transform transition-transform duration-500 group-hover:translate-y-[-8px]">
+                    <h3 className="font-playfair text-3xl font-bold mb-3">Men's Collection</h3>
+                    <p className="text-white/90 mb-6">Timeless sophistication</p>
+                    <Button variant="secondary" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                       Explore
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -264,24 +252,17 @@ const Index = () => {
                 </div>
               </Link>
 
-              <Link
-                to="/women"
-                className="group relative h-80 overflow-hidden rounded-lg"
-              >
+              <Link to="/women" className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500">
                 <img
                   src={womenBoots}
                   alt="Women's Collection"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-8">
-                  <div className="text-white">
-                    <h3 className="font-playfair text-2xl font-bold mb-2">
-                      Women's Collection
-                    </h3>
-                    <p className="text-white/90 mb-4 text-sm">
-                      Elegance redefined for the contemporary woman
-                    </p>
-                    <Button variant="secondary" size="sm">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-8">
+                  <div className="text-white transform transition-transform duration-500 group-hover:translate-y-[-8px]">
+                    <h3 className="font-playfair text-3xl font-bold mb-3">Women's Collection</h3>
+                    <p className="text-white/90 mb-6">Elegance redefined</p>
+                    <Button variant="secondary" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                       Explore
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -289,24 +270,17 @@ const Index = () => {
                 </div>
               </Link>
 
-              <Link
-                to="/accessories"
-                className="group relative h-80 overflow-hidden rounded-lg"
-              >
+              <Link to="/accessories" className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500">
                 <img
                   src={categoryAccessories}
-                  alt="Accessories Collection"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  alt="Accessories"
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-8">
-                  <div className="text-white">
-                    <h3 className="font-playfair text-2xl font-bold mb-2">
-                      Accessories
-                    </h3>
-                    <p className="text-white/90 mb-4 text-sm">
-                      Bags, wallets, belts, and watch straps
-                    </p>
-                    <Button variant="secondary" size="sm">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-8">
+                  <div className="text-white transform transition-transform duration-500 group-hover:translate-y-[-8px]">
+                    <h3 className="font-playfair text-3xl font-bold mb-3">Accessories</h3>
+                    <p className="text-white/90 mb-6">Complete your style</p>
+                    <Button variant="secondary" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                       Explore
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -314,24 +288,17 @@ const Index = () => {
                 </div>
               </Link>
 
-              <Link
-                to="/apparel"
-                className="group relative h-80 overflow-hidden rounded-lg"
-              >
+              <Link to="/apparel" className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500">
                 <img
                   src={categoryApparel}
-                  alt="Apparel Collection"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  alt="Apparel"
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-8">
-                  <div className="text-white">
-                    <h3 className="font-playfair text-2xl font-bold mb-2">
-                      Apparel
-                    </h3>
-                    <p className="text-white/90 mb-4 text-sm">
-                      Jackets, pants, skirts, and gloves
-                    </p>
-                    <Button variant="secondary" size="sm">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-8">
+                  <div className="text-white transform transition-transform duration-500 group-hover:translate-y-[-8px]">
+                    <h3 className="font-playfair text-3xl font-bold mb-3">Apparel</h3>
+                    <p className="text-white/90 mb-6">Jackets & more</p>
+                    <Button variant="secondary" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                       Explore
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -339,24 +306,17 @@ const Index = () => {
                 </div>
               </Link>
 
-              <Link
-                to="/furniture"
-                className="group relative h-80 overflow-hidden rounded-lg"
-              >
+              <Link to="/furniture" className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500">
                 <img
                   src={categoryFurniture}
-                  alt="Furniture Collection"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  alt="Furniture"
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-8">
-                  <div className="text-white">
-                    <h3 className="font-playfair text-2xl font-bold mb-2">
-                      Furniture
-                    </h3>
-                    <p className="text-white/90 mb-4 text-sm">
-                      Sofas, chairs, and ottomans
-                    </p>
-                    <Button variant="secondary" size="sm">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-8">
+                  <div className="text-white transform transition-transform duration-500 group-hover:translate-y-[-8px]">
+                    <h3 className="font-playfair text-3xl font-bold mb-3">Furniture</h3>
+                    <p className="text-white/90 mb-6">Luxury interiors</p>
+                    <Button variant="secondary" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                       Explore
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -364,24 +324,17 @@ const Index = () => {
                 </div>
               </Link>
 
-              <Link
-                to="/automotive"
-                className="group relative h-80 overflow-hidden rounded-lg"
-              >
+              <Link to="/automotive" className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500">
                 <img
                   src={categoryAutomotive}
-                  alt="Automotive Collection"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  alt="Automotive"
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-8">
-                  <div className="text-white">
-                    <h3 className="font-playfair text-2xl font-bold mb-2">
-                      Automotive
-                    </h3>
-                    <p className="text-white/90 mb-4 text-sm">
-                      Car seats and steering wheels
-                    </p>
-                    <Button variant="secondary" size="sm">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-8">
+                  <div className="text-white transform transition-transform duration-500 group-hover:translate-y-[-8px]">
+                    <h3 className="font-playfair text-3xl font-bold mb-3">Automotive</h3>
+                    <p className="text-white/90 mb-6">Drive in luxury</p>
+                    <Button variant="secondary" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                       Explore
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -392,20 +345,20 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Coming Soon */}
-        <section className="container mx-auto px-4 py-16">
-          <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-lg p-8 md:p-12 text-center">
-            <h2 className="font-playfair text-3xl md:text-4xl font-bold mb-4">
+        {/* Bespoke CTA */}
+        <section className="container mx-auto px-4 py-20">
+          <div className="bg-gradient-to-br from-primary via-primary/90 to-accent text-primary-foreground rounded-3xl p-12 md:p-16 text-center shadow-2xl">
+            <h2 className="font-playfair text-4xl md:text-5xl font-bold mb-6">
               Bespoke Leather Creations
             </h2>
-            <p className="text-lg mb-6 max-w-2xl mx-auto opacity-90">
-              Custom-made leather products across all categories - footwear, apparel, 
-              accessories, furniture, automotive, and specialty items. Create something 
-              uniquely yours.
+            <p className="text-lg md:text-xl mb-8 max-w-3xl mx-auto opacity-95">
+              Custom-made leather products tailored to your exact specifications. 
+              Create something uniquely yours with our master craftsmen.
             </p>
             <Link to="/bespoke">
-              <Button size="lg" variant="secondary">
+              <Button size="lg" variant="secondary" className="shadow-lg hover:shadow-xl transition-shadow">
                 Start Your Custom Order
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
           </div>

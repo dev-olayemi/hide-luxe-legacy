@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CartProvider } from "@/contexts/CartContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { WhatsAppChat } from "@/components/WhatsAppChat";
+import { BackToTop } from "@/components/BackToTop";
 import Index from "./pages/Index";
 import NewArrivals from "./pages/NewArrivals";
 import Men from "./pages/Men";
@@ -41,7 +43,9 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
-            <Routes>
+              <WhatsAppChat />
+              <BackToTop />
+              <Routes>
               <Route path="/" element={<Index />} />
             <Route path="/new-arrivals" element={<NewArrivals />} />
             <Route path="/men" element={<Men />} />

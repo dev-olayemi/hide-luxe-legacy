@@ -56,162 +56,113 @@ export const Header = () => {
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/70 backdrop-blur-lg backdrop-saturate-180">
-      <div className="container mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
-        {/* responsive grid: left/menu | center/logo | right/actions */}
-        <div className="grid grid-cols-3 items-center h-16 md:flex md:h-24 md:items-center md:justify-between">
-          {/* left: mobile menu trigger + (desktop: nav hidden here) */}
-          <div className="flex items-center gap-2">
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-72 p-0">
-                <MobileSidebar onClose={() => setMobileMenuOpen(false)} />
-              </SheetContent>
-            </Sheet>
-
-            {/* desktop nav left align on md+ */}
-            <nav className="hidden md:flex items-center gap-8">
-              <Link
-                to="/new-arrivals"
-                className="text-base font-medium hover:text-accent transition-colors"
-              >
-                NEW ARRIVALS
-              </Link>
-              <Link
-                to="/men"
-                className="text-base font-medium hover:text-accent transition-colors"
-              >
-                MEN
-              </Link>
-              <Link
-                to="/women"
-                className="text-base font-medium hover:text-accent transition-colors"
-              >
-                WOMEN
-              </Link>
-              <Link
-                to="/bespoke"
-                className="text-base font-medium hover:text-accent transition-colors"
-              >
-                BESPOKE
-              </Link>
-              {user && (
-                <Link
-                  to="/dashboard"
-                  className="text-base font-medium hover:text-accent transition-colors"
-                >
-                  DASHBOARD
-                </Link>
-              )}
-            </nav>
-          </div>
-
-          {/* center: logo (centered on mobile, left on desktop due to grid->flex behavior) */}
-          <div className="flex justify-center md:justify-start">
-            <Link to="/" className="flex items-center gap-2">
-              <img
-                src={logo}
-                alt="28th Hide Luxe"
-                className="h-10 w-10 sm:h-12 sm:w-12 md:h-20 md:w-20 rounded-full object-cover"
-              />
-              <div className="hidden sm:flex flex-col">
-                <span className="font-playfair text-sm md:text-base font-bold tracking-tight whitespace-nowrap">
-                  28TH HIDE LUXE
-                </span>
-                <span className="text-[10px] sm:text-xs md:text-sm tracking-widest text-muted-foreground whitespace-nowrap">
-                  LUXURY. LEATHER. LEGACY.
-                </span>
-              </div>
-            </Link>
-          </div>
-
-          {/* right: actions */}
-          <div className="flex items-center justify-end gap-2 md:gap-4">
-            {/* currency selector - hidden on small screens */}
-            <div className="hidden md:block">
-              <Select
-                value={currency}
-                onValueChange={(value: "NGN" | "USD") => setCurrency(value)}
-              >
-                <SelectTrigger className="w-28 font-semibold">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="NGN">₦ NGN</SelectItem>
-                  <SelectItem value="USD">$ USD</SelectItem>
-                </SelectContent>
-              </Select>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-xl backdrop-saturate-200 shadow-sm">
+      <div className="container mx-auto px-4 md:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          {/* Logo - Left */}
+          <Link to="/" className="flex items-center gap-3 group">
+            <img
+              src={logo}
+              alt="28th Hide Luxe"
+              className="h-14 w-14 rounded-full object-cover ring-2 ring-accent/20 group-hover:ring-accent/40 transition-all"
+            />
+            <div className="hidden md:flex flex-col">
+              <span className="font-playfair text-lg font-bold tracking-tight">
+                28TH HIDE LUXE
+              </span>
+              <span className="text-xs tracking-widest text-muted-foreground">
+                LUXURY. LEATHER. LEGACY.
+              </span>
             </div>
+          </Link>
 
-            {/* search */}
+          {/* Desktop Navigation - Center */}
+          <nav className="hidden lg:flex items-center gap-8">
+            <Link to="/new-arrivals" className="text-sm font-semibold hover:text-accent transition-colors">
+              NEW ARRIVALS
+            </Link>
+            <Link to="/men" className="text-sm font-semibold hover:text-accent transition-colors">
+              MEN
+            </Link>
+            <Link to="/women" className="text-sm font-semibold hover:text-accent transition-colors">
+              WOMEN
+            </Link>
+            <Link to="/bespoke" className="text-sm font-semibold hover:text-accent transition-colors">
+              BESPOKE
+            </Link>
+          </nav>
+
+          {/* Actions - Right */}
+          <div className="flex items-center gap-3">
+            {/* Currency Selector */}
+            <Select value={currency} onValueChange={(value: "NGN" | "USD") => setCurrency(value)}>
+              <SelectTrigger className="w-24 h-9 hidden md:flex font-semibold border-accent/30 hover:border-accent transition-colors">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="NGN">₦ NGN</SelectItem>
+                <SelectItem value="USD">$ USD</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Search */}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSearchOpen((s) => !s)}
+              className="hover:bg-accent/10"
               aria-label="Search"
             >
               <Search className="h-5 w-5" />
             </Button>
 
-            {/* wishlist - show small icon on mobile, badge remains */}
+            {/* Wishlist */}
             <Link to="/wishlist" className="relative hidden md:inline-block">
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative hover:bg-accent/10">
                 <Heart className="h-5 w-5" />
                 {wishlistCount > 0 && (
-                  <Badge className="absolute -right-1 -top-1 h-4 w-4 rounded-full p-0 flex items-center justify-center bg-accent text-accent-foreground text-[10px]">
+                  <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-accent text-accent-foreground text-xs font-bold">
                     {wishlistCount}
                   </Badge>
                 )}
               </Button>
             </Link>
 
-            {/* cart */}
+            {/* Cart */}
             <Link to="/cart" className="relative">
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative hover:bg-accent/10">
                 <ShoppingCart className="h-5 w-5" />
                 {cartCount > 0 && (
-                  <Badge className="absolute -right-1 -top-1 h-4 w-4 rounded-full p-0 flex items-center justify-center bg-accent text-accent-foreground text-[10px]">
+                  <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-accent text-accent-foreground text-xs font-bold">
                     {cartCount}
                   </Badge>
                 )}
               </Button>
             </Link>
 
-            {/* user / sign in */}
+            {/* User Menu */}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="flex items-center gap-2 h-9 px-2 md:h-10 md:px-3"
-                  >
-                    <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center text-accent-foreground font-bold text-sm">
+                  <Button variant="ghost" className="flex items-center gap-2 h-10 px-3 hover:bg-accent/10">
+                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-accent via-accent/80 to-primary flex items-center justify-center text-white font-bold text-sm shadow-md">
                       {getInitials(user.email)}
                     </div>
-                    <span className="hidden lg:inline-block font-medium max-w-[100px] truncate text-sm">
+                    <span className="hidden xl:inline-block font-semibold max-w-[120px] truncate">
                       {user.email?.split("@")[0]}
                     </span>
-                    <ChevronDown className="h-4 w-4 hidden lg:block" />
+                    <ChevronDown className="h-4 w-4 hidden xl:block" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel className="font-normal">
+                <DropdownMenuContent align="end" className="w-60">
+                  <DropdownMenuLabel>
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium">My Account</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {user.email}
-                      </p>
+                      <p className="font-semibold">My Account</p>
+                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => navigate("/dashboard")}
-                    className="cursor-pointer"
-                  >
+                  <DropdownMenuItem onClick={() => navigate("/dashboard")} className="cursor-pointer">
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     Dashboard
                   </DropdownMenuItem>
@@ -221,7 +172,7 @@ export const Header = () => {
                       await signOut(auth);
                       navigate("/auth");
                     }}
-                    className="cursor-pointer text-destructive"
+                    className="cursor-pointer text-destructive focus:text-destructive"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
@@ -230,16 +181,24 @@ export const Header = () => {
               </DropdownMenu>
             ) : (
               <Link to="/auth">
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <User className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <span className="hidden sm:inline">Sign In</span>
+                <Button size="sm" className="font-semibold">
+                  <User className="h-4 w-4 mr-2" />
+                  Sign In
                 </Button>
               </Link>
             )}
+
+            {/* Mobile Menu */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden hover:bg-accent/10">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-80 p-0">
+                <MobileSidebar onClose={() => setMobileMenuOpen(false)} />
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
 
