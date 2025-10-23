@@ -12,6 +12,9 @@ import {
   deleteDoc,
   query,
   where,
+  orderBy,
+  serverTimestamp,
+  arrayUnion,
 } from "firebase/firestore";
 import {
   getAuth,
@@ -20,6 +23,7 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { CartItem } from "@/contexts/CartContext";
 
 // Firebase Configuration (Replace with your own from Firebase Console)
 const firebaseConfig = {
@@ -213,21 +217,83 @@ async function deleteCategory(categoryId: string) {
 }
 
 // Cart Operations
-async function addToCart(userId: string, item: any) {
-  try {
-    const cartRef = doc(db, "carts", userId);
-    const cart = await getDoc(cartRef);
-    const items = cart.exists() ? cart.data().items : [];
-    items.push(item);
-    await setDoc(
-      cartRef,
-      { userId, items, updatedAt: new Date() },
-      { merge: true }
-    );
-  } catch (error: any) {
-    throw new Error(error.message);
+// (removed duplicate firebase/firestore import and fixed addToCart to accept array or single item)
+
+// Helper: remove undefined and nested arrays from an object
+const sanitizeItem = (item: any) => {
+  const out: Record<string, any> = {};
+  if (!item || typeof item !== "object") return item;
+  Object.entries(item).forEach(([k, v]) => {
+    if (v === undefined) return; // drop undefined
+    if (Array.isArray(v)) {
+      // omit nested arrays to avoid Firestore nested-array error
+      return;
+    }
+    if (v !== null && typeof v === "object") {
+      out[k] = sanitizeItem(v);
+    } else {
+      out[k] = v;
+    }
+  });
+  return out;
+};
+
+export const addToCart = async (userId: string, itemOrItems: any | any[]) => {
+  if (!userId) throw new Error("Missing userId");
+  const cartRef = doc(db, "carts", userId);
+
+  const itemsArray = Array.isArray(itemOrItems) ? itemOrItems : [itemOrItems];
+
+  // Convert each incoming item into a minimal safe object
+  const sanitizedItems = itemsArray
+    .map((item) => {
+      const base = {
+        id: item?.id ?? "",
+        name: item?.name ?? "",
+        price:
+          typeof item?.price === "number"
+            ? item.price
+            : Number(item?.price || 0),
+        quantity:
+          typeof item?.quantity === "number"
+            ? item.quantity
+            : Number(item?.quantity || 1),
+        image: item?.image ?? "",
+        category: item?.category ?? "",
+        // add other primitive fields here if needed
+      };
+      return sanitizeItem(base);
+    })
+    .filter(Boolean);
+
+  if (sanitizedItems.length === 0) {
+    throw new Error("No valid items to add to cart");
   }
-}
+
+  try {
+    // Use arrayUnion with spread so multiple items get appended safely
+    await updateDoc(cartRef, {
+      items: arrayUnion(...sanitizedItems),
+      updatedAt: serverTimestamp(),
+    });
+  } catch (err) {
+    // fallback: create or merge cart doc
+    try {
+      await setDoc(
+        cartRef,
+        {
+          items: sanitizedItems,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+    } catch (inner) {
+      console.error("Error adding to cart:", inner);
+      throw inner;
+    }
+  }
+};
 
 async function getCart(userId: string) {
   try {
@@ -323,57 +389,82 @@ async function clearWishlist(userId: string) {
 }
 
 // Order Operations
-async function createOrder(orderData: any) {
+export const createOrder = async (orderData: {
+  userId: string;
+  items: any[];
+  totalAmount: number;
+  status?: string;
+}) => {
   try {
-    const orderRef = await addDoc(collection(db, "orders"), {
+    const ordersRef = collection(db, "orders");
+    const newOrder = {
       ...orderData,
-      createdAt: new Date(),
-      status: "pending",
-    });
-    const message = `Hello, kindly confirm this order for me. I want to make payment. Cart details: ${orderData.items
-      .map((i: any) => `${i.productName}: ${i.quantity} x ${i.price}`)
-      .join(", ")}, Total: ${orderData.totalAmount}. Order ID: ${orderRef.id}`;
-    window.location.href = `https://wa.me/+2348144977227?text=${encodeURIComponent(
-      message
-    )}`;
-    return orderRef.id;
-  } catch (error: any) {
-    throw new Error(error.message);
-  }
-}
+      status: orderData.status || "pending",
+      createdAt: serverTimestamp(),
+    };
 
-async function getOrders(userId: string) {
+    const docRef = await addDoc(ordersRef, newOrder);
+    return { id: docRef.id, ...newOrder };
+  } catch (error) {
+    console.error("Error creating order:", error);
+    throw error;
+  }
+};
+
+export const updateOrder = async (orderId: string, data: Partial<Order>) => {
   try {
-    const q = query(collection(db, "orders"), where("userId", "==", userId));
+    const orderRef = doc(db, "orders", orderId);
+    await setDoc(orderRef, {
+      ...data,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Error updating order:", error);
+    throw error;
+  }
+};
+
+export const getOrders = async (userId: string) => {
+  try {
+    const ordersRef = collection(db, "orders");
+    const q = query(
+      ordersRef,
+      where("userId", "==", userId),
+      orderBy("createdAt", "desc")
+    );
+
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  } catch (error: any) {
-    throw new Error(error.message);
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate(), // Convert Firestore Timestamp
+    }));
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return [];
   }
-}
+};
 
-async function updateOrder(orderId: string, updates: any) {
+export const getBespokeRequests = async (userId: string) => {
   try {
-    const userRole = (await getUserProfile(auth.currentUser!.uid)).role;
-    if (userRole !== "admin") throw new Error("Admin access required");
-    await updateDoc(doc(db, "orders", orderId), {
-      ...updates,
-      updatedAt: new Date(),
-    });
-  } catch (error: any) {
-    throw new Error(error.message);
-  }
-}
+    const bespokeRef = collection(db, "bespokeRequests");
+    const q = query(
+      bespokeRef,
+      where("userId", "==", userId),
+      orderBy("createdAt", "desc")
+    );
 
-async function deleteOrder(orderId: string) {
-  try {
-    const userRole = (await getUserProfile(auth.currentUser!.uid)).role;
-    if (userRole !== "admin") throw new Error("Admin access required");
-    await deleteDoc(doc(db, "orders", orderId));
-  } catch (error: any) {
-    throw new Error(error.message);
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate(), // Convert Firestore Timestamp
+    }));
+  } catch (error) {
+    console.error("Error fetching bespoke requests:", error);
+    return [];
   }
-}
+};
 
 // Image Upload (for Products)
 async function uploadImage(file: File) {
@@ -420,7 +511,6 @@ export {
   getAllCategories,
   updateCategory,
   deleteCategory,
-  addToCart,
   getCart,
   updateCart,
   clearCart,
@@ -428,11 +518,6 @@ export {
   getWishlist,
   removeFromWishlist,
   clearWishlist,
-  createOrder,
-  getOrders,
-  updateOrder,
-  deleteOrder,
-  uploadImage,
   auth,
   db,
   storage,
@@ -441,4 +526,42 @@ export {
 export async function getAllUsers() {
   const snap = await getDocs(collection(db, "users"));
   return snap.docs.map((doc) => ({ uid: doc.id, ...doc.data() }));
+}
+
+// Type definitions
+interface DeliveryDetails {
+  fullName: string;
+  phoneNumber: string;
+  address: string;
+  city: string;
+  state: string;
+  additionalInfo?: string;
+}
+
+interface OrderItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image: string;
+  category: string;
+}
+
+interface Order {
+  userId: string;
+  userEmail: string;
+  items: OrderItem[];
+  totalAmount: number;
+  deliveryDetails: DeliveryDetails;
+  status: "pending" | "processing" | "completed" | "cancelled";
+  paymentStatus: "pending" | "paid" | "failed";
+  paymentDetails?: {
+    transactionId: string;
+    flwRef: string;
+    paymentType: string;
+    paidAt: Date;
+  };
+  createdAt: any;
+  updatedAt: any;
+  txRef: string;
 }
