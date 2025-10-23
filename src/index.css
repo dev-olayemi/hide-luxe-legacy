@@ -119,3 +119,18 @@ All colors MUST be HSL.
     font-family: "Playfair Display", serif;
   }
 }
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ensure numerals render as lining/tabular figures to match letters */
+.num-fix {
+  /* prefer font-feature flags if the font supports them */
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: "lnum" 1, "tnum" 1;
+  -webkit-font-feature-settings: "lnum" 1, "tnum" 1;
+  /* keep same size/height */
+  line-height: 1;
+  vertical-align: baseline;
+}

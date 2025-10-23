@@ -31,6 +31,7 @@ import AdminAuth from "@/admin/AdminAuth";
 import AdminDashboard from "@/admin/AdminDashboard";
 import AdminProducts from "@/admin/AdminProducts";
 import ProjectDetail from "@/pages/ProjectDetail";
+import OrderSuccess from "@/pages/OrderSuccess";
 
 const queryClient = new QueryClient();
 
@@ -46,34 +47,39 @@ const App = () => (
               <WhatsAppChat />
               <BackToTop />
               <Routes>
-              <Route path="/" element={<Index />} />
-            <Route path="/new-arrivals" element={<NewArrivals />} />
-            <Route path="/men" element={<Men />} />
-            <Route path="/women" element={<Women />} />
-            <Route path="/accessories" element={<Accessories />} />
-            <Route path="/apparel" element={<Apparel />} />
-            <Route path="/furniture" element={<Furniture />} />
-            <Route path="/automotive" element={<Automotive />} />
-            <Route path="/specialty" element={<Specialty />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/bespoke" element={<Bespoke />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/cart-details/:cartId" element={<CartDetails />} />
-              <Route path="/admin/auth" element={<AdminAuth />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/products" element={<AdminProducts />} />
-              <Route path="/project/:id" element={<ProjectDetail />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </CartProvider>
-    </CurrencyProvider>
+                <Route path="/" element={<Index />} />
+                <Route path="/new-arrivals" element={<NewArrivals />} />
+                <Route path="/men" element={<Men />} />
+                <Route path="/women" element={<Women />} />
+                <Route path="/accessories" element={<Accessories />} />
+                <Route path="/apparel" element={<Apparel />} />
+                <Route path="/furniture" element={<Furniture />} />
+                <Route path="/automotive" element={<Automotive />} />
+                <Route path="/specialty" element={<Specialty />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/wishlist" element={<Wishlist />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/bespoke" element={<Bespoke />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/cart-details/:cartId" element={<CartDetails />} />
+                <Route path="/admin/auth" element={<AdminAuth />} />
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/products" element={<AdminProducts />} />
+                <Route path="/project/:id" element={<ProjectDetail />} />
+                <Route
+                  path="/order-success/:orderId"
+                  element={<OrderSuccess />}
+                />
+                <Route path="/order-success" element={<OrderSuccess />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </CartProvider>
+      </CurrencyProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

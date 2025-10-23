@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { Header } from "@/components/Header";
@@ -24,43 +24,105 @@ import { useAuth } from "@/contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
 
 interface DeliveryDetails {
+  id?: string;
   fullName: string;
   email: string;
   phoneNumber: string;
   address: string;
   city: string;
   state: string;
+  country?: string;
   additionalInfo?: string;
 }
+
+const WHATSAPP_NUMBER = "+2348144977227";
 
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const WHATSAPP_NUMBER = "+2348144977227";
 
-  const [deliveryDetails, setDeliveryDetails] = useState<DeliveryDetails>(
+  const [countries, setCountries] = useState<string[]>([]);
+  const [states, setStates] = useState<string[]>([]);
+  const [countryLoading, setCountryLoading] = useState(false);
+
+  const [savedAddresses, setSavedAddresses] = useState<DeliveryDetails[]>(
     () => {
-      const savedDetails = localStorage.getItem(
-        `lastDeliveryDetails_${user?.uid}`
-      );
-      const parsed = savedDetails ? JSON.parse(savedDetails) : null;
-
-      return {
-        fullName: user?.displayName || parsed?.fullName || "",
-        email: user?.email || parsed?.email || "",
-        phoneNumber: parsed?.phoneNumber || "",
-        address: parsed?.address || "",
-        city: parsed?.city || "",
-        state: parsed?.state || "",
-        additionalInfo: parsed?.additionalInfo || "",
-      };
+      try {
+        if (!user) return [];
+        const raw = localStorage.getItem(`addresses_${user.uid}`);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        console.warn("failed to parse saved addresses", e);
+        return [];
+      }
+    }
+  );
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    () => {
+      try {
+        if (!user) return null;
+        const rawLast = localStorage.getItem(`lastDeliveryDetails_${user.uid}`);
+        const parsedLast = rawLast ? JSON.parse(rawLast) : null;
+        if (parsedLast && parsedLast.id) return parsedLast.id;
+        // fallback will be set after savedAddresses loads via effect below
+        return null;
+      } catch (e) {
+        console.warn("failed to parse lastDeliveryDetails", e);
+        return null;
+      }
     }
   );
 
+  const [deliveryDetails, setDeliveryDetails] = useState<DeliveryDetails>(
+    () => {
+      const base = {
+        fullName: user?.displayName || "",
+        email: user?.email || "",
+        phoneNumber: "",
+        address: "",
+        city: "",
+        state: "",
+        country: "",
+        additionalInfo: "",
+      } as DeliveryDetails;
+
+      // prefer lastDeliveryDetails if present in localStorage (safe parse)
+      try {
+        if (user) {
+          const rawLast = localStorage.getItem(
+            `lastDeliveryDetails_${user.uid}`
+          );
+          const parsedLast = rawLast ? JSON.parse(rawLast) : null;
+          if (parsedLast && typeof parsedLast === "object") {
+            return { ...base, ...parsedLast };
+          }
+        }
+      } catch (e) {
+        /* ignore parse errors, fall back to base */
+      }
+
+      return base;
+    }
+  );
+
+  // when savedAddresses load/update, ensure we have a selectedAddressId and deliveryDetails synced
+  useEffect(() => {
+    if (!selectedAddressId && savedAddresses.length > 0) {
+      const first = savedAddresses[0];
+      setSelectedAddressId(first.id ?? null);
+      setDeliveryDetails((prev) => ({ ...prev, ...first }));
+    }
+    // keep deliveryDetails in sync if selectedAddressId is already set but deliveryDetails is empty
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedAddresses]);
+
   const [showDeliveryForm, setShowDeliveryForm] = useState(false);
   const [formErrors, setFormErrors] = useState<Partial<DeliveryDetails>>({});
+  const [editingDeliveryForm, setEditingDeliveryForm] = useState(false);
 
   const [cartId] = useState(() => localStorage.getItem("cartId") || uuidv4());
   const cartLink = `${window.location.origin}/cart/${cartId}`;
@@ -70,21 +132,133 @@ const Cart = () => {
     0
   );
 
+  // fetch countries list (uses restcountries for readable names)
+  useEffect(() => {
+    (async () => {
+      setCountryLoading(true);
+      try {
+        let names: string[] = [];
+
+        // Try restcountries first (preferred)
+        try {
+          const res = await fetch("https://restcountries.com/v3.1/all");
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data)) {
+              names = data.map((c: any) => c?.name?.common).filter(Boolean);
+            }
+          } else {
+            console.warn("restcountries responded with", res.status);
+          }
+        } catch (e) {
+          console.warn("restcountries fetch failed:", e);
+        }
+
+        // Fallback to countriesnow if restcountries didn't return usable data
+        if (names.length === 0) {
+          try {
+            const res2 = await fetch(
+              "https://countriesnow.space/api/v0.1/countries/"
+            );
+            if (res2.ok) {
+              const json2 = await res2.json();
+              const data2 = json2?.data || json2?.countries || [];
+              if (Array.isArray(data2)) {
+                names = data2
+                  .map((c: any) => c.country || c.name || c.countryName)
+                  .filter(Boolean);
+              }
+            } else {
+              console.warn("countriesnow responded with", res2.status);
+            }
+          } catch (e) {
+            console.warn("countriesnow fetch failed:", e);
+          }
+        }
+
+        // Final small local fallback so UI still works if both APIs fail
+        if (names.length === 0) {
+          names = [
+            "Nigeria",
+            "United States",
+            "United Kingdom",
+            "Ghana",
+            "Kenya",
+            "South Africa",
+          ];
+        }
+
+        // normalize and sort
+        setCountries(Array.from(new Set(names)).sort());
+      } catch (err) {
+        console.error("countries fetch error", err);
+        setCountries(["Nigeria", "United States", "United Kingdom"]);
+      } finally {
+        setCountryLoading(false);
+      }
+    })();
+  }, []);
+
+  // fetch states for selected country using countriesnow.space
+  const fetchStatesForCountry = useCallback(async (countryName: string) => {
+    if (!countryName) {
+      setStates([]);
+      return;
+    }
+    try {
+      setStates([]);
+      const res = await fetch(
+        "https://countriesnow.space/api/v0.1/countries/states",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ country: countryName }),
+        }
+      );
+      const json = await res.json();
+      if (json && json.data && json.data.states) {
+        setStates(json.data.states.map((s: any) => s.name));
+      } else {
+        setStates([]);
+      }
+    } catch (err) {
+      console.error("states fetch error", err);
+      setStates([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    // if selectedAddressId corresponds to a saved address, load into deliveryDetails
+    if (!selectedAddressId) return;
+    const found = savedAddresses.find((a) => a.id === selectedAddressId);
+    if (found) {
+      setDeliveryDetails((prev) => ({ ...prev, ...found }));
+      if (found.country) fetchStatesForCountry(found.country);
+    }
+  }, [selectedAddressId, savedAddresses, fetchStatesForCountry]);
+
   const handleDeliveryDetailsChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const { name, value } = e.target;
-      setDeliveryDetails((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+    (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >
+    ) => {
+      const { name, value } = e.target as HTMLInputElement;
+      setDeliveryDetails((prev) => ({ ...prev, [name]: value }));
       setFormErrors((prev) => {
         if (!prev[name as keyof DeliveryDetails]) return prev;
         const copy = { ...prev };
         delete copy[name as keyof DeliveryDetails];
         return copy;
       });
+
+      if (name === "country") {
+        // fetch states for new country
+        fetchStatesForCountry(value);
+        setDeliveryDetails((prev) => ({ ...prev, state: "" }));
+      }
     },
-    []
+    [fetchStatesForCountry]
   );
 
   const validateDeliveryDetails = (): boolean => {
@@ -96,8 +270,8 @@ const Cart = () => {
       "address",
       "city",
       "state",
+      "country",
     ];
-
     required.forEach((field) => {
       if (!deliveryDetails[field as keyof DeliveryDetails]) {
         errors[field as keyof DeliveryDetails] = `${field
@@ -105,50 +279,126 @@ const Cart = () => {
           .toLowerCase()} is required`;
       }
     });
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  const [savedAddresses, setSavedAddresses] = useState<DeliveryDetails[]>([]);
-  const [editingDeliveryForm, setEditingDeliveryForm] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      const saved = localStorage.getItem(`addresses_${user.uid}`);
-      if (saved) {
-        try {
-          const addresses = JSON.parse(saved);
-          setSavedAddresses(addresses);
-          if (addresses.length > 0 && !deliveryDetails.address) {
-            setDeliveryDetails(addresses[0]);
-          }
-        } catch (e) {
-          console.error("Error loading saved addresses:", e);
-        }
-      }
-    }
-    // intentionally not including deliveryDetails in deps to avoid overwriting while editing
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
-
-  const saveDeliveryAddress = useCallback(() => {
+  const saveAddressesToLocal = (addresses: DeliveryDetails[]) => {
     if (!user) return;
-    const addresses = [
-      deliveryDetails,
-      ...savedAddresses.filter(
-        (addr) => addr.address !== deliveryDetails.address
-      ),
-    ].slice(0, 5);
-    setSavedAddresses(addresses);
     localStorage.setItem(`addresses_${user.uid}`, JSON.stringify(addresses));
     localStorage.setItem(
       `lastDeliveryDetails_${user.uid}`,
-      JSON.stringify(deliveryDetails)
+      JSON.stringify(addresses[0] ?? {})
     );
-  }, [user, deliveryDetails, savedAddresses]);
+  };
 
-  // Payment handler (kept here)
+  const addOrUpdateAddress = (addr: DeliveryDetails) => {
+    if (!user) return;
+    const copy = [...savedAddresses];
+    if (!addr.id) addr.id = uuidv4();
+    const idx = copy.findIndex((a) => a.id === addr.id);
+    if (idx === -1) copy.unshift(addr);
+    else copy[idx] = addr;
+    const next = copy.slice(0, 10);
+    setSavedAddresses(next);
+    saveAddressesToLocal(next);
+    setSelectedAddressId(addr.id);
+    setEditingDeliveryForm(false);
+    setShowDeliveryForm(false);
+  };
+
+  const deleteAddress = (id?: string) => {
+    if (!user || !id) return;
+    const next = savedAddresses.filter((a) => a.id !== id);
+    setSavedAddresses(next);
+    saveAddressesToLocal(next);
+    if (next.length > 0) {
+      setSelectedAddressId(next[0].id ?? null);
+      setDeliveryDetails(next[0]);
+    } else {
+      setSelectedAddressId(null);
+      setDeliveryDetails({
+        fullName: user.displayName || "",
+        email: user.email || "",
+        phoneNumber: "",
+        address: "",
+        city: "",
+        state: "",
+        country: "",
+        additionalInfo: "",
+      });
+    }
+  };
+
+  // Payment flow: initiate Flutterwave, create order & payment only after successful payment callback
+  const loadFlutterwaveScript = () => {
+    return new Promise<void>((resolve, reject) => {
+      if ((window as any).FlutterwaveCheckout) return resolve();
+      const script = document.createElement("script");
+      script.src = "https://checkout.flutterwave.com/v3.js";
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () =>
+        reject(new Error("Failed to load Flutterwave script"));
+      document.body.appendChild(script);
+    });
+  };
+
+  // create order + payment after successful payment response
+  const persistOrderAfterPayment = async (orderMeta: {
+    flwRef?: string;
+    transaction_id?: string;
+    amount?: number;
+    status?: string;
+    tx_ref?: string;
+  }) => {
+    if (!user) throw new Error("No authenticated user");
+    // build order payload
+    const orderPayload = {
+      userId: user.uid,
+      userEmail: user.email,
+      items: cartItems.map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image,
+        category: item.category,
+      })),
+      totalAmount: orderMeta.amount ?? total,
+      deliveryDetails: {
+        ...deliveryDetails,
+        createdAt: serverTimestamp(),
+      },
+      status: orderMeta.status === "successful" ? "processing" : "pending",
+      paymentStatus: orderMeta.status === "successful" ? "paid" : "pending",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      txRef: orderMeta.tx_ref || null,
+      paymentDetails: {
+        transactionId: orderMeta.transaction_id || null,
+        flwRef: orderMeta.flwRef || null,
+        amount: orderMeta.amount || total,
+        status: orderMeta.status || null,
+      },
+    };
+
+    // write order and payment docs
+    const orderRef = await addDoc(collection(db, "orders"), orderPayload);
+    await addDoc(collection(db, "payments"), {
+      orderId: orderRef.id,
+      transactionId: orderMeta.transaction_id || null,
+      flwRef: orderMeta.flwRef || null,
+      amount: orderMeta.amount || total,
+      status: orderMeta.status || null,
+      createdAt: serverTimestamp(),
+      customerEmail: deliveryDetails.email,
+      customerPhone: deliveryDetails.phoneNumber,
+    });
+
+    return orderRef.id;
+  };
+
   const handleInlinePay = async () => {
     if (!user) {
       toast({
@@ -160,6 +410,7 @@ const Cart = () => {
       return;
     }
 
+    // ensure delivery details selected or valid
     if (!validateDeliveryDetails()) {
       toast({
         title: "Missing Information",
@@ -171,27 +422,11 @@ const Cart = () => {
     }
 
     try {
-      const orderRef = await addDoc(collection(db, "orders"), {
-        userId: user.uid,
-        userEmail: user.email,
-        items: cartItems.map((item) => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.image,
-          category: item.category,
-        })),
-        totalAmount: total,
-        deliveryDetails,
-        status: "pending",
-        paymentStatus: "pending",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-
       await loadFlutterwaveScript();
-      const txRef = `hxl_${orderRef.id}_${Date.now()}`;
+
+      const txRef = `hxl_${Date.now()}_${Math.random()
+        .toString(36)
+        .slice(2, 9)}`;
 
       (window as any).FlutterwaveCheckout({
         public_key:
@@ -207,81 +442,93 @@ const Cart = () => {
           name: deliveryDetails.fullName,
         },
         meta: {
-          orderId: orderRef.id,
+          cartId,
         },
         customizations: {
           title: "28th Hide Luxe",
           description: "Order payment",
         },
+        // Fallback redirect: when inline callback isn't fired this ensures
+        // the payment provider redirects back to our app with tx_ref
+        redirect_url: `${window.location.origin}/order-success?tx_ref=${txRef}`,
         callback: async function (response: any) {
+          console.log("Flutterwave callback invoked:", response, { txRef });
           try {
-            if (!response.transaction_id || !response.status) {
-              throw new Error("Invalid payment response");
+            // Flutterwave returns response.status === "successful" when ok
+            const status = response?.status;
+            const txId = response?.transaction_id || response?.id || null;
+            const flwRef = response?.flw_ref || null;
+            const amount = response?.amount || total;
+
+            if (status !== "successful") {
+              toast({
+                title: "Payment not completed",
+                description:
+                  "Payment was not successful. Please try again or contact support.",
+                variant: "destructive",
+              });
+              return;
             }
 
-            await Promise.all([
-              addDoc(collection(db, "payments"), {
-                orderId: orderRef.id,
-                transactionId: response.transaction_id,
-                flwRef: response.flw_ref || null,
-                amount: response.amount || total,
-                status: response.status,
-                paymentType: response.payment_type || "card",
-                createdAt: serverTimestamp(),
-                customerEmail: deliveryDetails.email,
-                customerPhone: deliveryDetails.phoneNumber,
-                deliveryAddress: {
-                  ...deliveryDetails,
-                  createdAt: serverTimestamp(),
-                },
-              }),
-              updateDoc(doc(db, "orders", orderRef.id), {
-                paymentStatus: "paid",
-                status: "processing",
-                updatedAt: serverTimestamp(),
-                paymentDetails: {
-                  transactionId: response.transaction_id,
-                  flwRef: response.flw_ref || null,
-                  amount: response.amount || total,
-                  status: response.status,
-                  paymentType: response.payment_type || "card",
-                  paidAt: serverTimestamp(),
-                },
-                deliveryDetails: {
-                  ...deliveryDetails,
-                  updatedAt: serverTimestamp(),
-                },
-              }),
-            ]);
+            // Persist order & payment after successful payment
+            const orderId = await persistOrderAfterPayment({
+              flwRef,
+              transaction_id: txId,
+              amount,
+              status,
+              tx_ref: txRef,
+            });
 
+            // save last used address and addresses list
+            if (user) {
+              // ensure we have an id for the deliveryDetails
+              const finalAddr = {
+                ...deliveryDetails,
+                id: deliveryDetails.id ?? uuidv4(),
+              };
+              const deduped = [
+                finalAddr,
+                ...savedAddresses.filter(
+                  (a) => a.address !== finalAddr.address
+                ),
+              ].slice(0, 10);
+              setSavedAddresses(deduped);
+              saveAddressesToLocal(deduped);
+              localStorage.setItem(
+                `lastDeliveryDetails_${user.uid}`,
+                JSON.stringify(finalAddr)
+              );
+            }
+
+            // clear cart only after order/pymt persisted
             clearCart();
-            localStorage.setItem(
-              `lastDeliveryDetails_${user.uid}`,
-              JSON.stringify(deliveryDetails)
-            );
 
             toast({
               title: "Order Successful",
               description: "Your payment has been confirmed",
             });
 
-            navigate(`/order-success/${orderRef.id}`);
+            navigate(`/order-success/${orderId}`);
           } catch (err) {
             console.error("Payment verification error:", err);
             toast({
               title: "Verification Error",
-              description: "Please contact support with reference: " + txRef,
+              description:
+                "Failed to save order after payment. Contact support.",
               variant: "destructive",
             });
           }
         },
-        onclose: function () {},
+        onclose: function () {
+          console.log("Flutterwave modal closed");
+          // user closed checkout
+        },
       });
     } catch (err) {
       console.error(err);
       toast({
-        title: "Error",
-        description: "Could not process your order. Please try again.",
+        title: "Payment Error",
+        description: "Could not start payment. Please try again.",
         variant: "destructive",
       });
     }
@@ -303,21 +550,6 @@ const Cart = () => {
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
   }
-
-  const loadFlutterwaveScript = () => {
-    return new Promise<void>((resolve, reject) => {
-      if ((window as any).FlutterwaveCheckout) {
-        return resolve();
-      }
-      const script = document.createElement("script");
-      script.src = "https://checkout.flutterwave.com/v3.js";
-      script.async = true;
-      script.onload = () => resolve();
-      script.onerror = () =>
-        reject(new Error("Failed to load Flutterwave script"));
-      document.body.appendChild(script);
-    });
-  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -401,18 +633,24 @@ const Cart = () => {
                   </div>
                 </Card>
               ))}
-              {showDeliveryForm && (
-                <DeliveryForm
-                  deliveryDetails={deliveryDetails}
-                  onChange={handleDeliveryDetailsChange}
-                  savedAddresses={savedAddresses}
-                  editingDeliveryForm={editingDeliveryForm}
-                  setEditingDeliveryForm={setEditingDeliveryForm}
-                  saveDeliveryAddress={saveDeliveryAddress}
-                  setShowDeliveryForm={setShowDeliveryForm}
-                  user={user}
-                />
-              )}
+
+              {/* Delivery / addresses manager */}
+              <DeliveryManager
+                countries={countries}
+                countryLoading={countryLoading}
+                states={states}
+                savedAddresses={savedAddresses}
+                selectedAddressId={selectedAddressId}
+                setSelectedAddressId={setSelectedAddressId}
+                deliveryDetails={deliveryDetails}
+                onChange={handleDeliveryDetailsChange}
+                onAddOrUpdate={addOrUpdateAddress}
+                onDelete={deleteAddress}
+                showDeliveryForm={showDeliveryForm}
+                setShowDeliveryForm={setShowDeliveryForm}
+                editingDeliveryForm={editingDeliveryForm}
+                setEditingDeliveryForm={setEditingDeliveryForm}
+              />
             </div>
 
             <div>
@@ -492,180 +730,284 @@ const Cart = () => {
 export default Cart;
 
 /* =========================
-   DeliveryForm component
-   moved outside Cart to avoid remounts
+   DeliveryManager component
    ========================= */
-type DeliveryFormProps = {
-  deliveryDetails: DeliveryDetails;
-  onChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => void;
+
+type DeliveryManagerProps = {
+  countries: string[];
+  countryLoading: boolean;
+  states: string[];
   savedAddresses: DeliveryDetails[];
+  selectedAddressId: string | null;
+  setSelectedAddressId: (id: string | null) => void;
+  deliveryDetails: DeliveryDetails;
+  onChange: (e: React.ChangeEvent<any>) => void;
+  onAddOrUpdate: (addr: DeliveryDetails) => void;
+  onDelete: (id?: string) => void;
+  showDeliveryForm: boolean;
+  setShowDeliveryForm: (v: boolean) => void;
   editingDeliveryForm: boolean;
   setEditingDeliveryForm: (v: boolean) => void;
-  saveDeliveryAddress: () => void;
-  setShowDeliveryForm: (v: boolean) => void;
-  user: any;
 };
 
-const DeliveryForm: React.FC<DeliveryFormProps> = ({
+const DeliveryManager: React.FC<DeliveryManagerProps> = ({
+  countries,
+  countryLoading,
+  states,
+  savedAddresses,
+  selectedAddressId,
+  setSelectedAddressId,
   deliveryDetails,
   onChange,
-  savedAddresses,
+  onAddOrUpdate,
+  onDelete,
+  showDeliveryForm,
+  setShowDeliveryForm,
   editingDeliveryForm,
   setEditingDeliveryForm,
-  saveDeliveryAddress,
-  setShowDeliveryForm,
-  user,
 }) => {
-  const hasExistingAddress = savedAddresses.length > 0;
+  const [localAddr, setLocalAddr] = useState<DeliveryDetails>(deliveryDetails);
+
+  useEffect(() => setLocalAddr(deliveryDetails), [deliveryDetails]);
 
   return (
-    <Card className="p-6 mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-playfair text-xl font-bold">Delivery Details</h3>
-        {hasExistingAddress && !editingDeliveryForm && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setEditingDeliveryForm(true)}
-          >
-            Edit Address
-          </Button>
-        )}
-      </div>
-
-      {hasExistingAddress && !editingDeliveryForm ? (
-        <div className="space-y-4">
-          <div className="p-4 bg-muted rounded-lg">
-            <p className="font-medium">{deliveryDetails.fullName}</p>
-            <p>{deliveryDetails.email}</p>
-            <p>{deliveryDetails.phoneNumber}</p>
-            <p className="mt-2">{deliveryDetails.address}</p>
-            <p>
-              {deliveryDetails.city}
-              {deliveryDetails.city && deliveryDetails.state ? ", " : ""}
-              {deliveryDetails.state}
-            </p>
-          </div>
-          <Button className="w-full" onClick={() => setShowDeliveryForm(false)}>
-            Continue with this address
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => setEditingDeliveryForm(true)}
-          >
-            Use a different address
-          </Button>
-        </div>
-      ) : (
-        <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name *</Label>
-              <Input
-                id="fullName"
-                name="fullName"
-                value={deliveryDetails.fullName}
-                onChange={onChange}
-                placeholder="Enter your full name"
-                className="focus:ring-2 focus:ring-primary"
-                autoComplete="name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={deliveryDetails.email}
-                onChange={onChange}
-                placeholder="Enter your email"
-                className="focus:ring-2 focus:ring-primary"
-                autoComplete="email"
-                readOnly={!!user?.email}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phoneNumber">Phone Number *</Label>
-            <Input
-              id="phoneNumber"
-              name="phoneNumber"
-              value={deliveryDetails.phoneNumber}
-              onChange={onChange}
-              placeholder="Enter your phone number"
-              autoComplete="tel"
-              className="focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="address">Delivery Address *</Label>
-            <Textarea
-              id="address"
-              name="address"
-              value={deliveryDetails.address}
-              onChange={onChange}
-              placeholder="Enter your delivery address"
-              autoComplete="street-address"
-              className="focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="city">City *</Label>
-              <Input
-                id="city"
-                name="city"
-                value={deliveryDetails.city}
-                onChange={onChange}
-                placeholder="Enter your city"
-                autoComplete="address-level2"
-                className="focus:ring-2 focus:ring-primary"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="state">State</Label>
-              <Input
-                id="state"
-                name="state"
-                value={(deliveryDetails as any).state || ""}
-                onChange={onChange}
-                placeholder="State (optional)"
-                autoComplete="address-level1"
-                className="focus:ring-2 focus:ring-primary"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-2 mt-6">
-            <Button
-              type="button"
-              onClick={() => {
-                saveDeliveryAddress();
-                setEditingDeliveryForm(false);
-                setShowDeliveryForm(false);
-              }}
-            >
-              Save & Continue
-            </Button>
-            {hasExistingAddress && (
+    <div>
+      <Card className="p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-playfair text-xl font-bold">Delivery Details</h3>
+          <div className="flex items-center gap-2">
+            {savedAddresses.length > 0 && !showDeliveryForm && (
               <Button
-                type="button"
                 variant="outline"
-                onClick={() => setEditingDeliveryForm(false)}
+                size="sm"
+                onClick={() => setShowDeliveryForm(true)}
               >
-                Cancel
+                Change / Add
               </Button>
             )}
           </div>
-        </form>
-      )}
-    </Card>
+        </div>
+
+        {savedAddresses.length > 0 && !showDeliveryForm ? (
+          <div className="space-y-3">
+            {savedAddresses.map((addr) => (
+              <div
+                key={addr.id}
+                className={
+                  "p-3 rounded border " +
+                  (addr.id === selectedAddressId ? "ring-2 ring-accent" : "")
+                }
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="font-medium">{addr.fullName}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {addr.address}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {addr.city}, {addr.state} — {addr.country}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {addr.phoneNumber}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setSelectedAddressId(addr.id || null);
+                      }}
+                    >
+                      Use
+                    </Button>
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setSelectedAddressId(addr.id || null);
+                          setShowDeliveryForm(true);
+                          setEditingDeliveryForm(true);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => onDelete(addr.id)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <div className="flex gap-2">
+              <Button
+                onClick={() => {
+                  setShowDeliveryForm(true);
+                  setEditingDeliveryForm(false);
+                }}
+              >
+                Add New Address
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                onAddOrUpdate({ ...localAddr, id: localAddr.id ?? uuidv4() });
+              }}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Full Name *</Label>
+                  <Input
+                    value={localAddr.fullName}
+                    name="fullName"
+                    onChange={(e) => {
+                      setLocalAddr({ ...localAddr, fullName: e.target.value });
+                      onChange(e);
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Email *</Label>
+                  <Input
+                    value={localAddr.email}
+                    name="email"
+                    onChange={(e) => {
+                      setLocalAddr({ ...localAddr, email: e.target.value });
+                      onChange(e);
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Phone *</Label>
+                  <Input
+                    value={localAddr.phoneNumber}
+                    name="phoneNumber"
+                    onChange={(e) => {
+                      setLocalAddr({
+                        ...localAddr,
+                        phoneNumber: e.target.value,
+                      });
+                      onChange(e);
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Country *</Label>
+                  <select
+                    name="country"
+                    className="input"
+                    value={localAddr.country || ""}
+                    onChange={(e) => {
+                      setLocalAddr({
+                        ...localAddr,
+                        country: e.target.value,
+                        state: "",
+                      });
+                      onChange(e);
+                    }}
+                  >
+                    <option value="">Select country</option>
+                    {countryLoading ? (
+                      <option>Loading...</option>
+                    ) : (
+                      countries.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>State / Region *</Label>
+                  <select
+                    name="state"
+                    className="input"
+                    value={localAddr.state || ""}
+                    onChange={(e) => {
+                      setLocalAddr({ ...localAddr, state: e.target.value });
+                      onChange(e);
+                    }}
+                  >
+                    <option value="">Select state</option>
+                    {(states || []).map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>City / Town *</Label>
+                  <Input
+                    name="city"
+                    value={localAddr.city || ""}
+                    onChange={(e) => {
+                      setLocalAddr({ ...localAddr, city: e.target.value });
+                      onChange(e);
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Address *</Label>
+                  <Textarea
+                    value={localAddr.address}
+                    name="address"
+                    onChange={(e) => {
+                      setLocalAddr({ ...localAddr, address: e.target.value });
+                      onChange(e);
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Additional Info</Label>
+                  <Textarea
+                    value={localAddr.additionalInfo || ""}
+                    name="additionalInfo"
+                    onChange={(e) => {
+                      setLocalAddr({
+                        ...localAddr,
+                        additionalInfo: e.target.value,
+                      });
+                      onChange(e);
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 flex gap-2">
+                <Button type="submit">Save Address</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowDeliveryForm(false);
+                    setEditingDeliveryForm(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </div>
+        )}
+      </Card>
+    </div>
   );
 };

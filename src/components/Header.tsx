@@ -64,30 +64,43 @@ export const Header = () => {
             <img
               src={logo}
               alt="28th Hide Luxe"
-              className="h-14 w-14 rounded-full object-cover ring-2 ring-accent/20 group-hover:ring-accent/40 transition-all"
+              className="h-14 w-14 rounded-full object-fill ring-accent/20 group-hover:ring-accent/40 transition-all"
             />
-            <div className="hidden md:flex flex-col">
-              <span className="font-playfair text-lg font-bold tracking-tight">
-                28TH HIDE LUXE
+            <div className="hidden md:flex flex-col leading-tight">
+              <span className="font-playfair text-base md:text-lg lg:text-xl font-bold tracking-tight leading-[1]">
+                <span className="inline-block num-fix">28TH</span>{" "}
+                <span className="inline-block">HIDE LUXE</span>
               </span>
-              <span className="text-xs tracking-widest text-muted-foreground">
-                LUXURY. LEATHER. LEGACY.
+              <span className="text-[10px] md:text-xs tracking-widest text-muted-foreground uppercase mt-0.5">
+                Luxury. Leather. Legacy.
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation - Center */}
           <nav className="hidden lg:flex items-center gap-8">
-            <Link to="/new-arrivals" className="text-sm font-semibold hover:text-accent transition-colors">
+            <Link
+              to="/new-arrivals"
+              className="text-sm font-semibold hover:text-accent transition-colors"
+            >
               NEW ARRIVALS
             </Link>
-            <Link to="/men" className="text-sm font-semibold hover:text-accent transition-colors">
+            <Link
+              to="/men"
+              className="text-sm font-semibold hover:text-accent transition-colors"
+            >
               MEN
             </Link>
-            <Link to="/women" className="text-sm font-semibold hover:text-accent transition-colors">
+            <Link
+              to="/women"
+              className="text-sm font-semibold hover:text-accent transition-colors"
+            >
               WOMEN
             </Link>
-            <Link to="/bespoke" className="text-sm font-semibold hover:text-accent transition-colors">
+            <Link
+              to="/bespoke"
+              className="text-sm font-semibold hover:text-accent transition-colors"
+            >
               BESPOKE
             </Link>
           </nav>
@@ -95,7 +108,10 @@ export const Header = () => {
           {/* Actions - Right */}
           <div className="flex items-center gap-3">
             {/* Currency Selector */}
-            <Select value={currency} onValueChange={(value: "NGN" | "USD") => setCurrency(value)}>
+            <Select
+              value={currency}
+              onValueChange={(value: "NGN" | "USD") => setCurrency(value)}
+            >
               <SelectTrigger className="w-24 h-9 hidden md:flex font-semibold border-accent/30 hover:border-accent transition-colors">
                 <SelectValue />
               </SelectTrigger>
@@ -118,7 +134,11 @@ export const Header = () => {
 
             {/* Wishlist */}
             <Link to="/wishlist" className="relative hidden md:inline-block">
-              <Button variant="ghost" size="icon" className="relative hover:bg-accent/10">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative hover:bg-accent/10"
+              >
                 <Heart className="h-5 w-5" />
                 {wishlistCount > 0 && (
                   <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-accent text-accent-foreground text-xs font-bold">
@@ -130,7 +150,11 @@ export const Header = () => {
 
             {/* Cart */}
             <Link to="/cart" className="relative">
-              <Button variant="ghost" size="icon" className="relative hover:bg-accent/10">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative hover:bg-accent/10"
+              >
                 <ShoppingCart className="h-5 w-5" />
                 {cartCount > 0 && (
                   <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-accent text-accent-foreground text-xs font-bold">
@@ -144,7 +168,10 @@ export const Header = () => {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 h-10 px-3 hover:bg-accent/10">
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-2 h-10 px-3 hover:bg-accent/10"
+                  >
                     <div className="h-9 w-9 rounded-full bg-gradient-to-br from-accent via-accent/80 to-primary flex items-center justify-center text-white font-bold text-sm shadow-md">
                       {getInitials(user.email)}
                     </div>
@@ -158,11 +185,16 @@ export const Header = () => {
                   <DropdownMenuLabel>
                     <div className="flex flex-col space-y-1">
                       <p className="font-semibold">My Account</p>
-                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {user.email}
+                      </p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/dashboard")} className="cursor-pointer">
+                  <DropdownMenuItem
+                    onClick={() => navigate("/dashboard")}
+                    className="cursor-pointer"
+                  >
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     Dashboard
                   </DropdownMenuItem>
@@ -191,7 +223,11 @@ export const Header = () => {
             {/* Mobile Menu */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden hover:bg-accent/10">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden hover:bg-accent/10"
+                >
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>

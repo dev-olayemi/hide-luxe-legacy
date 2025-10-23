@@ -1,12 +1,18 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, ShoppingCart, Eye } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { cn } from "@/lib/utils";
+
+interface ColorOption {
+  label: string;
+  value: string;
+  hex?: string;
+}
 
 interface ProductCardProps {
   id: string;
@@ -15,6 +21,9 @@ interface ProductCardProps {
   image: string;
   category?: string;
   isNew?: boolean;
+  sizes?: string[];
+  colors?: ColorOption[];
+  availableCount?: number | null;
 }
 
 export const ProductCard = ({
@@ -24,92 +33,136 @@ export const ProductCard = ({
   image,
   category,
   isNew,
+  sizes = [],
+  colors = [],
+  availableCount = null,
 }: ProductCardProps) => {
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const { toast } = useToast();
   const { formatPrice } = useCurrency();
   const inWishlist = isInWishlist(id);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    addToCart({
-      id,
-      name,
-      price,
-      image,
-      category: category || "",
-    });
-    toast({
-      title: "Added to cart",
-      description: `${name} has been added to your cart.`,
-    });
+  const handleAddToCart = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    try {
+      // addToCart expects the item object without `quantity` (CartContext handles quantities)
+      addToCart({
+        id,
+        name,
+        price,
+        image,
+        category: category || "",
+      });
+      toast({
+        title: "Added to cart",
+        description: `${name} added to cart.`,
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Could not add to cart",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     toggleWishlist(id);
-    if (!inWishlist) {
-      toast({
-        title: "Added to wishlist",
-        description: `${name} has been added to your wishlist.`,
-      });
-    }
+    toast({
+      title: inWishlist ? "Removed from wishlist" : "Added to wishlist",
+      description: inWishlist
+        ? `${name} removed.`
+        : `${name} added to wishlist.`,
+    });
   };
 
   return (
-    <Card className="group relative overflow-hidden border-0 shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 rounded-2xl bg-card">
-      <div className="relative overflow-hidden aspect-[3/4] rounded-t-2xl">
-        <img
-          src={image}
-          alt={name}
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-        />
+    <Card className="relative overflow-hidden rounded-xl border bg-white shadow-sm">
+      {/* Image area - fixed height, no zoom */}
+      <div className="relative bg-white flex items-center justify-center border-b px-4 py-4 h-56">
+        <Link
+          to={`/product/${id}`}
+          className="block w-full h-full flex items-center justify-center"
+        >
+          <img
+            src={image}
+            alt={name}
+            className="max-h-full max-w-full object-contain"
+            loading="lazy"
+          />
+        </Link>
+
+        {/* wishlist button (visible) */}
+        <button
+          onClick={handleToggleWishlist}
+          aria-label="Toggle wishlist"
+          className="absolute right-3 top-3 z-20 rounded-full bg-white/95 p-2 shadow hover:bg-white"
+        >
+          <Heart
+            className={cn("h-4 w-4", inWishlist && "fill-accent text-accent")}
+          />
+        </button>
+
         {isNew && (
-          <Badge className="absolute top-4 left-4 bg-accent text-accent-foreground font-bold shadow-lg">
+          <Badge className="absolute left-3 top-3 bg-accent text-accent-foreground font-semibold">
             NEW
           </Badge>
         )}
-        
-        {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-6">
-          <div className="flex gap-2 w-full">
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={handleToggleWishlist}
-              className="flex-1"
-            >
-              <Heart className={cn("h-4 w-4 mr-2", inWishlist && "fill-accent text-accent")} />
-              Wishlist
-            </Button>
-            <Link to={`/product/${id}`} className="flex-1">
-              <Button size="sm" variant="secondary" className="w-full">
-                <Eye className="h-4 w-4 mr-2" />
-                View
-              </Button>
-            </Link>
-          </div>
-        </div>
       </div>
 
-      <CardContent className="p-5">
+      <CardContent className="p-4">
         <Link to={`/product/${id}`}>
-          <h3 className="font-bold text-lg mb-2 group-hover:text-accent transition-colors line-clamp-1">
+          <h3 className="text-sm font-semibold mb-1 line-clamp-2 text-neutral-900">
             {name}
           </h3>
         </Link>
+
         {category && (
-          <p className="text-sm text-muted-foreground capitalize mb-4">{category}</p>
+          <p className="text-xs text-muted-foreground mb-3 capitalize">
+            {category}
+          </p>
         )}
-        
-        <div className="flex items-center justify-between">
-          <span className="font-bold text-2xl">
+
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-lg font-bold text-neutral-900">
             {formatPrice(price)}
-          </span>
-          <Button size="sm" onClick={handleAddToCart} className="shadow-md hover:shadow-lg transition-shadow">
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {availableCount != null
+              ? `${availableCount} left`
+              : colors.length
+              ? `${colors.length} colors`
+              : ""}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 mb-3">
+          {colors.slice(0, 3).map((c) => (
+            <span
+              key={c.value}
+              className="w-4 h-4 rounded-full border"
+              style={{ backgroundColor: c.hex || undefined }}
+              title={c.label}
+            />
+          ))}
+          {sizes.length > 0 && (
+            <span className="text-xs text-muted-foreground ml-2">
+              {sizes.length} sizes
+            </span>
+          )}
+        </div>
+
+        <div className="flex gap-3">
+          <Button onClick={handleAddToCart} className="flex-1">
             <ShoppingCart className="h-4 w-4 mr-2" />
             Add
           </Button>
+          <Link to={`/product/${id}`} className="w-24">
+            <Button variant="outline" className="w-full">
+              View
+            </Button>
+          </Link>
         </div>
       </CardContent>
     </Card>

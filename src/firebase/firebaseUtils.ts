@@ -466,6 +466,41 @@ export const getBespokeRequests = async (userId: string) => {
   }
 };
 
+export const getAllBespokeRequests = async () => {
+  try {
+    const snap = await getDocs(collection(db, "bespokeRequests"));
+    return snap.docs.map((d) => {
+      const data = d.data();
+      return {
+        id: d.id,
+        ...data,
+        createdAt: data.createdAt?.toDate
+          ? data.createdAt.toDate()
+          : data.createdAt,
+        updatedAt: data.updatedAt?.toDate
+          ? data.updatedAt.toDate()
+          : data.updatedAt,
+      };
+    });
+  } catch (err) {
+    console.error("Error fetching all bespoke requests:", err);
+    return [];
+  }
+};
+
+export const updateBespokeRequest = async (id: string, updates: any) => {
+  try {
+    const ref = doc(db, "bespokeRequests", id);
+    await updateDoc(ref, {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (err) {
+    console.error("Error updating bespoke request:", err);
+    throw err;
+  }
+};
+
 // Image Upload (for Products)
 async function uploadImage(file: File) {
   try {

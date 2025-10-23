@@ -25,9 +25,10 @@ const AdminAuth = () => {
       toast({ title: "Welcome, admin!" });
       navigate("/admin/dashboard");
     } catch (err: any) {
+      console.error("Admin login error:", err);
       toast({
         title: "Error",
-        description: err.message,
+        description: err.code ? `${err.code}: ${err.message}` : err.message,
         variant: "destructive",
       });
     }

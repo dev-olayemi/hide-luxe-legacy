@@ -63,7 +63,9 @@ const Index = () => {
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+    setCurrentSlide(
+      (prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length
+    );
     setIsPaused(true);
     setTimeout(() => setIsPaused(false), 10000);
   };
@@ -80,14 +82,17 @@ const Index = () => {
 
       <main className="flex-1">
         {/* Hero Carousel */}
-        <section className="relative h-screen overflow-hidden bg-background" {...swipeHandlers}>
+        <section
+          className="relative h-screen overflow-hidden bg-background"
+          {...swipeHandlers}
+        >
           {/* Full-width background carousel */}
           <div className="absolute inset-0">
             {HERO_SLIDES.map((slide, index) => (
               <div
                 key={index}
                 className={`absolute inset-0 transition-opacity duration-1000 ${
-                  index === currentSlide ? 'opacity-100' : 'opacity-0'
+                  index === currentSlide ? "opacity-100" : "opacity-0"
                 }`}
               >
                 <img
@@ -105,9 +110,15 @@ const Index = () => {
               <p className="text-sm md:text-base tracking-[0.3em] mb-6 uppercase font-light">
                 Premium Leather
               </p>
-              <h1 className="font-playfair text-6xl md:text-8xl lg:text-9xl font-bold mb-8 tracking-tight">
-                Hide & Luxe
+
+              <h1 className="font-playfair font-bold mb-8 tracking-tight">
+                <span className="block text-4xl sm:text-5xl md:text-7xl lg:text-8xl leading-tight">
+                  <span className="block md:inline">Luxury.</span>
+                  <span className="block md:inline md:px-6">Leather.</span>
+                  <span className="block md:inline">Legacy.</span>
+                </span>
               </h1>
+
               <Link
                 to="/new-arrivals"
                 className="inline-block text-sm md:text-base tracking-widest border-b-2 border-white pb-1 hover:pb-2 transition-all uppercase font-light"
@@ -125,8 +136,8 @@ const Index = () => {
                 onClick={() => goToSlide(index)}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   index === currentSlide
-                    ? 'bg-white w-8'
-                    : 'bg-white/50 hover:bg-white/75 w-2'
+                    ? "bg-white w-8"
+                    : "bg-white/50 hover:bg-white/75 w-2"
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
@@ -141,7 +152,8 @@ const Index = () => {
               Featured Collection
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-              Explore our curated selection of premium leather goods, crafted with precision and passion.
+              Explore our curated selection of premium leather goods, crafted
+              with precision and passion.
             </p>
           </div>
 
@@ -155,21 +167,23 @@ const Index = () => {
                 No products found.
               </div>
             ) : (
-              products.slice(0, 8).map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  image={
-                    Array.isArray(product.images) && product.images.length > 0
-                      ? product.images[0]
-                      : "/placeholder.png"
-                  }
-                  category={product.category}
-                  isNew={product.isNew}
-                />
-              ))
+              products
+                .slice(0, 8)
+                .map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    image={
+                      Array.isArray(product.images) && product.images.length > 0
+                        ? product.images[0]
+                        : "/placeholder.png"
+                    }
+                    category={product.category}
+                    isNew={product.isNew}
+                  />
+                ))
             )}
           </div>
 
@@ -196,7 +210,10 @@ const Index = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <Link to="/men" className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500">
+              <Link
+                to="/men"
+                className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500"
+              >
                 <img
                   src={menLoafers}
                   alt="Men's Collection"
@@ -204,9 +221,17 @@ const Index = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-8">
                   <div className="text-white transform transition-transform duration-500 group-hover:translate-y-[-8px]">
-                    <h3 className="font-playfair text-3xl font-bold mb-3">Men's Collection</h3>
-                    <p className="text-white/90 mb-6">Timeless sophistication</p>
-                    <Button variant="secondary" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <h3 className="font-playfair text-3xl font-bold mb-3">
+                      Men's Collection
+                    </h3>
+                    <p className="text-white/90 mb-6">
+                      Timeless sophistication
+                    </p>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    >
                       Explore
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -214,7 +239,10 @@ const Index = () => {
                 </div>
               </Link>
 
-              <Link to="/women" className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500">
+              <Link
+                to="/women"
+                className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500"
+              >
                 <img
                   src={womenBoots}
                   alt="Women's Collection"
@@ -222,9 +250,15 @@ const Index = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-8">
                   <div className="text-white transform transition-transform duration-500 group-hover:translate-y-[-8px]">
-                    <h3 className="font-playfair text-3xl font-bold mb-3">Women's Collection</h3>
+                    <h3 className="font-playfair text-3xl font-bold mb-3">
+                      Women's Collection
+                    </h3>
                     <p className="text-white/90 mb-6">Elegance redefined</p>
-                    <Button variant="secondary" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    >
                       Explore
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -232,7 +266,10 @@ const Index = () => {
                 </div>
               </Link>
 
-              <Link to="/accessories" className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500">
+              <Link
+                to="/accessories"
+                className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500"
+              >
                 <img
                   src={categoryAccessories}
                   alt="Accessories"
@@ -240,9 +277,15 @@ const Index = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-8">
                   <div className="text-white transform transition-transform duration-500 group-hover:translate-y-[-8px]">
-                    <h3 className="font-playfair text-3xl font-bold mb-3">Accessories</h3>
+                    <h3 className="font-playfair text-3xl font-bold mb-3">
+                      Accessories
+                    </h3>
                     <p className="text-white/90 mb-6">Complete your style</p>
-                    <Button variant="secondary" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    >
                       Explore
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -250,7 +293,10 @@ const Index = () => {
                 </div>
               </Link>
 
-              <Link to="/apparel" className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500">
+              <Link
+                to="/apparel"
+                className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500"
+              >
                 <img
                   src={categoryApparel}
                   alt="Apparel"
@@ -258,9 +304,15 @@ const Index = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-8">
                   <div className="text-white transform transition-transform duration-500 group-hover:translate-y-[-8px]">
-                    <h3 className="font-playfair text-3xl font-bold mb-3">Apparel</h3>
+                    <h3 className="font-playfair text-3xl font-bold mb-3">
+                      Apparel
+                    </h3>
                     <p className="text-white/90 mb-6">Jackets & more</p>
-                    <Button variant="secondary" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    >
                       Explore
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -268,7 +320,10 @@ const Index = () => {
                 </div>
               </Link>
 
-              <Link to="/furniture" className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500">
+              <Link
+                to="/furniture"
+                className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500"
+              >
                 <img
                   src={categoryFurniture}
                   alt="Furniture"
@@ -276,9 +331,15 @@ const Index = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-8">
                   <div className="text-white transform transition-transform duration-500 group-hover:translate-y-[-8px]">
-                    <h3 className="font-playfair text-3xl font-bold mb-3">Furniture</h3>
+                    <h3 className="font-playfair text-3xl font-bold mb-3">
+                      Furniture
+                    </h3>
                     <p className="text-white/90 mb-6">Luxury interiors</p>
-                    <Button variant="secondary" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    >
                       Explore
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -286,7 +347,10 @@ const Index = () => {
                 </div>
               </Link>
 
-              <Link to="/automotive" className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500">
+              <Link
+                to="/automotive"
+                className="group relative h-96 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500"
+              >
                 <img
                   src={categoryAutomotive}
                   alt="Automotive"
@@ -294,9 +358,15 @@ const Index = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-8">
                   <div className="text-white transform transition-transform duration-500 group-hover:translate-y-[-8px]">
-                    <h3 className="font-playfair text-3xl font-bold mb-3">Automotive</h3>
+                    <h3 className="font-playfair text-3xl font-bold mb-3">
+                      Automotive
+                    </h3>
                     <p className="text-white/90 mb-6">Drive in luxury</p>
-                    <Button variant="secondary" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    >
                       Explore
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -314,11 +384,12 @@ const Index = () => {
               Bespoke Leather Creations
             </h2>
             <p className="text-lg md:text-xl mb-8 max-w-3xl mx-auto">
-              Custom-made leather products tailored to your exact specifications. 
-              Create something uniquely yours with our master craftsmen.
+              Custom-made leather products tailored to your exact
+              specifications. Create something uniquely yours with our master
+              craftsmen.
             </p>
             <Link to="/bespoke">
-              <Button size="lg" variant="outline" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary shadow-lg hover:shadow-xl transition-all">
+              <Button size="lg" variant="outline" className="text-black">
                 Start Your Custom Order
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
