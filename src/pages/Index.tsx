@@ -6,6 +6,7 @@ import { useSwipeable } from "react-swipeable";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
+import { CookieConsent } from "@/components/CookieConsent";
 import { Button } from "@/components/ui/button";
 import { getAllProducts } from "@/firebase/firebaseUtils";
 import heroFootwear from "@/assets/hero-leather-craft.jpg";
@@ -79,7 +80,7 @@ const Index = () => {
 
       <main className="flex-1">
         {/* Hero Carousel */}
-        <section className="relative h-[90vh] overflow-hidden bg-background" {...swipeHandlers}>
+        <section className="relative h-screen overflow-hidden bg-background" {...swipeHandlers}>
           {/* Full-width background carousel */}
           <div className="absolute inset-0">
             {HERO_SLIDES.map((slide, index) => (
@@ -98,36 +99,34 @@ const Index = () => {
             ))}
           </div>
 
-          {/* Backdrop filter card overlay */}
-          <div className="absolute inset-0 flex items-center justify-center px-4 md:px-8">
-            <div className="relative w-full max-w-5xl bg-black/40 backdrop-blur-xl rounded-3xl p-8 md:p-16 shadow-2xl border border-white/10 animate-fade-in">
-              <div className="text-white text-center">
-                <h1 className="font-playfair text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
-                  Luxury. Leather. Legacy.
-                </h1>
-                <p className="text-xl md:text-3xl mb-10 text-white/90 font-light tracking-wide">
-                  Handcrafted Excellence Since 1995
-                </p>
-                <Link to="/new-arrivals">
-                  <Button size="lg" className="bg-white text-black hover:bg-white/90 text-lg px-8 py-6 h-auto">
-                    Shop New Arrivals
-                    <ArrowRight className="ml-2 h-6 w-6" />
-                  </Button>
-                </Link>
-              </div>
+          {/* Centered minimal overlay like LV */}
+          <div className="absolute inset-0 flex items-center justify-center px-4">
+            <div className="text-center text-white">
+              <p className="text-sm md:text-base tracking-[0.3em] mb-6 uppercase font-light">
+                Premium Leather
+              </p>
+              <h1 className="font-playfair text-6xl md:text-8xl lg:text-9xl font-bold mb-8 tracking-tight">
+                Hide & Luxe
+              </h1>
+              <Link
+                to="/new-arrivals"
+                className="inline-block text-sm md:text-base tracking-widest border-b-2 border-white pb-1 hover:pb-2 transition-all uppercase font-light"
+              >
+                Discover the collection
+              </Link>
             </div>
           </div>
 
-          {/* Circular Dot Indicators */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-40 flex gap-3">
+          {/* Minimal Dot Indicators */}
+          <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-40 flex gap-3">
             {HERO_SLIDES.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`transition-all duration-300 rounded-full ${
+                className={`h-2 rounded-full transition-all duration-300 ${
                   index === currentSlide
-                    ? 'bg-white w-3 h-3 scale-125'
-                    : 'bg-white/50 hover:bg-white/80 w-3 h-3 hover:scale-110'
+                    ? 'bg-white w-8'
+                    : 'bg-white/50 hover:bg-white/75 w-2'
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
@@ -329,6 +328,7 @@ const Index = () => {
       </main>
 
       <Footer />
+      <CookieConsent />
     </div>
   );
 };
