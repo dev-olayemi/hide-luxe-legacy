@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Heart, ShoppingCart, ArrowLeft } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { BackButton } from "@/components/BackButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -70,13 +71,7 @@ const ProductDetail = () => {
       <Header />
 
       <main className="flex-1 container mx-auto px-4 py-12">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-accent mb-8 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Home
-        </Link>
+        <BackButton label="Back to Home" className="mb-8" />
 
         <div className="grid md:grid-cols-2 gap-12">
           {/* Product Image */}

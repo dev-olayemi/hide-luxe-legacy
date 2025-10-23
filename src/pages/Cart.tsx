@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { BackButton } from "@/components/BackButton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -323,6 +324,7 @@ const Cart = () => {
       <Header />
 
       <main className="flex-1 container mx-auto px-4 py-12">
+        <BackButton className="mb-6" />
         <h1 className="font-playfair text-4xl md:text-5xl font-bold mb-8">
           Shopping Cart
         </h1>

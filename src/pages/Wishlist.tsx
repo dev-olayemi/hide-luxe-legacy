@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { BackButton } from "@/components/BackButton";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ProductCard";
 import { useCart } from "@/contexts/CartContext";
@@ -30,6 +31,7 @@ const Wishlist = () => {
       <Header />
 
       <main className="flex-1 container mx-auto px-4 py-12">
+        <BackButton className="mb-6" />
         <h1 className="font-playfair text-4xl md:text-5xl font-bold mb-8">
           Wishlist
         </h1>

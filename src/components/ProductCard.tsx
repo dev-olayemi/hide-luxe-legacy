@@ -103,7 +103,7 @@ export const ProductCard = ({
         )}
         
         <div className="flex items-center justify-between">
-          <span className="font-bold text-2xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <span className="font-bold text-2xl">
             {formatPrice(price)}
           </span>
           <Button size="sm" onClick={handleAddToCart} className="shadow-md hover:shadow-lg transition-shadow">

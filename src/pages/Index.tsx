@@ -79,80 +79,43 @@ const Index = () => {
 
       <main className="flex-1">
         {/* Hero Carousel */}
-        <section className="relative h-[75vh] md:h-[85vh] overflow-hidden bg-background" {...swipeHandlers}>
-          <div className="absolute inset-0 flex items-center justify-center">
-            {HERO_SLIDES.map((slide, index) => {
-              const offset = (index - currentSlide + HERO_SLIDES.length) % HERO_SLIDES.length;
-              const isCenter = offset === 0;
-              const isLeft = offset === HERO_SLIDES.length - 1;
-              const isRight = offset === 1;
+        <section className="relative h-[90vh] overflow-hidden bg-background" {...swipeHandlers}>
+          {/* Full-width background carousel */}
+          <div className="absolute inset-0">
+            {HERO_SLIDES.map((slide, index) => (
+              <div
+                key={index}
+                className={`absolute inset-0 transition-opacity duration-1000 ${
+                  index === currentSlide ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                <img
+                  src={slide.image}
+                  alt={`Slide ${index + 1}`}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
 
-              let transform = "translateX(0) scale(0.8)";
-              let opacity = 0;
-              let zIndex = 0;
-
-              if (isCenter) {
-                transform = "translateX(0) scale(1)";
-                opacity = 1;
-                zIndex = 30;
-              } else if (isLeft) {
-                transform = "translateX(-85%) scale(0.85)";
-                opacity = 0.4;
-                zIndex = 20;
-              } else if (isRight) {
-                transform = "translateX(85%) scale(0.85)";
-                opacity = 0.4;
-                zIndex = 20;
-              }
-
-              return (
-                <div
-                  key={index}
-                  className="absolute transition-all duration-700 ease-out cursor-pointer"
-                  style={{
-                    transform,
-                    opacity,
-                    zIndex,
-                  }}
-                  onClick={() => {
-                    if (!isCenter) goToSlide(index);
-                  }}
-                >
-                  <div className="relative w-[70vw] md:w-[50vw] h-[55vh] md:h-[65vh] rounded-3xl overflow-hidden shadow-2xl">
-                    <img
-                      src={slide.image}
-                      alt={`Slide ${index + 1}`}
-                      className="h-full w-full object-cover"
-                    />
-                    {isCenter && (
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-8 md:p-12">
-                        <div className="text-white w-full">
-                          <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold mb-4 animate-fade-in">
-                            Luxury. Leather. Legacy.
-                          </h1>
-                          <p className="text-lg md:text-2xl mb-8 text-accent font-medium">
-                            Handcrafted Excellence Since 1995
-                          </p>
-                          <div className="flex flex-col sm:flex-row gap-4">
-                            <Link to="/new-arrivals">
-                              <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                                Shop New Arrivals
-                                <ArrowRight className="ml-2 h-5 w-5" />
-                              </Button>
-                            </Link>
-                            <Link to="/bespoke">
-                              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-black">
-                                Bespoke Orders
-                              </Button>
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+          {/* Backdrop filter card overlay */}
+          <div className="absolute inset-0 flex items-center justify-center px-4 md:px-8">
+            <div className="relative w-full max-w-5xl bg-black/40 backdrop-blur-xl rounded-3xl p-8 md:p-16 shadow-2xl border border-white/10 animate-fade-in">
+              <div className="text-white text-center">
+                <h1 className="font-playfair text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
+                  Luxury. Leather. Legacy.
+                </h1>
+                <p className="text-xl md:text-3xl mb-10 text-white/90 font-light tracking-wide">
+                  Handcrafted Excellence Since 1995
+                </p>
+                <Link to="/new-arrivals">
+                  <Button size="lg" className="bg-white text-black hover:bg-white/90 text-lg px-8 py-6 h-auto">
+                    Shop New Arrivals
+                    <ArrowRight className="ml-2 h-6 w-6" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
 
           {/* Circular Dot Indicators */}
@@ -163,8 +126,8 @@ const Index = () => {
                 onClick={() => goToSlide(index)}
                 className={`transition-all duration-300 rounded-full ${
                   index === currentSlide
-                    ? 'bg-accent w-3 h-3 scale-125'
-                    : 'bg-white/60 hover:bg-white/90 w-3 h-3 hover:scale-110'
+                    ? 'bg-white w-3 h-3 scale-125'
+                    : 'bg-white/50 hover:bg-white/80 w-3 h-3 hover:scale-110'
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
@@ -175,7 +138,7 @@ const Index = () => {
         {/* Featured Products */}
         <section className="container mx-auto px-4 py-20">
           <div className="text-center mb-16">
-            <h2 className="font-playfair text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <h2 className="font-playfair text-4xl md:text-5xl font-bold mb-6">
               Featured Collection
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
@@ -347,16 +310,16 @@ const Index = () => {
 
         {/* Bespoke CTA */}
         <section className="container mx-auto px-4 py-20">
-          <div className="bg-gradient-to-br from-primary via-primary/90 to-accent text-primary-foreground rounded-3xl p-12 md:p-16 text-center shadow-2xl">
+          <div className="bg-primary text-primary-foreground rounded-3xl p-12 md:p-16 text-center shadow-2xl border border-border">
             <h2 className="font-playfair text-4xl md:text-5xl font-bold mb-6">
               Bespoke Leather Creations
             </h2>
-            <p className="text-lg md:text-xl mb-8 max-w-3xl mx-auto opacity-95">
+            <p className="text-lg md:text-xl mb-8 max-w-3xl mx-auto">
               Custom-made leather products tailored to your exact specifications. 
               Create something uniquely yours with our master craftsmen.
             </p>
             <Link to="/bespoke">
-              <Button size="lg" variant="secondary" className="shadow-lg hover:shadow-xl transition-shadow">
+              <Button size="lg" variant="outline" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary shadow-lg hover:shadow-xl transition-all">
                 Start Your Custom Order
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>

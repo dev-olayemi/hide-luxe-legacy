@@ -28,8 +28,8 @@ All colors MUST be HSL.
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
 
-    --accent: 43 74% 49%;
-    --accent-foreground: 0 0% 0%;
+    --accent: 0 0% 20%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
@@ -40,9 +40,9 @@ All colors MUST be HSL.
 
     --radius: 0.375rem;
 
-    --luxury-gold: 43 74% 49%;
-    --luxury-gold-light: 43 74% 65%;
-    --luxury-gold-dark: 43 74% 35%;
+    --luxury-gold: 0 0% 15%;
+    --luxury-gold-light: 0 0% 25%;
+    --luxury-gold-dark: 0 0% 10%;
 
     --sidebar-background: 0 0% 98%;
 
@@ -80,7 +80,7 @@ All colors MUST be HSL.
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 65%;
 
-    --accent: 43 74% 49%;
+    --accent: 0 0% 85%;
     --accent-foreground: 0 0% 5%;
 
     --destructive: 0 62.8% 30.6%;
