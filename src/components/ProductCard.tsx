@@ -139,15 +139,21 @@ export const ProductCard = ({
 
         <div className="flex items-center gap-2 mb-3">
           {colors.slice(0, 3).map((c) => (
-            <span
-              key={c.value}
-              className="w-4 h-4 rounded-full border"
-              style={{ backgroundColor: c.hex || undefined }}
-              title={c.label}
-            />
+            <div key={c.value} className="flex flex-col items-center gap-1">
+              <span
+                className="w-6 h-6 rounded-full border"
+                style={{ backgroundColor: c.hex || undefined }}
+                title={c.label}
+              />
+            </div>
           ))}
+          {colors.length > 3 && (
+            <span className="text-xs text-muted-foreground">
+              +{colors.length - 3}
+            </span>
+          )}
           {sizes.length > 0 && (
-            <span className="text-xs text-muted-foreground ml-2">
+            <span className="text-xs text-muted-foreground ml-auto">
               {sizes.length} sizes
             </span>
           )}

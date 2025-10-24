@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { BackButton } from "@/components/BackButton";
@@ -50,7 +50,7 @@ const ProductDetail = () => {
   const inWishlist = isInWishlist(product.id);
 
   const handleAddToCart = () => {
-    if (!selectedSize) {
+    if (product.sizes && product.sizes.length > 0 && !selectedSize) {
       alert("Please select a size");
       return;
     }
@@ -115,6 +115,27 @@ const ProductDetail = () => {
                 {product.name}
               </h1>
               {product.isNew && <Badge className="mb-4">New Arrival</Badge>}
+              
+              {/* Rating */}
+              <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={cn(
+                        "h-5 w-5",
+                        star <= (product.rating || 0)
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "fill-gray-200 text-gray-200"
+                      )}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  {product.rating ? `${product.rating}.0` : "No ratings yet"}
+                </span>
+              </div>
+
               <p className="text-3xl font-semibold mb-6">
                 ₦{product.price.toLocaleString()}
               </p>
@@ -125,7 +146,7 @@ const ProductDetail = () => {
             </div>
 
             {/* Color Selection */}
-            {product.colors.length > 0 && (
+            {product.colors && product.colors.length > 0 && (
               <div className="space-y-3">
                 <Label className="text-base font-medium">Color</Label>
                 <RadioGroup
@@ -133,33 +154,42 @@ const ProductDetail = () => {
                   onValueChange={setSelectedColor}
                 >
                   <div className="flex gap-3">
-                    {product.colors.map((color) => (
-                      <div key={color} className="flex items-center">
-                        <RadioGroupItem
-                          value={color}
-                          id={`color-${color}`}
-                          className="sr-only"
-                        />
-                        <Label
-                          htmlFor={`color-${color}`}
-                          className={cn(
-                            "px-6 py-2 border rounded cursor-pointer transition-colors",
-                            selectedColor === color
-                              ? "border-accent bg-accent/10"
-                              : "border-border hover:border-accent/50"
-                          )}
-                        >
-                          {color}
-                        </Label>
-                      </div>
-                    ))}
+                    {product.colors.map((color: any) => {
+                      const colorValue = typeof color === 'string' ? color : color.value || color.label;
+                      const colorHex = typeof color === 'object' ? color.hex : undefined;
+                      const colorLabel = typeof color === 'string' ? color : color.label;
+                      
+                      return (
+                        <div key={colorValue} className="flex flex-col items-center gap-2">
+                          <RadioGroupItem
+                            value={colorValue}
+                            id={`color-${colorValue}`}
+                            className="sr-only"
+                          />
+                          <Label
+                            htmlFor={`color-${colorValue}`}
+                            className={cn(
+                              "w-12 h-12 rounded-full border-2 cursor-pointer transition-all",
+                              selectedColor === colorValue
+                                ? "border-accent ring-2 ring-accent ring-offset-2"
+                                : "border-border hover:border-accent/50"
+                            )}
+                            style={{ backgroundColor: colorHex || colorValue }}
+                            title={colorLabel}
+                          />
+                          <span className="text-xs text-muted-foreground capitalize">
+                            {colorLabel}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </RadioGroup>
               </div>
             )}
 
             {/* Size Selection */}
-            {product.sizes.length > 0 && (
+            {product.sizes && product.sizes.length > 0 && (
               <div className="space-y-3">
                 <Label className="text-base font-medium">Size</Label>
                 <RadioGroup
