@@ -30,6 +30,12 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import AdminAuth from "@/admin/AdminAuth";
 import AdminDashboard from "@/admin/AdminDashboard";
 import AdminProducts from "@/admin/AdminProducts";
+import AdminOrders from "@/admin/pages/AdminOrders";
+import AdminBespoke from "@/admin/pages/AdminBespoke";
+import AdminUsers from "@/admin/pages/AdminUsers";
+import AdminAnalytics from "@/admin/pages/AdminAnalytics";
+import AdminSettings from "@/admin/pages/AdminSettings";
+import Admin404 from "@/admin/pages/Admin404";
 import ProjectDetail from "@/pages/ProjectDetail";
 import OrderSuccess from "@/pages/OrderSuccess";
 import AdminRoutes from "./admin/AdminRoutes";
@@ -69,6 +75,12 @@ const App = () => (
                 <Route path="/admin/auth" element={<AdminAuth />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/products" element={<AdminProducts />} />
+                <Route path="/admin/orders" element={<AdminOrders />} />
+                <Route path="/admin/bespoke-requests" element={<AdminBespoke />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
+                <Route path="/admin/analytics" element={<AdminAnalytics />} />
+                <Route path="/admin/settings" element={<AdminSettings />} />
+                <Route path="/admin/*" element={<Admin404 />} />
                 <Route path="/project/:id" element={<ProjectDetail />} />
                 <Route
                   path="/order-success/:orderId"

@@ -3,90 +3,126 @@ import { useEffect, useState } from "react";
 import { getAllProducts, deleteProduct } from "@/firebase/firebaseUtils";
 import AdminAddProduct from "./AdminAddProduct";
 import { toast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import AdminLayout from "./AdminLayout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Trash2, Package } from "lucide-react";
 
 const AdminProducts = () => {
   const [products, setProducts] = useState<any[]>([]);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (localStorage.getItem("isAdmin") !== "true") {
-      navigate("/admin/auth");
-      return;
-    }
-    getAllProducts().then(setProducts);
-  }, [navigate]);
+    fetchProducts();
+  }, []);
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Delete this product?")) return;
-    await deleteProduct(id);
-    setProducts(products.filter((p) => p.id !== id));
-    toast({ title: "Product deleted" });
+  const fetchProducts = async () => {
+    try {
+      const data = await getAllProducts();
+      setProducts(data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    try {
+      await deleteProduct(id);
+      setProducts(products.filter((p) => p.id !== id));
+      toast({ title: "Product deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast({ title: "Error deleting product", variant: "destructive" });
+    }
+  };
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6 text-indigo-700">All Products</h1>
-      <AdminAddProduct />
-      <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {products.length === 0 && (
-          <div className="col-span-full text-center text-gray-400">
-            No products found.
-          </div>
-        )}
-        {products.map((p) => (
-          <div
-            key={p.id}
-            className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-2xl transition"
-          >
-            <div className="relative w-full h-48 bg-gray-100 flex items-center justify-center">
-              {Array.isArray(p.images) && p.images.length > 0 ? (
-                <img
-                  src={p.images[0]}
-                  alt={p.name}
-                  className="object-contain h-full w-full"
-                />
-              ) : (
-                <span className="text-gray-400">No image</span>
-              )}
-              {p.isLimited && (
-                <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                  Limited
-                </span>
-              )}
-            </div>
-            <div className="p-4 flex-1 flex flex-col">
-              <h2 className="font-semibold text-lg text-gray-800 mb-1">
-                {p.name}
-              </h2>
-              <div className="text-xs text-gray-500 mb-2">{p.category}</div>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {Array.isArray(p.sizes) && p.sizes.length > 0 && (
-                  <span className="text-xs text-indigo-600">
-                    Sizes: {p.sizes.join(", ")}
-                  </span>
-                )}
-                {Array.isArray(p.colors) && p.colors.length > 0 && (
-                  <span className="text-xs text-pink-600">
-                    Colors: {p.colors.join(", ")}
-                  </span>
-                )}
-              </div>
-              <div className="font-bold text-indigo-700 text-lg mb-2">
-                ₦{p.price}
-              </div>
-              <div className="text-xs text-gray-400 mb-4">Stock: {p.stock}</div>
-              <button
-                className="mt-auto bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition"
-                onClick={() => handleDelete(p.id)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
+    <AdminLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Products Management</h1>
+          <p className="text-gray-500 mt-1">Manage your product catalog</p>
+        </div>
+
+        <AdminAddProduct />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.length === 0 ? (
+            <Card className="col-span-full">
+              <CardContent className="flex items-center justify-center h-64">
+                <div className="text-center">
+                  <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">No products found</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            products.map((p) => (
+              <Card key={p.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="relative h-48 bg-white flex items-center justify-center border-b">
+                  {Array.isArray(p.images) && p.images.length > 0 ? (
+                    <img
+                      src={p.images[0]}
+                      alt={p.name}
+                      className="h-full w-full object-contain p-4"
+                    />
+                  ) : (
+                    <Package className="h-12 w-12 text-gray-300" />
+                  )}
+                  {p.isLimited && (
+                    <Badge className="absolute top-2 right-2 bg-red-500">Limited</Badge>
+                  )}
+                </div>
+                <CardContent className="p-4 space-y-3">
+                  <div>
+                    <h3 className="font-semibold text-lg line-clamp-1">{p.name}</h3>
+                    <p className="text-xs text-gray-500">{p.category}</p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-bold">₦{p.price?.toLocaleString()}</span>
+                    <span className="text-sm text-gray-500">Stock: {p.stock}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {Array.isArray(p.sizes) && p.sizes.length > 0 && (
+                      <span className="text-xs bg-slate-100 px-2 py-1 rounded">
+                        {p.sizes.length} sizes
+                      </span>
+                    )}
+                    {Array.isArray(p.colors) && p.colors.length > 0 && (
+                      <span className="text-xs bg-slate-100 px-2 py-1 rounded">
+                        {p.colors.length} colors
+                      </span>
+                    )}
+                  </div>
+                  <Button
+                    variant="destructive"
+                    className="w-full"
+                    onClick={() => handleDelete(p.id)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 
