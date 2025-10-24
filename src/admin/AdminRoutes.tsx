@@ -32,7 +32,6 @@ const AdminRoutes: React.FC = () => (
         <Route path="orders/:id" element={<OrderDetails />} />
         <Route path="bespoke" element={<BespokeRequests />} />
         <Route path="products" element={<Products />} />
-        <Route path="add-product" element={<AdminAddProduct />} />
         <Route path="users" element={<Users />} />
         <Route path="subscriptions" element={<Subscriptions />} />
         <Route path="settings" element={<Settings />} />
