@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { X, MessageCircle, Mail } from "lucide-react";
+import { X, MessageCircle, Mail, MessagesSquare } from "lucide-react";
+
+// Extend Window interface for MomentCRM
+declare global {
+  interface Window {
+    MomentCRM?: (action: string, options?: any) => void;
+  }
+}
 
 export const WhatsAppChat: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -9,6 +16,13 @@ export const WhatsAppChat: React.FC = () => {
   const whatsappUrl = `https://wa.me/${phoneDigits}`;
   const email = "28hideluxe@gmail.com";
   const mailto = `mailto:${email}`;
+
+  const openLiveChat = () => {
+    if (window.MomentCRM) {
+      window.MomentCRM('openChat');
+      setOpen(false);
+    }
+  };
 
   return (
     <>
@@ -55,49 +69,60 @@ export const WhatsAppChat: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-[#25D366] hover:bg-[#20BA5A] text-white px-3 py-2 font-medium transition"
-                aria-label="Chat on WhatsApp"
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={openLiveChat}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground px-3 py-2.5 font-medium transition shadow-sm"
+                aria-label="Start live chat"
               >
-                {/* WhatsApp SVG */}
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  aria-hidden
-                >
-                  <path
-                    fill="#fff"
-                    d="M20.52 3.48A11.88 11.88 0 0012 0C5.383 0 .01 5.373 0 12c0 2.115.553 4.18 1.6 6.02L0 24l6.24-1.62A11.93 11.93 0 0012 24c6.627 0 12-5.373 12-12 0-3.2-1.246-6.02-3.48-8.52z"
-                  />
-                  <path
-                    fill="#25D366"
-                    d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10c-1.94 0-3.74-.56-5.26-1.52L4 22l1.52-2.74A9.965 9.965 0 012 12C2 6.477 6.477 2 12 2z"
-                    opacity="0.0"
-                  />
-                  <path
-                    fill="#fff"
-                    d="M7.2 6.6c-.26 0-.5.1-.68.28-.36.36-.36.94 0 1.3l.86.86c.34.34.88.43 1.32.24 1.3-.56 2.78-.56 4.08 0 .42.18.94.09 1.28-.27l.86-.86c.36-.36.36-.94 0-1.3-.36-.36-.94-.36-1.3 0l-.86.86a2.9 2.9 0 01-1.48.57c-1.8 0-3.36-1.56-3.36-3.36 0-.4-.32-.72-.72-.72z"
-                  />
-                </svg>
-                WhatsApp
-              </a>
+                <MessagesSquare className="w-4 h-4" />
+                Live Chat
+              </button>
 
-              <a
-                href={mailto}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-yellow-50 hover:bg-yellow-100 text-neutral-900 px-3 py-2 font-medium border border-neutral-200 transition"
-                aria-label="Email us"
-              >
-                <Mail className="w-4 h-4" />
-                Email
-              </a>
+              <div className="flex gap-2">
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-[#25D366] hover:bg-[#20BA5A] text-white px-3 py-2 font-medium transition text-sm"
+                  aria-label="Chat on WhatsApp"
+                >
+                  {/* WhatsApp SVG */}
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden
+                  >
+                    <path
+                      fill="#fff"
+                      d="M20.52 3.48A11.88 11.88 0 0012 0C5.383 0 .01 5.373 0 12c0 2.115.553 4.18 1.6 6.02L0 24l6.24-1.62A11.93 11.93 0 0012 24c6.627 0 12-5.373 12-12 0-3.2-1.246-6.02-3.48-8.52z"
+                    />
+                    <path
+                      fill="#25D366"
+                      d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10c-1.94 0-3.74-.56-5.26-1.52L4 22l1.52-2.74A9.965 9.965 0 012 12C2 6.477 6.477 2 12 2z"
+                      opacity="0.0"
+                    />
+                    <path
+                      fill="#fff"
+                      d="M7.2 6.6c-.26 0-.5.1-.68.28-.36.36-.36.94 0 1.3l.86.86c.34.34.88.43 1.32.24 1.3-.56 2.78-.56 4.08 0 .42.18.94.09 1.28-.27l.86-.86c.36-.36.36-.94 0-1.3-.36-.36-.94-.36-1.3 0l-.86.86a2.9 2.9 0 01-1.48.57c-1.8 0-3.36-1.56-3.36-3.36 0-.4-.32-.72-.72-.72z"
+                    />
+                  </svg>
+                  WhatsApp
+                </a>
+
+                <a
+                  href={mailto}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-secondary hover:bg-secondary/80 text-secondary-foreground px-3 py-2 font-medium transition text-sm"
+                  aria-label="Email us"
+                >
+                  <Mail className="w-4 h-4" />
+                  Email
+                </a>
+              </div>
             </div>
           </div>
 
