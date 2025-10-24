@@ -32,6 +32,7 @@ import AdminDashboard from "@/admin/AdminDashboard";
 import AdminProducts from "@/admin/AdminProducts";
 import ProjectDetail from "@/pages/ProjectDetail";
 import OrderSuccess from "@/pages/OrderSuccess";
+import AdminRoutes from "./admin/AdminRoutes";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,7 @@ const App = () => (
                 />
                 <Route path="/order-success" element={<OrderSuccess />} />
                 <Route path="*" element={<NotFound />} />
+                <Route path="admin/*" element={<AdminRoutes />} />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
