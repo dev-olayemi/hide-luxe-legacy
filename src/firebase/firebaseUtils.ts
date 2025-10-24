@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { initializeApp } from "firebase/app";
 import {
-  getFirestore,
   collection,
   addDoc,
   getDoc,
@@ -17,28 +15,15 @@ import {
   arrayUnion,
 } from "firebase/firestore";
 import {
-  getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   onAuthStateChanged,
 } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { CartItem } from "@/contexts/CartContext";
+import { db, auth, app } from "./firebaseConfig";
 
-// Firebase Configuration (Replace with your own from Firebase Console)
-const firebaseConfig = {
-  apiKey: "AIzaSyABtJcFymrh6MwLqr3NC6ytdAs5Da36n2I",
-  authDomain: "hide-luxe.firebaseapp.com",
-  projectId: "hide-luxe",
-  storageBucket: "hide-luxe.appspot.com",
-  messagingSenderId: "182094958607",
-  appId: "1:182094958607:web:288036767a37ea338c537a",
-  measurementId: "G-CB2L81WCN4",
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+// Initialize storage
 const storage = getStorage(app);
 
 // User Operations
@@ -238,7 +223,7 @@ const sanitizeItem = (item: any) => {
   return out;
 };
 
-export const addToCart = async (userId: string, itemOrItems: any | any[]) => {
+const addToCart = async (userId: string, itemOrItems: any | any[]) => {
   if (!userId) throw new Error("Missing userId");
   const cartRef = doc(db, "carts", userId);
 
@@ -389,7 +374,7 @@ async function clearWishlist(userId: string) {
 }
 
 // Order Operations
-export const createOrder = async (orderData: {
+const createOrder = async (orderData: {
   userId: string;
   items: any[];
   totalAmount: number;
@@ -411,7 +396,7 @@ export const createOrder = async (orderData: {
   }
 };
 
-export const updateOrder = async (orderId: string, data: Partial<Order>) => {
+const updateOrder = async (orderId: string, data: Partial<Order>) => {
   try {
     const orderRef = doc(db, "orders", orderId);
     await setDoc(orderRef, {
@@ -424,7 +409,7 @@ export const updateOrder = async (orderId: string, data: Partial<Order>) => {
   }
 };
 
-export const getOrders = async (userId: string) => {
+const getOrders = async (userId: string) => {
   try {
     const ordersRef = collection(db, "orders");
     const q = query(
@@ -445,7 +430,7 @@ export const getOrders = async (userId: string) => {
   }
 };
 
-export const getBespokeRequests = async (userId: string) => {
+const getBespokeRequests = async (userId: string) => {
   try {
     const bespokeRef = collection(db, "bespokeRequests");
     const q = query(
@@ -466,7 +451,7 @@ export const getBespokeRequests = async (userId: string) => {
   }
 };
 
-export const getAllBespokeRequests = async () => {
+const getAllBespokeRequests = async () => {
   try {
     const snap = await getDocs(collection(db, "bespokeRequests"));
     return snap.docs.map((d) => {
@@ -488,7 +473,7 @@ export const getAllBespokeRequests = async () => {
   }
 };
 
-export const updateBespokeRequest = async (id: string, updates: any) => {
+const updateBespokeRequest = async (id: string, updates: any) => {
   try {
     const ref = doc(db, "bespokeRequests", id);
     await updateDoc(ref, {
@@ -546,6 +531,7 @@ export {
   getAllCategories,
   updateCategory,
   deleteCategory,
+  addToCart,
   getCart,
   updateCart,
   clearCart,
@@ -553,6 +539,13 @@ export {
   getWishlist,
   removeFromWishlist,
   clearWishlist,
+  createOrder,
+  updateOrder,
+  getOrders,
+  getBespokeRequests,
+  getAllBespokeRequests,
+  updateBespokeRequest,
+  uploadImage,
   auth,
   db,
   storage,

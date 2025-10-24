@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import { db } from "@/firebase/firebaseUtils";
+import { db } from "@/firebase/firebaseConfig";
 
 const Users: React.FC = () => {
   const [list, setList] = useState<any[]>([]);

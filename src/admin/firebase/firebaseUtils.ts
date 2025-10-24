@@ -1,5 +1,5 @@
 import { getDocs, collection } from "firebase/firestore";
-import { db } from "../../../src/firebase/firebaseConfig";
+import { db } from "@/firebase/firebaseConfig";
 
 export async function getAllUsers() {
   const snap = await getDocs(collection(db, "users"));
