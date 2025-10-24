@@ -129,10 +129,12 @@ const Products = () => {
                 </Badge>
               )}
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                <Button size="sm" variant="secondary">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit
-                </Button>
+                <Link to={`/admin/products/edit/${p.id}`}>
+                  <Button size="sm" variant="secondary">
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                </Link>
                 <Button 
                   size="sm" 
                   variant="destructive"
@@ -159,16 +161,32 @@ const Products = () => {
               </div>
 
               {(p.sizes || p.colors) && (
-                <div className="flex flex-wrap gap-1 pt-2 border-t">
+                <div className="flex flex-wrap gap-2 pt-2 border-t">
                   {Array.isArray(p.sizes) && p.sizes.length > 0 && (
-                    <Badge variant="outline" className="text-xs">
-                      {p.sizes.length} size{p.sizes.length > 1 ? 's' : ''}
-                    </Badge>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-muted-foreground">Sizes:</span>
+                      <div className="flex gap-1">
+                        {p.sizes.slice(0, 3).map((size: string, idx: number) => (
+                          <Badge key={idx} variant="outline" className="text-xs">{size}</Badge>
+                        ))}
+                        {p.sizes.length > 3 && (
+                          <Badge variant="outline" className="text-xs">+{p.sizes.length - 3}</Badge>
+                        )}
+                      </div>
+                    </div>
                   )}
                   {Array.isArray(p.colors) && p.colors.length > 0 && (
-                    <Badge variant="outline" className="text-xs">
-                      {p.colors.length} color{p.colors.length > 1 ? 's' : ''}
-                    </Badge>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-muted-foreground">Colors:</span>
+                      <div className="flex gap-1">
+                        {p.colors.slice(0, 3).map((color: string, idx: number) => (
+                          <Badge key={idx} variant="outline" className="text-xs capitalize">{color}</Badge>
+                        ))}
+                        {p.colors.length > 3 && (
+                          <Badge variant="outline" className="text-xs">+{p.colors.length - 3}</Badge>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
               )}

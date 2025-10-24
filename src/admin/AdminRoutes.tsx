@@ -11,10 +11,11 @@ import Orders from "./pages/Orders";
 import OrderDetails from "./pages/OrderDetails";
 import BespokeRequests from "./pages/BespokeRequests";
 import Products from "./pages/Products";
+import AddProduct from "./pages/AddProduct";
+import EditProduct from "./pages/EditProduct";
 import Users from "./pages/Users";
 import Subscriptions from "./pages/Subscriptions";
 import Settings from "./pages/Settings";
-import AddProduct from "./pages/AddProduct";
 import Analytics from "./pages/Analytics";
 
 const AdminRoutes: React.FC = () => (
@@ -37,6 +38,7 @@ const AdminRoutes: React.FC = () => (
         <Route path="bespoke-requests" element={<BespokeRequests />} />
         <Route path="products" element={<Products />} />
         <Route path="add-product" element={<AddProduct />} />
+        <Route path="products/edit/:id" element={<EditProduct />} />
         <Route path="users" element={<Users />} />
         <Route path="subscriptions" element={<Subscriptions />} />
         <Route path="analytics" element={<Analytics />} />
