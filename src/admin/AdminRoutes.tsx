@@ -10,10 +10,10 @@ import Orders from "./pages/Orders";
 import OrderDetails from "./pages/OrderDetails";
 import BespokeRequests from "./pages/BespokeRequests";
 import Products from "./pages/Products";
-import AddProduct from "./pages/AddProduct";
 import Users from "./pages/Users";
 import Subscriptions from "./pages/Subscriptions";
 import Settings from "./pages/Settings";
+import AddProduct from "./pages/AddProduct";
 
 const AdminRoutes: React.FC = () => (
   <Suspense fallback={<div>Loading admin...</div>}>
@@ -32,7 +32,7 @@ const AdminRoutes: React.FC = () => (
         <Route path="orders/:id" element={<OrderDetails />} />
         <Route path="bespoke" element={<BespokeRequests />} />
         <Route path="products" element={<Products />} />
-        <Route path="add-product" element={<AddProduct />} />
+        <Route path="add-product" element={<AdminAddProduct />} />
         <Route path="users" element={<Users />} />
         <Route path="subscriptions" element={<Subscriptions />} />
         <Route path="settings" element={<Settings />} />

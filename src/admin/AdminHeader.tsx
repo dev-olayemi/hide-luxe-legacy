@@ -8,7 +8,7 @@ const navLinks = [
   { to: "/admin/dashboard", label: "Dashboard" },
   { to: "/admin/orders", label: "Orders" },
   { to: "/admin/products", label: "Products" },
-  { to: "/admin/add-product", label: "Add Product" },
+  { to: "/admin/add", label: "Add" },
   { to: "/admin/collections", label: "Collections" },
   { to: "/admin/bespoke-requests", label: "Bespoke" },
   { to: "/admin/users", label: "Users" },

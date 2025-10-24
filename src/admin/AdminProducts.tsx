@@ -29,7 +29,8 @@ const AdminProducts = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    if (!window.confirm("Are you sure you want to delete this product?"))
+      return;
     try {
       await deleteProduct(id);
       setProducts(products.filter((p) => p.id !== id));
@@ -54,11 +55,11 @@ const AdminProducts = () => {
     <AdminLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Products Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Products Management
+          </h1>
           <p className="text-gray-500 mt-1">Manage your product catalog</p>
         </div>
-
-        <AdminAddProduct />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {products.length === 0 ? (
@@ -72,7 +73,10 @@ const AdminProducts = () => {
             </Card>
           ) : (
             products.map((p) => (
-              <Card key={p.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <Card
+                key={p.id}
+                className="overflow-hidden hover:shadow-lg transition-shadow"
+              >
                 <div className="relative h-48 bg-white flex items-center justify-center border-b">
                   {Array.isArray(p.images) && p.images.length > 0 ? (
                     <img
@@ -84,17 +88,25 @@ const AdminProducts = () => {
                     <Package className="h-12 w-12 text-gray-300" />
                   )}
                   {p.isLimited && (
-                    <Badge className="absolute top-2 right-2 bg-red-500">Limited</Badge>
+                    <Badge className="absolute top-2 right-2 bg-red-500">
+                      Limited
+                    </Badge>
                   )}
                 </div>
                 <CardContent className="p-4 space-y-3">
                   <div>
-                    <h3 className="font-semibold text-lg line-clamp-1">{p.name}</h3>
+                    <h3 className="font-semibold text-lg line-clamp-1">
+                      {p.name}
+                    </h3>
                     <p className="text-xs text-gray-500">{p.category}</p>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold">₦{p.price?.toLocaleString()}</span>
-                    <span className="text-sm text-gray-500">Stock: {p.stock}</span>
+                    <span className="text-lg font-bold">
+                      ₦{p.price?.toLocaleString()}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      Stock: {p.stock}
+                    </span>
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {Array.isArray(p.sizes) && p.sizes.length > 0 && (
