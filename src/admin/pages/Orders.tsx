@@ -11,6 +11,8 @@ type Order = {
   createdAt?: any;
   deliveryDetails?: any;
   paymentDetails?: any;
+  userEmail?: string;
+  items?: any[];
 };
 
 const Orders: React.FC = () => {
@@ -56,48 +58,72 @@ const Orders: React.FC = () => {
       {loading && <div>Loading orders…</div>}
       {error && <div className="text-red-600">Error: {error}</div>}
 
-      <div className="space-y-4">
+      <div className="grid gap-4">
         {orders.map((o) => (
           <div
             key={o.id}
-            className="bg-white p-4 rounded shadow-sm flex justify-between items-center"
+            className="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow"
           >
-            <div>
-              <div className="font-medium">Order #{o.id}</div>
-              <div className="text-sm text-gray-500">
-                {o.deliveryDetails?.fullName ?? "—"} •{" "}
-                {new Date(
-                  o.createdAt?.seconds ? o.createdAt.seconds * 1000 : Date.now()
-                ).toLocaleString()}
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="font-semibold text-lg">Order #{o.id.slice(0, 8)}</div>
+                <div className="text-sm text-muted-foreground mt-1">
+                  {new Date(
+                    o.createdAt?.seconds ? o.createdAt.seconds * 1000 : Date.now()
+                  ).toLocaleString()}
+                </div>
+              </div>
+              <div
+                className={`text-xs px-3 py-1 rounded-full font-medium ${
+                  o.status === "completed"
+                    ? "bg-green-100 text-green-700"
+                    : o.status === "processing"
+                    ? "bg-blue-100 text-blue-700"
+                    : o.status === "paid"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : o.status === "cancelled"
+                    ? "bg-red-100 text-red-700"
+                    : o.status === "refunded"
+                    ? "bg-purple-100 text-purple-700"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {o.status ?? "pending"}
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="text-sm font-semibold">
-                ₦{Number(o.totalAmount ?? 0).toLocaleString()}
+            <div className="grid md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <div className="text-xs text-muted-foreground">Customer</div>
+                <div className="font-medium">{o.deliveryDetails?.fullName ?? "—"}</div>
+                <div className="text-sm text-muted-foreground">{o.deliveryDetails?.email ?? o.userEmail ?? "—"}</div>
               </div>
-              <div
-                className={`text-xs px-2 py-1 rounded-full ${
-                  o.status === "processing"
-                    ? "bg-yellow-50 text-yellow-700"
-                    : o.status === "paid"
-                    ? "bg-green-50 text-green-700"
-                    : "bg-gray-50 text-gray-700"
-                }`}
-              >
-                {o.status ?? "—"}
+              <div>
+                <div className="text-xs text-muted-foreground">Total Amount</div>
+                <div className="text-xl font-bold">
+                  ₦{Number(o.totalAmount ?? 0).toLocaleString()}
+                </div>
               </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Items</div>
+                <div className="font-medium">{o.items?.length ?? 0} items</div>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
               <Link
                 to={`/admin/orders/${o.id}`}
-                className="text-indigo-600 text-sm"
+                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
               >
-                Details
+                View Details →
               </Link>
             </div>
           </div>
         ))}
         {!loading && orders.length === 0 && (
-          <div className="text-gray-500">No orders found.</div>
+          <div className="text-center py-12 text-muted-foreground bg-white rounded-lg">
+            No orders found.
+          </div>
         )}
       </div>
     </div>
