@@ -1,5 +1,8 @@
-import { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/firebase/firebaseUtils";
 import { SearchDialog } from "@/components/SearchDialog";
 import {
   Menu,
@@ -48,12 +51,26 @@ export const Header = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [categories, setCategories] = useState<any[]>([]);
   const { cartItems, wishlistItems } = useCart();
   const { user } = useAuth();
   const { currency, setCurrency } = useCurrency();
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const wishlistCount = wishlistItems.length;
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const snap = await getDocs(collection(db, "categories"));
+        const cats = snap.docs.map((d) => ({ id: d.id, name: d.data().name }));
+        setCategories(cats);
+      } catch (error) {
+        console.error("Failed to fetch categories", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-xl backdrop-saturate-200 shadow-sm">
@@ -85,18 +102,15 @@ export const Header = () => {
             >
               NEW ARRIVALS
             </Link>
-            <Link
-              to="/men"
-              className="text-sm font-semibold hover:text-accent transition-colors"
-            >
-              MEN
-            </Link>
-            <Link
-              to="/women"
-              className="text-sm font-semibold hover:text-accent transition-colors"
-            >
-              WOMEN
-            </Link>
+            {categories.map((cat) => (
+              <Link
+                key={cat.id}
+                to={`/category/${cat.name.toLowerCase().replace(/\s+/g, "-")}`}
+                className="text-sm font-semibold hover:text-accent transition-colors"
+              >
+                {cat.name.toUpperCase()}
+              </Link>
+            ))}
             <Link
               to="/bespoke"
               className="text-sm font-semibold hover:text-accent transition-colors"
@@ -256,8 +270,22 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
   const { cartItems, wishlistItems } = useCart();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [categories, setCategories] = useState<any[]>([]);
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const wishlistCount = wishlistItems.length;
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const snap = await getDocs(collection(db, "categories"));
+        const cats = snap.docs.map((d) => ({ id: d.id, name: d.data().name }));
+        setCategories(cats);
+      } catch (error) {
+        console.error("Failed to fetch categories", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   return (
     <div className="flex h-full flex-col">
@@ -301,20 +329,16 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
             >
               NEW ARRIVALS
             </Link>
-            <Link
-              to="/men"
-              className="block py-3 text-base font-medium hover:text-accent transition-colors border-b"
-              onClick={onClose}
-            >
-              MEN
-            </Link>
-            <Link
-              to="/women"
-              className="block py-3 text-base font-medium hover:text-accent transition-colors border-b"
-              onClick={onClose}
-            >
-              WOMEN
-            </Link>
+            {categories.map((cat) => (
+              <Link
+                key={cat.id}
+                to={`/category/${cat.name.toLowerCase().replace(/\s+/g, "-")}`}
+                className="block py-3 text-base font-medium hover:text-accent transition-colors border-b"
+                onClick={onClose}
+              >
+                {cat.name.toUpperCase()}
+              </Link>
+            ))}
             <Link
               to="/bespoke"
               className="block py-3 text-base font-medium hover:text-accent transition-colors border-b"

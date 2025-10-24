@@ -92,6 +92,28 @@ const Orders: React.FC = () => {
               </div>
             </div>
 
+            {/* Product Images */}
+            {o.items && o.items.length > 0 && (
+              <div className="mb-4">
+                <div className="flex gap-2 flex-wrap">
+                  {o.items.slice(0, 4).map((item: any, idx: number) => (
+                    <div key={idx} className="relative group">
+                      <img
+                        src={item.image || "/placeholder.png"}
+                        alt={item.name || "Product"}
+                        className="w-16 h-16 object-cover rounded border"
+                      />
+                    </div>
+                  ))}
+                  {o.items.length > 4 && (
+                    <div className="w-16 h-16 rounded border bg-muted flex items-center justify-center text-sm font-medium">
+                      +{o.items.length - 4}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="grid md:grid-cols-3 gap-4 mb-4">
               <div>
                 <div className="text-xs text-muted-foreground">Customer</div>
