@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { addDoc, collection, getDocs, deleteDoc, doc } from "firebase/firestore";
-import { db } from "@/firebase/firebaseUtils";
+import { db, uploadImage } from "@/firebase/firebaseUtils";
 import { toast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { X, Plus, ArrowLeft, FolderPlus } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { X, Plus, ArrowLeft, FolderPlus, Upload, Loader2 } from "lucide-react";
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ const AddProduct = () => {
   const [currentImage, setCurrentImage] = useState("");
   const [currentSize, setCurrentSize] = useState("");
   const [currentColor, setCurrentColor] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -92,6 +94,35 @@ const AddProduct = () => {
     if (currentImage && !formData.images.includes(currentImage)) {
       setFormData({ ...formData, images: [...formData.images, currentImage] });
       setCurrentImage("");
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Please select an image file", variant: "destructive" });
+      return;
+    }
+
+    // Validate file size (max 5MB for good quality)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Image size should be less than 5MB", variant: "destructive" });
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const imageUrl = await uploadImage(file);
+      setFormData({ ...formData, images: [...formData.images, imageUrl] });
+      toast({ title: "Image uploaded successfully!" });
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      toast({ title: "Failed to upload image", variant: "destructive" });
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -276,26 +307,54 @@ const AddProduct = () => {
               <CardTitle>Product Images</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Image URL"
-                  value={currentImage}
-                  onChange={(e) => setCurrentImage(e.target.value)}
-                />
-                <Button type="button" onClick={addImage}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add
-                </Button>
-              </div>
+              <Tabs defaultValue="url" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="url">Image URL</TabsTrigger>
+                  <TabsTrigger value="upload">Upload Image</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="url" className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="https://example.com/image.jpg"
+                      value={currentImage}
+                      onChange={(e) => setCurrentImage(e.target.value)}
+                    />
+                    <Button type="button" onClick={addImage}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add
+                    </Button>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="upload" className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      disabled={uploadingImage}
+                      className="cursor-pointer"
+                    />
+                    {uploadingImage && (
+                      <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Maximum file size: 5MB. Supported formats: JPG, PNG, WEBP
+                  </p>
+                </TabsContent>
+              </Tabs>
+              
               {formData.images.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                   {formData.images.map((img, idx) => (
                     <div key={idx} className="relative group">
                       <img src={img} alt={`Product ${idx + 1}`} className="w-full h-32 object-cover rounded-lg" />
                       <button
                         type="button"
                         onClick={() => removeImage(img)}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="h-4 w-4" />
                       </button>
