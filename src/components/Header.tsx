@@ -72,6 +72,23 @@ export const Header = () => {
     fetchCategories();
   }, []);
 
+  // build nav items dynamically (keep labels uppercase)
+  const navItems = [
+    { to: "/new-arrivals", label: "NEW ARRIVALS" },
+    // categories appended below
+    ...categories.map((c) => ({
+      to: `/category/${c.name.toLowerCase().replace(/\s+/g, "-")}`,
+      label: c.name.toUpperCase(),
+      id: c.id,
+    })),
+    { to: "/bespoke", label: "BESPOKE" },
+  ];
+
+  // show first N items and collapse the rest into a "More" dropdown
+  const MAX_VISIBLE = 4;
+  const visibleNav = navItems.slice(0, MAX_VISIBLE);
+  const overflowNav = navItems.slice(MAX_VISIBLE);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-xl backdrop-saturate-200 shadow-sm">
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
@@ -94,29 +111,39 @@ export const Header = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation - Center */}
-          <nav className="hidden lg:flex items-center gap-8">
-            <Link
-              to="/new-arrivals"
-              className="text-sm font-semibold hover:text-accent transition-colors"
-            >
-              NEW ARRIVALS
-            </Link>
-            {categories.map((cat) => (
+          {/* Desktop Navigation - Center (with overflow menu) */}
+          <nav className="hidden lg:flex items-center gap-4">
+            {visibleNav.map((item) => (
               <Link
-                key={cat.id}
-                to={`/category/${cat.name.toLowerCase().replace(/\s+/g, "-")}`}
-                className="text-sm font-semibold hover:text-accent transition-colors"
+                key={(item as any).id ?? item.to}
+                to={item.to}
+                className="text-sm font-semibold px-2 py-1 rounded hover:text-accent transition-colors"
               >
-                {cat.name.toUpperCase()}
+                {item.label}
               </Link>
             ))}
-            <Link
-              to="/bespoke"
-              className="text-sm font-semibold hover:text-accent transition-colors"
-            >
-              BESPOKE
-            </Link>
+
+            {overflowNav.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 text-sm font-semibold px-2 py-1 rounded hover:bg-gray-50">
+                    More
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuLabel>More</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {overflowNav.map((item) => (
+                    <DropdownMenuItem key={(item as any).id ?? item.to} asChild>
+                      <Link to={item.to} className="w-full block">
+                        {item.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </nav>
 
           {/* Actions - Right */}

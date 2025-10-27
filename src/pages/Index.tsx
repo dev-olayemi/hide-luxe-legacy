@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useSwipeable } from "react-swipeable";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -83,65 +83,106 @@ const Index = () => {
       <main className="flex-1">
         {/* Hero Carousel */}
         <section
-          className="relative h-screen overflow-hidden bg-background"
+          className="relative overflow-hidden bg-background"
           {...swipeHandlers}
         >
-          {/* Full-width background carousel */}
-          <div className="absolute inset-0">
+          {/* Responsive hero height: shorter on mobile, full-screen from md */}
+          <div className="relative w-full h-[70vh] md:h-screen">
+            {/* Slides */}
             {HERO_SLIDES.map((slide, index) => (
               <div
                 key={index}
-                className={`absolute inset-0 transition-opacity duration-1000 ${
-                  index === currentSlide ? "opacity-100" : "opacity-0"
+                className={`absolute inset-0 transition-opacity duration-700 ${
+                  index === currentSlide
+                    ? "opacity-100 z-10"
+                    : "opacity-0 z-0 pointer-events-none"
                 }`}
               >
                 <img
                   src={slide.image}
                   alt={`Slide ${index + 1}`}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover object-center"
                 />
               </div>
             ))}
-          </div>
 
-          {/* Centered minimal overlay like LV */}
-          <div className="absolute inset-0 flex items-center justify-center px-4">
-            <div className="text-center text-white">
-              <p className="text-sm md:text-base tracking-[0.3em] mb-6 uppercase font-light">
-                Premium Leather
-              </p>
+            {/* Black transparent overlay for better text contrast */}
+            <div className="absolute inset-0 pointer-events-none">
+              {/* Base dark veil (stronger on md+) */}
+              <div className="absolute inset-0 bg-black/60 md:bg-black/70 transition-opacity" />
 
-              <h1 className="font-playfair font-bold mb-8 tracking-tight">
-                <span className="block text-4xl sm:text-5xl md:text-7xl lg:text-8xl leading-tight">
-                  <span className="block md:inline">Luxury.</span>
-                  <span className="block md:inline md:px-6">Leather.</span>
-                  <span className="block md:inline">Legacy.</span>
-                </span>
-              </h1>
+              {/* Top gradient to preserve image fade near top */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-              <Link
-                to="/new-arrivals"
-                className="inline-block text-sm md:text-base tracking-widest border-b-2 border-white pb-1 hover:pb-2 transition-all uppercase font-light"
-              >
-                Discover the collection
-              </Link>
+              {/* Slight backdrop blur for better legibility */}
+              <div className="absolute inset-0 backdrop-blur-sm" />
             </div>
-          </div>
 
-          {/* Minimal Dot Indicators */}
-          <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-40 flex gap-3">
-            {HERO_SLIDES.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  index === currentSlide
-                    ? "bg-white w-8"
-                    : "bg-white/50 hover:bg-white/75 w-2"
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
+            {/* Navigation arrows (visible on all sizes) */}
+            <button
+              onClick={prevSlide}
+              aria-label="Previous slide"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-30 flex items-center justify-center w-10 h-10 rounded-full bg-black/50 text-white hover:bg-black/60 focus:outline-none"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={nextSlide}
+              aria-label="Next slide"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-30 flex items-center justify-center w-10 h-10 rounded-full bg-black/50 text-white hover:bg-black/60 focus:outline-none"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+
+            {/* Centered hero content */}
+            <div className="absolute inset-0 flex items-center justify-center px-6 z-20">
+              <div className="text-center text-white max-w-3xl">
+                <p className="text-xs sm:text-sm tracking-[0.35em] mb-3 uppercase font-light opacity-90">
+                  Premium Leather
+                </p>
+
+                <h1 className="font-playfair font-bold mb-4 tracking-tight">
+                  <span className="block text-3xl sm:text-4xl md:text-6xl lg:text-7xl leading-tight">
+                    <span className="block md:inline">Luxury.</span>
+                    <span className="block md:inline md:px-4">Leather.</span>
+                    <span className="block md:inline">Legacy.</span>
+                  </span>
+                </h1>
+
+                <div className="flex flex-col sm:flex-row items-center gap-3 justify-center mt-3">
+                  <Link
+                    to="/new-arrivals"
+                    className="inline-flex items-center justify-center bg-yellow-500 text-black px-6 py-3 rounded-md font-semibold hover:opacity-95 transition"
+                  >
+                    Shop New Arrivals
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Link>
+
+                  <Link
+                    to="/our-story"
+                    className="inline-flex items-center justify-center border border-white/30 text-white px-6 py-3 rounded-md font-medium hover:bg-white/10 transition"
+                  >
+                    Our Story
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Dot indicators (slightly higher on mobile so they don't overlap footer) */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-3">
+              {HERO_SLIDES.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToSlide(index)}
+                  className={`rounded-full transition-all duration-300 ${
+                    index === currentSlide
+                      ? "bg-white w-8 h-2"
+                      : "bg-white/50 hover:bg-white/75 w-2 h-2"
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
           </div>
         </section>
 
