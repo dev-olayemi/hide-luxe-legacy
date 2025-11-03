@@ -18,6 +18,7 @@ interface HeroContent {
   title: string;
   ctaText: string;
   ctaLink: string;
+  ctaButtonColor: string;
   secondaryCtaText: string;
   secondaryCtaLink: string;
 }
@@ -35,6 +36,7 @@ const HeroManagement = () => {
     title: "Luxury. Leather. Legacy.",
     ctaText: "Shop New Arrivals",
     ctaLink: "/new-arrivals",
+    ctaButtonColor: "#eab308",
     secondaryCtaText: "Our Story",
     secondaryCtaLink: "/our-story"
   });
@@ -170,6 +172,26 @@ const HeroManagement = () => {
                       value={heroContent.ctaLink}
                       onChange={(e) => setHeroContent({ ...heroContent, ctaLink: e.target.value })}
                       placeholder="/new-arrivals"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="ctaButtonColor">Primary Button Color</Label>
+                  <div className="flex gap-3 items-center">
+                    <Input
+                      type="color"
+                      id="ctaButtonColor"
+                      value={heroContent.ctaButtonColor}
+                      onChange={(e) => setHeroContent({ ...heroContent, ctaButtonColor: e.target.value })}
+                      className="w-20 h-10"
+                    />
+                    <Input
+                      type="text"
+                      value={heroContent.ctaButtonColor}
+                      onChange={(e) => setHeroContent({ ...heroContent, ctaButtonColor: e.target.value })}
+                      placeholder="#eab308"
+                      className="flex-1"
                     />
                   </div>
                 </div>

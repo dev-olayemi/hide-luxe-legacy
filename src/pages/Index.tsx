@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useSwipeable } from "react-swipeable";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -9,6 +9,8 @@ import { ProductCard } from "@/components/ProductCard";
 import { CookieConsent } from "@/components/CookieConsent";
 import { Button } from "@/components/ui/button";
 import { getAllProducts } from "@/firebase/firebaseUtils";
+import { db } from "@/firebase/firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
 import heroFootwear from "@/assets/hero-leather-craft.jpg";
 import heroJackets from "@/assets/hero-jackets.jpg";
 import heroAccessories from "@/assets/hero-accessories.jpg";
@@ -34,11 +36,44 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [heroContent, setHeroContent] = useState({
+    subtitle: "Premium Leather",
+    title: "Luxury. Leather. Legacy.",
+    ctaText: "Shop New Arrivals",
+    ctaLink: "/new-arrivals",
+    ctaButtonColor: "#eab308",
+    secondaryCtaText: "Our Story",
+    secondaryCtaLink: "/our-story"
+  });
+  const [noticeBoard, setNoticeBoard] = useState<{
+    enabled: boolean;
+    message: string;
+    type: 'info' | 'warning' | 'success';
+    link?: string;
+  } | null>(null);
+  const [showNotice, setShowNotice] = useState(true);
 
   useEffect(() => {
     getAllProducts().then((data) => {
       setProducts(data);
       setLoading(false);
+    });
+
+    // Load hero content
+    getDoc(doc(db, 'siteSettings', 'hero')).then((docSnap) => {
+      if (docSnap.exists()) {
+        setHeroContent(docSnap.data() as any);
+      }
+    });
+
+    // Load notice board
+    getDoc(doc(db, 'siteSettings', 'noticeBoard')).then((docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data() as any;
+        if (data.enabled) {
+          setNoticeBoard(data);
+        }
+      }
     });
   }, []);
 
@@ -81,6 +116,38 @@ const Index = () => {
       <Header />
 
       <main className="flex-1">
+        {/* Notice Board */}
+        {noticeBoard && noticeBoard.enabled && showNotice && (
+          <div
+            className={`relative ${
+              noticeBoard.type === 'info' ? 'bg-blue-500' :
+              noticeBoard.type === 'warning' ? 'bg-yellow-500' :
+              'bg-green-500'
+            } text-white`}
+          >
+            <div className="container mx-auto px-4 py-3">
+              <div className="flex items-center justify-between gap-4">
+                {noticeBoard.link ? (
+                  <Link to={noticeBoard.link} className="flex-1 text-center font-medium hover:underline">
+                    {noticeBoard.message}
+                  </Link>
+                ) : (
+                  <p className="flex-1 text-center font-medium">
+                    {noticeBoard.message}
+                  </p>
+                )}
+                <button
+                  onClick={() => setShowNotice(false)}
+                  className="flex-shrink-0 hover:bg-white/20 rounded-full p-1 transition"
+                  aria-label="Close notice"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Hero Carousel */}
         <section
           className="relative overflow-hidden bg-background"
@@ -138,31 +205,30 @@ const Index = () => {
             <div className="absolute inset-0 flex items-center justify-center px-6 z-20">
               <div className="text-center text-white max-w-3xl">
                 <p className="text-xs sm:text-sm tracking-[0.35em] mb-3 uppercase font-light opacity-90">
-                  Premium Leather
+                  {heroContent.subtitle}
                 </p>
 
                 <h1 className="font-playfair font-bold mb-4 tracking-tight">
                   <span className="block text-3xl sm:text-4xl md:text-6xl lg:text-7xl leading-tight">
-                    <span className="block md:inline">Luxury.</span>
-                    <span className="block md:inline md:px-4">Leather.</span>
-                    <span className="block md:inline">Legacy.</span>
+                    {heroContent.title}
                   </span>
                 </h1>
 
                 <div className="flex flex-col sm:flex-row items-center gap-3 justify-center mt-3">
                   <Link
-                    to="/new-arrivals"
-                    className="inline-flex items-center justify-center bg-yellow-500 text-black px-6 py-3 rounded-md font-semibold hover:opacity-95 transition"
+                    to={heroContent.ctaLink}
+                    className="inline-flex items-center justify-center text-black px-6 py-3 rounded-md font-semibold hover:opacity-95 transition"
+                    style={{ backgroundColor: heroContent.ctaButtonColor }}
                   >
-                    Shop New Arrivals
+                    {heroContent.ctaText}
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Link>
 
                   <Link
-                    to="/our-story"
+                    to={heroContent.secondaryCtaLink}
                     className="inline-flex items-center justify-center border border-white/30 text-white px-6 py-3 rounded-md font-medium hover:bg-white/10 transition"
                   >
-                    Our Story
+                    {heroContent.secondaryCtaText}
                   </Link>
                 </div>
               </div>

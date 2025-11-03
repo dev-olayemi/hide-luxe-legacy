@@ -1,4 +1,4 @@
-import { MessageSquare } from "lucide-react";
+import { useEffect } from "react";
 
 declare global {
   interface Window {
@@ -7,28 +7,34 @@ declare global {
 }
 
 export const WhatsAppChat: React.FC = () => {
-  const openLiveChat = () => {
-    if (window.MomentCRM) {
-      window.MomentCRM('openChat');
-    }
-  };
+  useEffect(() => {
+    // Initialize MomentCRM
+    const script1 = document.createElement('script');
+    script1.src = 'https://app.momentcrm.com/embed';
+    script1.async = true;
+    document.body.appendChild(script1);
 
-  return (
-    <div className="fixed right-6 bottom-6 z-50">
-      <button
-        onClick={openLiveChat}
-        aria-label="Open live chat"
-        className="group relative rounded-full w-16 h-16 flex items-center justify-center shadow-2xl focus:outline-none transition transform hover:scale-105"
-      >
-        <span className="absolute inset-0 rounded-full bg-gradient-to-b from-blue-500 to-blue-600"></span>
-        <MessageSquare className="relative w-7 h-7 text-white" />
-        <span className="absolute -top-1 -right-1 flex h-4 w-4">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-4 w-4 bg-blue-500"></span>
-        </span>
-      </button>
-    </div>
-  );
+    script1.onload = () => {
+      const script2 = document.createElement('script');
+      script2.innerHTML = `
+        MomentCRM('init', {
+          'teamVanityId': 'th-hide-luxe-legacy',
+          'doChat': true,
+          'doTimeTravel': true,
+          'quadClickForFeedback': true,
+        });
+      `;
+      document.body.appendChild(script2);
+    };
+
+    return () => {
+      if (document.body.contains(script1)) {
+        document.body.removeChild(script1);
+      }
+    };
+  }, []);
+
+  return null;
 };
 
 export default WhatsAppChat;
