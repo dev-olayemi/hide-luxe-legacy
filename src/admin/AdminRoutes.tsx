@@ -17,6 +17,7 @@ import Users from "./pages/Users";
 import Subscriptions from "./pages/Subscriptions";
 import Settings from "./pages/Settings";
 import Analytics from "./pages/Analytics";
+import HeroManagement from "./pages/HeroManagement";
 
 const AdminRoutes: React.FC = () => (
   <Suspense fallback={<div className="flex items-center justify-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
@@ -43,6 +44,7 @@ const AdminRoutes: React.FC = () => (
         <Route path="subscriptions" element={<Subscriptions />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="hero" element={<HeroManagement />} />
         <Route path="*" element={<Admin404 />} />
       </Route>
     </Routes>

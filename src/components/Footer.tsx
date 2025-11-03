@@ -11,7 +11,7 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <img src={logoFull} alt="28th Hide Luxe" className="h-12 mb-6" />
+            <img src={logoFull} alt="28th Hide Luxe" className="h-20 mb-6" />
 
             <div className="space-y-3 text-sm">
               <div className="flex items-start gap-2">
@@ -66,35 +66,35 @@ export const Footer = () => {
             <ul className="space-y-2.5 text-sm">
               <li>
                 <Link
-                  to="/contact"
+                  to="/faq"
                   className="text-foreground hover:text-accent transition-colors"
                 >
                   FAQs
                 </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="/privacy-policy"
                   className="text-foreground hover:text-accent transition-colors"
                 >
                   privacy policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="/exchange-return-policy"
                   className="text-foreground hover:text-accent transition-colors"
                 >
                   Exchange/Return Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="/terms-conditions"
                   className="text-foreground hover:text-accent transition-colors"
                 >
                   Terms & conditions
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

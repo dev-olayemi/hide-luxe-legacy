@@ -22,6 +22,10 @@ import Wishlist from "./pages/Wishlist";
 import Auth from "./pages/Auth";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import FAQ from "./pages/FAQ";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import ExchangeReturnPolicy from "./pages/ExchangeReturnPolicy";
+import TermsConditions from "./pages/TermsConditions";
 import ProductDetail from "./pages/ProductDetail";
 import Bespoke from "./pages/Bespoke";
 import Dashboard from "./pages/Dashboard";
@@ -61,6 +65,10 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/exchange-return-policy" element={<ExchangeReturnPolicy />} />
+                <Route path="/terms-conditions" element={<TermsConditions />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/bespoke" element={<Bespoke />} />
                 <Route path="/dashboard" element={<Dashboard />} />
