@@ -14,19 +14,6 @@ export const Footer = () => {
             <img src={logoFull} alt="28th Hide Luxe" className="h-20 mb-6" />
 
             <div className="space-y-3 text-sm">
-              <div className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
-                <div>
-                  <p className="text-foreground">
-                    Lagos: 51, Omoirne Johnson Street opposite Scoilish Mall,
-                    Lekki Phase 1, Lagos.
-                  </p>
-                  <p className="text-foreground mt-2">
-                    Abuja: 5 Kandi Close, Hotel De Horizon, Wuse 2 Abuja
-                  </p>
-                </div>
-              </div>
-
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <a

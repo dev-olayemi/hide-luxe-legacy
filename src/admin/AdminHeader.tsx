@@ -11,7 +11,8 @@ import {
   TrendingUp,
   CreditCard,
   Menu,
-  X
+  X,
+  Megaphone
 } from "lucide-react";
 import { useState } from "react";
 
@@ -31,6 +32,7 @@ const AdminHeader = () => {
     { path: "/admin/products", label: "Products", icon: Package },
     { path: "/admin/orders", label: "Orders", icon: ShoppingCart },
     { path: "/admin/bespoke", label: "Bespoke", icon: Palette },
+    { path: "/admin/hero", label: "Hero & Notice", icon: Megaphone },
     { path: "/admin/users", label: "Users", icon: Users },
     { path: "/admin/analytics", label: "Analytics", icon: TrendingUp },
     { path: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard },
