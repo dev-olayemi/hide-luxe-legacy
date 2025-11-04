@@ -1,5 +1,11 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { 
   LayoutDashboard, 
   Package, 
@@ -12,7 +18,8 @@ import {
   CreditCard,
   Menu,
   X,
-  Megaphone
+  Megaphone,
+  MoreHorizontal
 } from "lucide-react";
 import { useState } from "react";
 
@@ -27,10 +34,15 @@ const AdminHeader = () => {
     navigate("/admin/auth");
   };
 
-  const navItems = [
+  // Primary items always visible on desktop
+  const primaryNavItems = [
     { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/products", label: "Products", icon: Package },
     { path: "/admin/orders", label: "Orders", icon: ShoppingCart },
+  ];
+
+  // Secondary items in "More" dropdown
+  const secondaryNavItems = [
     { path: "/admin/bespoke", label: "Bespoke", icon: Palette },
     { path: "/admin/hero", label: "Hero & Notice", icon: Megaphone },
     { path: "/admin/users", label: "Users", icon: Users },
@@ -38,6 +50,8 @@ const AdminHeader = () => {
     { path: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard },
     { path: "/admin/settings", label: "Settings", icon: Settings },
   ];
+
+  const allNavItems = [...primaryNavItems, ...secondaryNavItems];
 
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
 
@@ -55,7 +69,7 @@ const AdminHeader = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-1">
-            {navItems.map((item) => {
+            {primaryNavItems.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
@@ -72,6 +86,42 @@ const AdminHeader = () => {
                 </Link>
               );
             })}
+            
+            {/* More dropdown for secondary items */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`flex items-center gap-2 ${
+                    secondaryNavItems.some(item => isActive(item.path))
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span>More</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {secondaryNavItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <DropdownMenuItem key={item.path} asChild>
+                      <Link
+                        to={item.path}
+                        className={`flex items-center gap-2 w-full cursor-pointer ${
+                          isActive(item.path) ? "bg-muted" : ""
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
 
           {/* Actions */}
@@ -101,7 +151,7 @@ const AdminHeader = () => {
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <div className="lg:hidden border-t py-4 space-y-1">
-            {navItems.map((item) => {
+            {allNavItems.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
