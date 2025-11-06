@@ -11,7 +11,7 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <img src={logoFull} alt="28th Hide Luxe" className="h-20 mb-6" />
+            <img src={logoFull} alt="28th Hide Luxe" className="h-50 mb-6" />
 
             <div className="space-y-3 text-sm">
               <div className="flex items-start gap-2">
