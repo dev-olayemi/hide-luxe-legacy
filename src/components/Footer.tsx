@@ -17,20 +17,20 @@ export const Footer = () => {
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <a
-                  href="mailto:info@28thhideluxe.com"
+                  href="mailto:28hideluxe@gmail.com"
                   className="text-foreground hover:text-accent transition-colors"
                 >
-                  info@28thhideluxe.com
+                  28hideluxe@gmail.com
                 </a>
               </div>
 
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-muted-foreground" />
                 <a
-                  href="tel:+2349012345678"
+                  href="tel:+2348144977227"
                   className="text-foreground hover:text-accent transition-colors"
                 >
-                  +234 901 234 5678
+                  +234 814 497 7227
                 </a>
               </div>
 
