@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { MapPin, Mail, Phone, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import logoFull from "@/assets/logo-full.jpg";
+import logoFull from "@/assets/logo-full.png";
 
 export const Footer = () => {
   return (
