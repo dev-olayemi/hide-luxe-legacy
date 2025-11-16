@@ -63,7 +63,7 @@ const Auth = () => {
     try {
       await signup(signupEmail, signupPassword);
       toast({ title: "Account created successfully!" });
-      navigate("/");
+      navigate("/onboarding");
     } catch (error: any) {
       setSignupError(error.message);
     }
