@@ -9,9 +9,6 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/components/ui/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-import { db } from "@/firebase/firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
 import { Sparkles, Palette, ShoppingBag } from "lucide-react";
 
 const STEPS = 3;
@@ -23,7 +20,6 @@ const Onboarding = () => {
     colors: [] as string[],
     categories: [] as string[],
   });
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   const styles = [
@@ -84,30 +80,14 @@ const Onboarding = () => {
     }
   };
 
-  const handleComplete = async () => {
+  const handleComplete = () => {
     if (preferences.categories.length === 0) {
       toast({ title: "Please select at least one category", variant: "destructive" });
       return;
     }
 
-    try {
-      if (user) {
-        await setDoc(
-          doc(db, "profiles", user.uid),
-          {
-            preferences,
-            onboardingCompleted: true,
-            updatedAt: new Date().toISOString(),
-          },
-          { merge: true }
-        );
-      }
-      toast({ title: "Welcome to 28TH HIDE LUXE! 🎉", description: "Your preferences have been saved." });
-      navigate("/");
-    } catch (error) {
-      console.error("Error saving preferences:", error);
-      toast({ title: "Something went wrong", variant: "destructive" });
-    }
+    toast({ title: "Welcome to 28TH HIDE LUXE! 🎉", description: "Your preferences have been saved." });
+    navigate("/");
   };
 
   const progress = (step / STEPS) * 100;
