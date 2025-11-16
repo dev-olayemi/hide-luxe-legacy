@@ -36,7 +36,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import logo from "@/assets/logo-hexagon.png";
+import logo from "@/assets/logo-icon-new.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebase/firebaseUtils";
@@ -72,17 +72,12 @@ export const Header = () => {
     fetchCategories();
   }, []);
 
-  // build nav items dynamically (keep labels uppercase)
-  const navItems = [
-    { to: "/new-arrivals", label: "NEW ARRIVALS" },
-    // categories appended below
-    ...categories.map((c) => ({
-      to: `/category/${c.name.toLowerCase().replace(/\s+/g, "-")}`,
-      label: c.name.toUpperCase(),
-      id: c.id,
-    })),
-    { to: "/bespoke", label: "BESPOKE" },
-  ];
+  // build nav items dynamically from database only
+  const navItems = categories.map((c) => ({
+    to: `/category/${c.name.toLowerCase().replace(/\s+/g, "-")}`,
+    label: c.name.toUpperCase(),
+    id: c.id,
+  }));
 
   // show first N items and collapse the rest into a "More" dropdown
   const MAX_VISIBLE = 4;
@@ -349,13 +344,6 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
           </h2>
 
           <nav className="space-y-2">
-            <Link
-              to="/new-arrivals"
-              className="block py-3 text-base font-medium hover:text-accent transition-colors border-b"
-              onClick={onClose}
-            >
-              NEW ARRIVALS
-            </Link>
             {categories.map((cat) => (
               <Link
                 key={cat.id}
@@ -366,13 +354,6 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
                 {cat.name.toUpperCase()}
               </Link>
             ))}
-            <Link
-              to="/bespoke"
-              className="block py-3 text-base font-medium hover:text-accent transition-colors border-b"
-              onClick={onClose}
-            >
-              BESPOKE
-            </Link>
             {user && (
               <Link
                 to="/dashboard"

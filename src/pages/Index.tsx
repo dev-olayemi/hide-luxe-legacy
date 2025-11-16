@@ -43,7 +43,7 @@ const Index = () => {
     ctaLink: "/new-arrivals",
     ctaButtonColor: "#eab308",
     secondaryCtaText: "Our Story",
-    secondaryCtaLink: "/our-story"
+    secondaryCtaLink: "/about"
   });
   const [noticeBoard, setNoticeBoard] = useState<{
     enabled: boolean;

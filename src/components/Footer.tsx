@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { MapPin, Mail, Phone, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import logoFull from "@/assets/logo-full.png";
+import logoFull from "@/assets/logo-full-new.png";
 
 export const Footer = () => {
   return (
@@ -86,10 +86,10 @@ export const Footer = () => {
             </ul>
           </div>
 
-          {/* About us */}
+          {/* Info */}
           <div>
             <h3 className="font-playfair text-base font-semibold mb-4 text-foreground">
-              About us
+              Info
             </h3>
             <ul className="space-y-2.5 text-sm">
               <li>
@@ -122,6 +122,14 @@ export const Footer = () => {
                   className="text-foreground hover:text-accent transition-colors"
                 >
                   Track Order
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/contact"
+                  className="text-foreground hover:text-accent transition-colors"
+                >
+                  Contact Us
                 </Link>
               </li>
             </ul>

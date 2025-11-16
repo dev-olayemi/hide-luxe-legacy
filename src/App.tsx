@@ -1,10 +1,11 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CartProvider } from "@/contexts/CartContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { WhatsAppChat } from "@/components/WhatsAppChat";
 import { BackToTop } from "@/components/BackToTop";
 import Index from "./pages/Index";
@@ -38,6 +39,16 @@ import AdminRoutes from "./admin/AdminRoutes";
 
 const queryClient = new QueryClient();
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -47,6 +58,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <ScrollToTop />
               <WhatsAppChat />
               <BackToTop />
               <Routes>
@@ -64,6 +76,7 @@ const App = () => (
                 <Route path="/wishlist" element={<Wishlist />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/our-story" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
