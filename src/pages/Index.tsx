@@ -201,32 +201,32 @@ const Index = () => {
               <ChevronRight className="w-5 h-5" />
             </button>
 
-            {/* Centered hero content */}
-            <div className="absolute inset-0 flex items-center justify-center px-6 z-20">
-              <div className="text-center text-white max-w-3xl">
-                <p className="text-xs sm:text-sm tracking-[0.35em] mb-3 uppercase font-light opacity-90">
-                  {heroContent.subtitle}
-                </p>
-
-                <h1 className="font-playfair font-bold mb-4 tracking-tight">
-                  <span className="block text-3xl sm:text-4xl md:text-6xl lg:text-7xl leading-tight">
+            {/* Left-aligned hero content with description */}
+            <div className="absolute inset-0 flex items-center px-6 md:px-12 lg:px-24 z-20">
+              <div className="text-white max-w-2xl">
+                <h1 className="font-playfair font-bold mb-6 tracking-tight">
+                  <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight">
                     {heroContent.title}
                   </span>
                 </h1>
 
-                <div className="flex flex-col sm:flex-row items-center gap-3 justify-center mt-3">
+                <p className="text-base sm:text-lg md:text-xl mb-8 max-w-xl leading-relaxed">
+                  Discover handcrafted leather footwear that defines sophistication. Every piece tells a story of timeless elegance.
+                </p>
+
+                <div className="flex flex-col sm:flex-row items-start gap-4">
                   <Link
                     to={heroContent.ctaLink}
-                    className="inline-flex items-center justify-center text-black px-6 py-3 rounded-md font-semibold hover:opacity-95 transition"
+                    className="inline-flex items-center justify-center text-black px-8 py-4 rounded-md font-semibold hover:opacity-95 transition text-lg"
                     style={{ backgroundColor: heroContent.ctaButtonColor }}
                   >
                     {heroContent.ctaText}
-                    <ArrowRight className="ml-2 w-4 h-4" />
+                    <ArrowRight className="ml-2 w-5 h-5" />
                   </Link>
 
                   <Link
                     to={heroContent.secondaryCtaLink}
-                    className="inline-flex items-center justify-center border border-white/30 text-white px-6 py-3 rounded-md font-medium hover:bg-white/10 transition"
+                    className="inline-flex items-center justify-center border-2 border-white text-white px-8 py-4 rounded-md font-semibold hover:bg-white hover:text-black transition text-lg"
                   >
                     {heroContent.secondaryCtaText}
                   </Link>
