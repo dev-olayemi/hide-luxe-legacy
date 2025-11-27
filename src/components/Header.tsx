@@ -93,7 +93,7 @@ export const Header = () => {
             <img
               src={logo}
               alt="28th Hide Luxe"
-              className="h-14 w-14 rounded-full object-fill ring-accent/20 group-hover:ring-accent/40 transition-all"
+              className="h-14 w-20 rounded-full object-fill ring-accent/20 group-hover:ring-accent/40 transition-all"
             />
             <div className="hidden md:flex flex-col leading-tight">
               <span className="font-playfair text-base md:text-lg lg:text-xl font-bold tracking-tight leading-[1]">
