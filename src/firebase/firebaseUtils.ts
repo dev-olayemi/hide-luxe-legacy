@@ -17,6 +17,8 @@ import {
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
   onAuthStateChanged,
 } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -63,6 +65,38 @@ async function login(email: string, password: string) {
   }
 }
 
+// Google Sign-in (popup)
+async function signInWithGoogle() {
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    // ensure user record exists in Firestore
+    try {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists()) {
+        await setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          email: user.email,
+          role: "user",
+          createdAt: serverTimestamp(),
+          lastLogin: serverTimestamp(),
+        });
+      } else {
+        await updateDoc(doc(db, "users", user.uid), { lastLogin: serverTimestamp() });
+      }
+    } catch (e) {
+      console.warn("Failed to ensure user doc after Google sign-in", e);
+    }
+
+    return user;
+  } catch (error: any) {
+    console.error("Google sign-in failed", error);
+    throw error;
+  }
+}
+
 async function getUserProfile(uid: string) {
   try {
     const userDoc = await getDoc(doc(db, "users", uid));
@@ -101,7 +135,7 @@ async function getAllProducts() {
   try {
     const q = query(collection(db, "products"));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return snapshot.docs.map((doc) => ({ ...(doc.data() as any), id: doc.id }));
   } catch (error: any) {
     throw new Error(error.message);
   }
@@ -111,7 +145,7 @@ async function getProductById(productId: string) {
   try {
     const productDoc = await getDoc(doc(db, "products", productId));
     return productDoc.exists()
-      ? { id: productDoc.id, ...productDoc.data() }
+      ? { ...(productDoc.data() as any), id: productDoc.id }
       : null;
   } catch (error: any) {
     throw new Error(error.message);
@@ -148,7 +182,7 @@ async function getProductsByCategory(category: string) {
       where("category", "==", category)
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return snapshot.docs.map((doc) => ({ ...(doc.data() as any), id: doc.id }));
   } catch (error: any) {
     throw new Error(error.message);
   }
@@ -300,6 +334,38 @@ async function updateCart(userId: string, items: any[]) {
     );
   } catch (error: any) {
     throw new Error(error.message);
+  }
+}
+
+// Shared cart snapshots (for seller viewing across devices)
+async function saveSharedCartSnapshot(cartId: string, payload: any) {
+  try {
+    if (!cartId) throw new Error("Missing cartId");
+    const ref = doc(db, "sharedCarts", cartId);
+    await setDoc(
+      ref,
+      {
+        ...payload,
+        updatedAt: serverTimestamp(),
+        createdAt: payload.createdAt ? payload.createdAt : serverTimestamp(),
+      },
+      { merge: true }
+    );
+    return cartId;
+  } catch (error: any) {
+    console.error("Error saving shared cart snapshot:", error);
+    throw error;
+  }
+}
+
+async function getSharedCartSnapshot(cartId: string) {
+  try {
+    if (!cartId) return null;
+    const snap = await getDoc(doc(db, "sharedCarts", cartId));
+    return snap.exists() ? { id: snap.id, ...(snap.data() as any) } : null;
+  } catch (error: any) {
+    console.error("Error fetching shared cart snapshot:", error);
+    throw error;
   }
 }
 
@@ -519,6 +585,7 @@ onAuthStateChanged(auth, (user) => {
 export {
   signup,
   login,
+  signInWithGoogle,
   getUserProfile,
   updateUserProfile,
   addProduct,
@@ -546,6 +613,8 @@ export {
   getAllBespokeRequests,
   updateBespokeRequest,
   uploadImage,
+  saveSharedCartSnapshot,
+  getSharedCartSnapshot,
   auth,
   db,
   storage,

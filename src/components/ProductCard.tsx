@@ -159,16 +159,38 @@ export const ProductCard = ({
           )}
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
           <Button onClick={handleAddToCart} className="flex-1">
             <ShoppingCart className="h-4 w-4 mr-2" />
             Add
           </Button>
+
           <Link to={`/product/${id}`} className="w-24">
             <Button variant="outline" className="w-full">
               View
             </Button>
           </Link>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Contact seller"
+            onClick={(e) => {
+              e.preventDefault();
+              const WHATSAPP_NUMBER = "+2348144977227";
+              const phone = WHATSAPP_NUMBER.replace(/[^\d]/g, "");
+              const productLink = `${window.location.origin}/product/${id}`;
+              const msg = `Hello, I need information about this product:\n\nProduct: ${name}\nCategory: ${category || ''}\nPrice: ₦${price.toLocaleString()}\nLink: ${productLink}`;
+              const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+              window.open(url, "_blank");
+            }}
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </Button>
+
+          {/* PalmPay button intentionally removed from product cards; PalmPay flow is available from Cart page */}
         </div>
       </CardContent>
     </Card>

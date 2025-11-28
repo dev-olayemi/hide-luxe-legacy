@@ -13,6 +13,15 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Fix DOMPurify resolution for packages that import it dynamically (e.g. jspdf)
+      // Point to a concrete distributable build so Vite/esbuild can prebundle correctly.
+      "dompurify": path.resolve(
+        __dirname,
+        "./node_modules/dompurify/dist/purify.js"
+      ),
     },
+  },
+  optimizeDeps: {
+    include: ["dompurify"],
   },
 }));

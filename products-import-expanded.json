@@ -1,0 +1,802 @@
+{
+  "products": [
+    {
+      "name": "4 In 1 Leather Accessories",
+      "category": "Accessories",
+      "subcategory": "Accessory",
+      "price": 55000,
+      "originalPrice": 66000,
+      "description": "Experience premium quality with our 4 In 1 Leather Accessories. Crafted from 100% genuine leather with meticulous attention to detail and superior craftsmanship. Perfect for discerning customers.",
+      "images": [
+        "/collections/4-in-1-leather-accessories.jpg"
+      ],
+      "thumbnail": "/collections/4-in-1-leather-accessories.jpg",
+      "colors": [
+        "Black"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": true,
+      "isFeatured": true,
+      "rating": 4.7,
+      "reviews": 11,
+      "inStock": true,
+      "orderCount": 43,
+      "tags": [
+        "accessory",
+        "accessories",
+        "leather",
+        "premium",
+        "handcrafted",
+        "black"
+      ],
+      "image": "/collections/4-in-1-leather-accessories.jpg"
+    },
+    {
+      "name": "Back Bag For Men",
+      "category": "Bags & Travel",
+      "subcategory": "Bag",
+      "price": 165000,
+      "originalPrice": 198000,
+      "description": "Carry in style with our Back Bag For Men. Quality leather construction with functional design and durable hardware. Perfect for work, travel, or everyday use.",
+      "images": [
+        "/collections/Back-bag-for-men.jpg"
+      ],
+      "thumbnail": "/collections/Back-bag-for-men.jpg",
+      "colors": [
+        "Black"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": true,
+      "isFeatured": false,
+      "rating": 4.7,
+      "reviews": 34,
+      "inStock": true,
+      "orderCount": 72,
+      "tags": [
+        "bag",
+        "bags-&-travel",
+        "leather",
+        "premium",
+        "handcrafted",
+        "black"
+      ],
+      "image": "/collections/Back-bag-for-men.jpg"
+    },
+    {
+      "name": "Bag Brown Travel",
+      "category": "Bags & Travel",
+      "subcategory": "Bag",
+      "price": 100000,
+      "originalPrice": 120000,
+      "description": "Carry in style with our Bag Brown Travel. Quality leather construction with functional design and durable hardware. Perfect for work, travel, or everyday use.",
+      "images": [
+        "/collections/bag-brown-travel.jpg"
+      ],
+      "thumbnail": "/collections/bag-brown-travel.jpg",
+      "colors": [
+        "Brown"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": true,
+      "isFeatured": true,
+      "rating": 4.7,
+      "reviews": 16,
+      "inStock": true,
+      "orderCount": 16,
+      "tags": [
+        "bag",
+        "bags-&-travel",
+        "leather",
+        "premium",
+        "handcrafted",
+        "brown"
+      ],
+      "image": "/collections/bag-brown-travel.jpg"
+    },
+    {
+      "name": "Black Leather Belt",
+      "category": "Accessories",
+      "subcategory": "Belt",
+      "price": 40000,
+      "originalPrice": 48000,
+      "description": "Complete your look with our Black Leather Belt. Premium leather with quality buckle and refined craftsmanship. A timeless accessory for any wardrobe.",
+      "images": [
+        "/collections/black-leather-belt.jpg"
+      ],
+      "thumbnail": "/collections/black-leather-belt.jpg",
+      "colors": [
+        "Black"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": true,
+      "isFeatured": true,
+      "rating": 4.7,
+      "reviews": 34,
+      "inStock": true,
+      "orderCount": 75,
+      "tags": [
+        "belt",
+        "accessories",
+        "leather",
+        "premium",
+        "handcrafted",
+        "black"
+      ],
+      "image": "/collections/black-leather-belt.jpg"
+    },
+    {
+      "name": "Brown Leather Watch",
+      "category": "Accessories",
+      "subcategory": "Watch",
+      "price": 75000,
+      "originalPrice": 90000,
+      "description": "Elevate your wrist with our Brown Leather Watch. Premium leather strap with quality construction and elegant design. Perfect for any occasion.",
+      "images": [
+        "/collections/brown-leather-watch.jpg"
+      ],
+      "thumbnail": "/collections/brown-leather-watch.jpg",
+      "colors": [
+        "Brown"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": false,
+      "isFeatured": true,
+      "rating": 4.6,
+      "reviews": 48,
+      "inStock": true,
+      "orderCount": 36,
+      "tags": [
+        "watch",
+        "accessories",
+        "leather",
+        "premium",
+        "handcrafted",
+        "brown"
+      ],
+      "image": "/collections/brown-leather-watch.jpg"
+    },
+    {
+      "name": "Brown Men Shoe Black",
+      "category": "Footwear",
+      "subcategory": "Shoe",
+      "price": 145000,
+      "originalPrice": 174000,
+      "description": "Discover luxury footwear crafted with meticulous attention to detail. Our Brown Men Shoe Black features premium 100% genuine leather, hand-stitched construction, and ergonomic design for all-day comfort. Perfect for both professional and casual settings.",
+      "images": [
+        "/collections/brown-men-shoe-black.jpg"
+      ],
+      "thumbnail": "/collections/brown-men-shoe-black.jpg",
+      "colors": [
+        "Black",
+        "Brown"
+      ],
+      "sizes": [
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46"
+      ],
+      "material": "100% Genuine Premium Leather",
+      "isNew": false,
+      "isFeatured": false,
+      "rating": 4.8,
+      "reviews": 14,
+      "inStock": true,
+      "orderCount": 17,
+      "tags": [
+        "shoe",
+        "footwear",
+        "leather",
+        "premium",
+        "handcrafted",
+        "black",
+        "brown"
+      ],
+      "image": "/collections/brown-men-shoe-black.jpg"
+    },
+    {
+      "name": "Brown Men Shoe",
+      "category": "Footwear",
+      "subcategory": "Shoe",
+      "price": 170000,
+      "originalPrice": 204000,
+      "description": "Discover luxury footwear crafted with meticulous attention to detail. Our Brown Men Shoe features premium 100% genuine leather, hand-stitched construction, and ergonomic design for all-day comfort. Perfect for both professional and casual settings.",
+      "images": [
+        "/collections/brown-men-shoe.jpg"
+      ],
+      "thumbnail": "/collections/brown-men-shoe.jpg",
+      "colors": [
+        "Brown"
+      ],
+      "sizes": [
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46"
+      ],
+      "material": "100% Genuine Premium Leather",
+      "isNew": true,
+      "isFeatured": true,
+      "rating": 4.8,
+      "reviews": 51,
+      "inStock": true,
+      "orderCount": 30,
+      "tags": [
+        "shoe",
+        "footwear",
+        "leather",
+        "premium",
+        "handcrafted",
+        "brown"
+      ],
+      "image": "/collections/brown-men-shoe.jpg"
+    },
+    {
+      "name": "Brown Shoe Men",
+      "category": "Footwear",
+      "subcategory": "Shoe",
+      "price": 165000,
+      "originalPrice": 198000,
+      "description": "Discover luxury footwear crafted with meticulous attention to detail. Our Brown Shoe Men features premium 100% genuine leather, hand-stitched construction, and ergonomic design for all-day comfort. Perfect for both professional and casual settings.",
+      "images": [
+        "/collections/brown-shoe-men.jpg"
+      ],
+      "thumbnail": "/collections/brown-shoe-men.jpg",
+      "colors": [
+        "Brown"
+      ],
+      "sizes": [
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46"
+      ],
+      "material": "100% Genuine Premium Leather",
+      "isNew": false,
+      "isFeatured": true,
+      "rating": 4.6,
+      "reviews": 33,
+      "inStock": true,
+      "orderCount": 87,
+      "tags": [
+        "shoe",
+        "footwear",
+        "leather",
+        "premium",
+        "handcrafted",
+        "brown"
+      ],
+      "image": "/collections/brown-shoe-men.jpg"
+    },
+    {
+      "name": "Chocolate Cap",
+      "category": "Accessories",
+      "subcategory": "Cap",
+      "price": 85000,
+      "originalPrice": 102000,
+      "description": "Experience premium quality with our Chocolate Cap. Crafted from 100% genuine leather with meticulous attention to detail and superior craftsmanship. Perfect for discerning customers.",
+      "images": [
+        "/collections/chocolate-cap.jpg"
+      ],
+      "thumbnail": "/collections/chocolate-cap.jpg",
+      "colors": [
+        "Chocolate"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": false,
+      "isFeatured": false,
+      "rating": 4.7,
+      "reviews": 42,
+      "inStock": true,
+      "orderCount": 19,
+      "tags": [
+        "cap",
+        "accessories",
+        "leather",
+        "premium",
+        "handcrafted",
+        "chocolate"
+      ],
+      "image": "/collections/chocolate-cap.jpg"
+    },
+    {
+      "name": "Cool Brown Bag",
+      "category": "Bags & Travel",
+      "subcategory": "Bag",
+      "price": 165000,
+      "originalPrice": 198000,
+      "description": "Carry in style with our Cool Brown Bag. Quality leather construction with functional design and durable hardware. Perfect for work, travel, or everyday use.",
+      "images": [
+        "/collections/cool-brown-bag.jpg"
+      ],
+      "thumbnail": "/collections/cool-brown-bag.jpg",
+      "colors": [
+        "Brown",
+        "Cool"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": true,
+      "isFeatured": true,
+      "rating": 4.7,
+      "reviews": 32,
+      "inStock": true,
+      "orderCount": 77,
+      "tags": [
+        "bag",
+        "bags-&-travel",
+        "leather",
+        "premium",
+        "handcrafted",
+        "brown",
+        "cool"
+      ],
+      "image": "/collections/cool-brown-bag.jpg"
+    },
+    {
+      "name": "Cool Deep Brown Show",
+      "category": "Accessories",
+      "subcategory": "Accessory",
+      "price": 75000,
+      "originalPrice": 90000,
+      "description": "Experience premium quality with our Cool Deep Brown Show. Crafted from 100% genuine leather with meticulous attention to detail and superior craftsmanship. Perfect for discerning customers.",
+      "images": [
+        "/collections/cool-deep-brown-show.jpg"
+      ],
+      "thumbnail": "/collections/cool-deep-brown-show.jpg",
+      "colors": [
+        "Brown",
+        "Deep",
+        "Cool"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": true,
+      "isFeatured": true,
+      "rating": 4.5,
+      "reviews": 39,
+      "inStock": true,
+      "orderCount": 68,
+      "tags": [
+        "accessory",
+        "accessories",
+        "leather",
+        "premium",
+        "handcrafted",
+        "brown",
+        "deep",
+        "cool"
+      ],
+      "image": "/collections/cool-deep-brown-show.jpg"
+    },
+    {
+      "name": "Deep Blue Men",
+      "category": "Accessories",
+      "subcategory": "Accessory",
+      "price": 85000,
+      "originalPrice": 102000,
+      "description": "Experience premium quality with our Deep Blue Men. Crafted from 100% genuine leather with meticulous attention to detail and superior craftsmanship. Perfect for discerning customers.",
+      "images": [
+        "/collections/deep-blue-men.jpg"
+      ],
+      "thumbnail": "/collections/deep-blue-men.jpg",
+      "colors": [
+        "Blue",
+        "Deep"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": true,
+      "isFeatured": true,
+      "rating": 4.9,
+      "reviews": 51,
+      "inStock": true,
+      "orderCount": 23,
+      "tags": [
+        "accessory",
+        "accessories",
+        "leather",
+        "premium",
+        "handcrafted",
+        "blue",
+        "deep"
+      ],
+      "image": "/collections/deep-blue-men.jpg"
+    },
+    {
+      "name": "Deep Brown Bag",
+      "category": "Bags & Travel",
+      "subcategory": "Bag",
+      "price": 195000,
+      "originalPrice": 234000,
+      "description": "Carry in style with our Deep Brown Bag. Quality leather construction with functional design and durable hardware. Perfect for work, travel, or everyday use.",
+      "images": [
+        "/collections/deep-brown-bag.jpg"
+      ],
+      "thumbnail": "/collections/deep-brown-bag.jpg",
+      "colors": [
+        "Brown",
+        "Deep"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": false,
+      "isFeatured": true,
+      "rating": 5,
+      "reviews": 51,
+      "inStock": true,
+      "orderCount": 61,
+      "tags": [
+        "bag",
+        "bags-&-travel",
+        "leather",
+        "premium",
+        "handcrafted",
+        "brown",
+        "deep"
+      ],
+      "image": "/collections/deep-brown-bag.jpg"
+    },
+    {
+      "name": "Deep Brown Men Shoe",
+      "category": "Footwear",
+      "subcategory": "Shoe",
+      "price": 135000,
+      "originalPrice": 162000,
+      "description": "Discover luxury footwear crafted with meticulous attention to detail. Our Deep Brown Men Shoe features premium 100% genuine leather, hand-stitched construction, and ergonomic design for all-day comfort. Perfect for both professional and casual settings.",
+      "images": [
+        "/collections/deep-brown-men-shoe.jpg"
+      ],
+      "thumbnail": "/collections/deep-brown-men-shoe.jpg",
+      "colors": [
+        "Brown",
+        "Deep"
+      ],
+      "sizes": [
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46"
+      ],
+      "material": "100% Genuine Premium Leather",
+      "isNew": true,
+      "isFeatured": true,
+      "rating": 4.7,
+      "reviews": 52,
+      "inStock": true,
+      "orderCount": 49,
+      "tags": [
+        "shoe",
+        "footwear",
+        "leather",
+        "premium",
+        "handcrafted",
+        "brown",
+        "deep"
+      ],
+      "image": "/collections/deep-brown-men-shoe.jpg"
+    },
+    {
+      "name": "Female Hand Bag",
+      "category": "Bags & Travel",
+      "subcategory": "Bag",
+      "price": 145000,
+      "originalPrice": 174000,
+      "description": "Carry in style with our Female Hand Bag. Quality leather construction with functional design and durable hardware. Perfect for work, travel, or everyday use.",
+      "images": [
+        "/collections/female-hand-bag.jpg"
+      ],
+      "thumbnail": "/collections/female-hand-bag.jpg",
+      "colors": [
+        "Black"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": true,
+      "isFeatured": true,
+      "rating": 4.6,
+      "reviews": 37,
+      "inStock": true,
+      "orderCount": 47,
+      "tags": [
+        "bag",
+        "bags-&-travel",
+        "leather",
+        "premium",
+        "handcrafted",
+        "black"
+      ],
+      "image": "/collections/female-hand-bag.jpg"
+    },
+    {
+      "name": "Ladies",
+      "category": "Accessories",
+      "subcategory": "Accessory",
+      "price": 85000,
+      "originalPrice": 102000,
+      "description": "Experience premium quality with our Ladies. Crafted from 100% genuine leather with meticulous attention to detail and superior craftsmanship. Perfect for discerning customers.",
+      "images": [
+        "/collections/ladies.jpg"
+      ],
+      "thumbnail": "/collections/ladies.jpg",
+      "colors": [
+        "Black"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": true,
+      "isFeatured": true,
+      "rating": 4.6,
+      "reviews": 37,
+      "inStock": true,
+      "orderCount": 1,
+      "tags": [
+        "accessory",
+        "accessories",
+        "leather",
+        "premium",
+        "handcrafted",
+        "black"
+      ],
+      "image": "/collections/ladies.jpg"
+    },
+    {
+      "name": "Leather Bag",
+      "category": "Bags & Travel",
+      "subcategory": "Bag",
+      "price": 85000,
+      "originalPrice": 102000,
+      "description": "Carry in style with our Leather Bag. Quality leather construction with functional design and durable hardware. Perfect for work, travel, or everyday use.",
+      "images": [
+        "/collections/leather-bag.jpg"
+      ],
+      "thumbnail": "/collections/leather-bag.jpg",
+      "colors": [
+        "Black"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": true,
+      "isFeatured": true,
+      "rating": 4.9,
+      "reviews": 19,
+      "inStock": true,
+      "orderCount": 86,
+      "tags": [
+        "bag",
+        "bags-&-travel",
+        "leather",
+        "premium",
+        "handcrafted",
+        "black"
+      ],
+      "image": "/collections/leather-bag.jpg"
+    },
+    {
+      "name": "Leather Cap",
+      "category": "Accessories",
+      "subcategory": "Cap",
+      "price": 200000,
+      "originalPrice": 240000,
+      "description": "Experience premium quality with our Leather Cap. Crafted from 100% genuine leather with meticulous attention to detail and superior craftsmanship. Perfect for discerning customers.",
+      "images": [
+        "/collections/leather-cap.jpg"
+      ],
+      "thumbnail": "/collections/leather-cap.jpg",
+      "colors": [
+        "Black"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": true,
+      "isFeatured": false,
+      "rating": 4.8,
+      "reviews": 41,
+      "inStock": true,
+      "orderCount": 22,
+      "tags": [
+        "cap",
+        "accessories",
+        "leather",
+        "premium",
+        "handcrafted",
+        "black"
+      ],
+      "image": "/collections/leather-cap.jpg"
+    },
+    {
+      "name": "Leather Gloves",
+      "category": "Accessories",
+      "subcategory": "Glove",
+      "price": 25000,
+      "originalPrice": 30000,
+      "description": "Stay warm in style with our Leather Gloves. Soft leather with comfortable fit and quality stitching. Perfect for winter and formal occasions.",
+      "images": [
+        "/collections/Leather-gloves.jpg"
+      ],
+      "thumbnail": "/collections/Leather-gloves.jpg",
+      "colors": [
+        "Black"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": false,
+      "isFeatured": false,
+      "rating": 4.9,
+      "reviews": 28,
+      "inStock": true,
+      "orderCount": 27,
+      "tags": [
+        "glove",
+        "accessories",
+        "leather",
+        "premium",
+        "handcrafted",
+        "black"
+      ],
+      "image": "/collections/Leather-gloves.jpg"
+    },
+    {
+      "name": "Leather Watch Strap",
+      "category": "Accessories",
+      "subcategory": "Watch",
+      "price": 80000,
+      "originalPrice": 96000,
+      "description": "Elevate your wrist with our Leather Watch Strap. Premium leather strap with quality construction and elegant design. Perfect for any occasion.",
+      "images": [
+        "/collections/leather-watch-strap.jpg"
+      ],
+      "thumbnail": "/collections/leather-watch-strap.jpg",
+      "colors": [
+        "Black"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": true,
+      "isFeatured": false,
+      "rating": 4.9,
+      "reviews": 11,
+      "inStock": true,
+      "orderCount": 62,
+      "tags": [
+        "watch",
+        "accessories",
+        "leather",
+        "premium",
+        "handcrafted",
+        "black"
+      ],
+      "image": "/collections/leather-watch-strap.jpg"
+    },
+    {
+      "name": "Nice Female Hand Bag",
+      "category": "Bags & Travel",
+      "subcategory": "Bag",
+      "price": 140000,
+      "originalPrice": 168000,
+      "description": "Carry in style with our Nice Female Hand Bag. Quality leather construction with functional design and durable hardware. Perfect for work, travel, or everyday use.",
+      "images": [
+        "/collections/nice-female-hand-bag.jpg"
+      ],
+      "thumbnail": "/collections/nice-female-hand-bag.jpg",
+      "colors": [
+        "Nice"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": true,
+      "isFeatured": true,
+      "rating": 4.6,
+      "reviews": 57,
+      "inStock": true,
+      "orderCount": 80,
+      "tags": [
+        "bag",
+        "bags-&-travel",
+        "leather",
+        "premium",
+        "handcrafted",
+        "nice"
+      ],
+      "image": "/collections/nice-female-hand-bag.jpg"
+    },
+    {
+      "name": "Shoulder Holster",
+      "category": "Accessories",
+      "subcategory": "Holster",
+      "price": 175000,
+      "originalPrice": 210000,
+      "description": "Experience premium quality with our Shoulder Holster. Crafted from 100% genuine leather with meticulous attention to detail and superior craftsmanship. Perfect for discerning customers.",
+      "images": [
+        "/collections/shoulder-Holster.jpg"
+      ],
+      "thumbnail": "/collections/shoulder-Holster.jpg",
+      "colors": [
+        "Black"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": false,
+      "isFeatured": false,
+      "rating": 5,
+      "reviews": 28,
+      "inStock": true,
+      "orderCount": 17,
+      "tags": [
+        "holster",
+        "accessories",
+        "leather",
+        "premium",
+        "handcrafted",
+        "black"
+      ],
+      "image": "/collections/shoulder-Holster.jpg"
+    },
+    {
+      "name": "Sling Bag Women",
+      "category": "Bags & Travel",
+      "subcategory": "Bag",
+      "price": 115000,
+      "originalPrice": 138000,
+      "description": "Carry in style with our Sling Bag Women. Quality leather construction with functional design and durable hardware. Perfect for work, travel, or everyday use.",
+      "images": [
+        "/collections/Sling-bag-women.jpg"
+      ],
+      "thumbnail": "/collections/Sling-bag-women.jpg",
+      "colors": [
+        "Black"
+      ],
+      "sizes": [],
+      "material": "100% Genuine Premium Leather",
+      "isNew": true,
+      "isFeatured": true,
+      "rating": 4.9,
+      "reviews": 56,
+      "inStock": true,
+      "orderCount": 88,
+      "tags": [
+        "bag",
+        "bags-&-travel",
+        "leather",
+        "premium",
+        "handcrafted",
+        "black"
+      ],
+      "image": "/collections/Sling-bag-women.jpg"
+    }
+  ]
+}

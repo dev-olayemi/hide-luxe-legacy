@@ -74,6 +74,8 @@ const App = () => (
                 <Route path="/specialty" element={<Specialty />} />
                 <Route path="/category/:categoryName" element={<Category />} />
                 <Route path="/cart" element={<Cart />} />
+                {/* Support legacy/shared cart links like /cart/:cartId for sellers */}
+                <Route path="/cart/:cartId" element={<CartDetails />} />
                 <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/onboarding" element={<Onboarding />} />

@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useCart } from "@/contexts/CartContext";
-import { getProductById } from "@/firebase/firebaseUtils";
+import { getProductById, getAllProducts } from "@/firebase/firebaseUtils";
 import { cn } from "@/lib/utils";
 import NotFound from "./NotFound";
 
@@ -19,16 +19,35 @@ const ProductDetail = () => {
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
 
   const [product, setProduct] = useState<any | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
 
   useEffect(() => {
     if (!id) return;
-    getProductById(id).then((data) => {
-      setProduct(data || null);
-      setLoading(false);
-    });
+    
+    const fetchProduct = async () => {
+      try {
+        const data = await getProductById(id);
+        setProduct(data || null);
+        
+        if (data) {
+          // Fetch all products to find related ones
+          const allProducts = await getAllProducts();
+          const related = allProducts
+            .filter((p: any) => p.id !== id && p.category === data.category)
+            .slice(0, 6);
+          setRelatedProducts(related);
+        }
+      } catch (err) {
+        console.error('Error loading product:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
   }, [id]);
 
   if (loading) {
@@ -223,24 +242,49 @@ const ProductDetail = () => {
             )}
 
             {/* Action Buttons */}
-            <div className="flex gap-4 pt-4">
+            <div className="flex gap-4 pt-4 items-center">
               <Button size="lg" className="flex-1" onClick={handleAddToCart}>
                 <ShoppingCart className="mr-2 h-5 w-5" />
                 Add to Cart
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => toggleWishlist(product.id)}
-                className={cn(inWishlist && "border-accent")}
-              >
-                <Heart
-                  className={cn(
-                    "h-5 w-5",
-                    inWishlist && "fill-accent text-accent"
-                  )}
-                />
-              </Button>
+
+              <div className="flex flex-col gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => toggleWishlist(product.id)}
+                  className={cn(inWishlist && "border-accent")}
+                >
+                  <Heart
+                    className={cn(
+                      "h-4 w-4 mr-2 inline-block",
+                      inWishlist && "fill-accent text-accent"
+                    )}
+                  />
+                  Wishlist
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    const WHATSAPP_NUMBER = "+2348144977227";
+                    const phone = WHATSAPP_NUMBER.replace(/[^\d]/g, "");
+                    const productLink = `${window.location.origin}/product/${product.id}`;
+                    const msg = `Hello, I would like information about this product:\n\nProduct: ${product.name}\nCategory: ${product.category}\nPrice: ₦${product.price.toLocaleString()}\nLink: ${productLink}`;
+                    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+                    window.open(url, "_blank");
+                  }}
+                >
+                  {/* chat icon */}
+                  <svg className="w-4 h-4 mr-2 inline-block" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Contact Seller
+                </Button>
+
+                {/* PalmPay button intentionally omitted on product pages; kept on Cart page only */}
+              </div>
             </div>
 
             {/* Product Details */}
@@ -267,6 +311,67 @@ const ProductDetail = () => {
           </div>
         </div>
       </main>
+
+      {/* Related Products Section */}
+      {relatedProducts.length > 0 && (
+        <section className="bg-gray-50 py-12">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl md:text-3xl font-bold mb-8 text-gray-900">You May Also Like</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {relatedProducts.map((p: any) => (
+                <Link
+                  key={p.id}
+                  to={`/product/${p.id}`}
+                  className="group block bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                >
+                  {/* Product Image */}
+                  <div className="w-full aspect-square bg-gray-100 overflow-hidden relative">
+                    <img
+                      src={p.image || p.thumbnail || (p.images && p.images[0])}
+                      alt={p.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      onError={(e) => {
+                        e.currentTarget.src = '/collections/cool-brown-bag.jpg';
+                      }}
+                    />
+                    {p.isNew && (
+                      <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded">
+                        NEW
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Product Info */}
+                  <div className="p-3">
+                    <h4 className="text-xs md:text-sm font-semibold text-gray-900 line-clamp-2 mb-1">
+                      {p.name}
+                    </h4>
+                    <div className="text-xs text-gray-600 mb-2">{p.subcategory}</div>
+
+                    {/* Rating */}
+                    <div className="flex items-center gap-1 text-xs mb-2">
+                      <span>⭐ {p.rating || 0}</span>
+                      <span className="text-gray-500">({p.reviews || 0})</span>
+                    </div>
+
+                    {/* Price */}
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm font-bold text-gray-900">
+                        ₦{(p.price || 0).toLocaleString()}
+                      </div>
+                      {p.originalPrice > p.price && (
+                        <div className="text-xs text-gray-500 line-through">
+                          ₦{(p.originalPrice || 0).toLocaleString()}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <Footer />
     </div>

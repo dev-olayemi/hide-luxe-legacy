@@ -19,7 +19,7 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
-import { db } from "@/firebase/firebaseUtils";
+import { db, saveSharedCartSnapshot as saveSharedCartSnapshotToFirestore } from "@/firebase/firebaseUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
 
@@ -36,6 +36,7 @@ interface DeliveryDetails {
 }
 
 const WHATSAPP_NUMBER = "+2348144977227";
+const SHARED_CART_PREFIX = "shared_cart_";
 
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
@@ -127,10 +128,50 @@ const Cart = () => {
   const [cartId] = useState(() => localStorage.getItem("cartId") || uuidv4());
   const cartLink = `${window.location.origin}/cart/${cartId}`;
 
+  // Persist a snapshot of the cart + delivery details for seller preview/share
+  const saveSharedCartSnapshot = async (items: any[], delivery: DeliveryDetails | null) => {
+    const payload = {
+      id: cartId,
+      items,
+      deliveryDetails: delivery || null,
+      total: items.reduce((s: number, it: any) => s + it.price * it.quantity, 0),
+      createdAt: new Date().toISOString(),
+    };
+
+    // Save locally first (fallback/offline)
+    try {
+      localStorage.setItem(`${SHARED_CART_PREFIX}${cartId}`, JSON.stringify(payload));
+    } catch (e) {
+      console.warn("Failed to persist shared snapshot locally", e);
+    }
+
+    // Try saving to Firestore so sellers on other devices can access
+    try {
+      await saveSharedCartSnapshotToFirestore(cartId, payload);
+    } catch (err) {
+      console.warn("Failed to save shared snapshot to Firestore", err);
+    }
+  };
+
   const total = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  // keep shared snapshot up to date whenever cart or delivery changes
+  useEffect(() => {
+    saveSharedCartSnapshot(cartItems, deliveryDetails);
+    // also persist a simple cart copy for CartDetails fallback
+    try {
+      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    } catch (e) {
+      console.warn('failed to persist cartItems', e);
+    }
+    // store cartId so link remains stable across reloads
+    try {
+      localStorage.setItem('cartId', cartId);
+    } catch (e) {}
+  }, [cartItems, deliveryDetails, cartId]);
 
   // fetch countries list (uses restcountries for readable names)
   useEffect(() => {
@@ -604,6 +645,25 @@ const Cart = () => {
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        title="Chat seller about this item"
+                        onClick={() => {
+                          // Compose a per-item WhatsApp message and open chat
+                          const phone = WHATSAPP_NUMBER.replace(/[^\d]/g, "");
+                          const now = new Date().toLocaleString();
+                          const msg = `Hello, I'd like information about this product:\n\nProduct: ${item.name}\nCategory: ${item.category}\nPrice: ₦${item.price.toLocaleString()}\nQuantity: ${item.quantity}\nSelected options: ${item.size || 'N/A'} / ${item.color || 'N/A'}\n\nCart link: ${cartLink}\nDate: ${now}`;
+                          const url = `https://wa.me/${phone}?text=${encodeURIComponent(
+                            msg
+                          )}`;
+                          window.open(url, "_blank");
+                        }}
+                      >
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </Button>
                       <div className="flex items-center gap-2 border rounded">
                         <Button
                           size="icon"
@@ -691,6 +751,21 @@ const Cart = () => {
                       onClick={handleInlinePay}
                     >
                       Pay Now
+                    </Button>
+                    <Button
+                      className="w-full mb-3"
+                      size="lg"
+                      variant="secondary"
+                      onClick={(e) => {
+                        // For PalmPay we open a WhatsApp request to seller to initiate PalmPay flow
+                        e.preventDefault();
+                        const phone = WHATSAPP_NUMBER.replace(/[^\d]/g, "");
+                        const msg = `Hello, I'd like to pay via PalmPay.\n\nCart: ${cartLink}\nTotal: ₦${total.toLocaleString()}\nName: ${deliveryDetails.fullName || 'N/A'}\nPhone: ${deliveryDetails.phoneNumber || 'N/A'}`;
+                        const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+                        window.open(url, "_blank");
+                      }}
+                    >
+                      Pay with PalmPay
                     </Button>
                     <Button
                       className="w-full"

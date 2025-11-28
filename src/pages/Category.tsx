@@ -5,27 +5,43 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { getAllProducts } from "@/firebase/firebaseUtils";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/firebase/firebaseConfig";
 
 const Category = () => {
   const { categoryName } = useParams();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Convert URL slug back to category name
-  const displayName = categoryName
-    ? categoryName
-        .split("-")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ")
-    : "";
+  const [categoryDisplayName, setCategoryDisplayName] = useState<string>(
+    ""
+  );
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchCategoryAndProducts = async () => {
       setLoading(true);
       try {
+        // Attempt to resolve category name from categories collection by slug
+        let resolvedName = "";
+        if (categoryName) {
+          const docRef = doc(db, "categories", categoryName);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data() as any;
+            resolvedName = data.name || "";
+          } else {
+            // Fallback: convert slug to display name
+            resolvedName = categoryName
+              .split("-")
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(" ");
+          }
+        }
+
+        setCategoryDisplayName(resolvedName);
+
         const allProducts = await getAllProducts();
         const filtered = allProducts.filter(
-          (p: any) => p.category?.toLowerCase() === displayName.toLowerCase()
+          (p: any) => p.category?.toLowerCase() === resolvedName.toLowerCase()
         );
         setProducts(filtered);
       } catch (error) {
@@ -34,8 +50,8 @@ const Category = () => {
         setLoading(false);
       }
     };
-    fetchProducts();
-  }, [displayName]);
+    fetchCategoryAndProducts();
+  }, [categoryName]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -44,10 +60,10 @@ const Category = () => {
       <main className="flex-1 container mx-auto px-4 py-12">
         <div className="text-center mb-12">
           <h1 className="font-playfair text-4xl md:text-5xl font-bold mb-4">
-            {displayName} Collection
+            {categoryDisplayName || "Category"} Collection
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Discover our premium {displayName.toLowerCase()} leather products
+            Discover our premium {categoryDisplayName.toLowerCase()} leather products
           </p>
         </div>
 

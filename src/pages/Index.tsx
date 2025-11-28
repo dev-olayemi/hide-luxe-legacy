@@ -14,6 +14,8 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { CookieConsent } from "@/components/CookieConsent";
+import { CategoriesGrid } from "@/components/CategoriesGrid";
+import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { getAllProducts } from "@/firebase/firebaseUtils";
 import { db } from "@/firebase/firebaseConfig";
@@ -33,35 +35,47 @@ import categoryAutomotive from "@/assets/category-automotive.jpg";
 const HERO_SLIDES = [
   {
     image: heroFootwear,
-    title: "Artisan Footwear",
-    subtitle: "Handcrafted Excellence",
+    title: "HLX Footwear Atelier",
+    subtitle: "Step Into Luxury",
     description:
-      "Step into luxury with our bespoke leather footwear collection",
+      "Step into luxury with our impeccably crafted leather footwear collection",
+    link: "/accessories",
   },
   {
     image: heroJackets,
-    title: "Premium Outerwear",
-    subtitle: "Timeless Style",
-    description: "Elevate your wardrobe with our signature leather jackets",
+    title: "HLX Apparels & Outerwear",
+    subtitle: "Premium Fashion",
+    description: "Elevate your closet with our sophisticated apparels and outerwear collections finished in premium leather details",
+    link: "/apparel",
   },
   {
     image: heroAccessories,
-    title: "Luxury Accessories",
-    subtitle: "Refined Details",
+    title: "HLX Bags & Travel",
+    subtitle: "Go Further",
     description:
-      "Complete your look with meticulously crafted leather accessories",
+      "Go further with HLX leather bags for motion, work, and leisure — refined in genuine hide. The world moves, carry luxury with you",
+    link: "/category?name=Bags%20%26%20Travel",
+  },
+  {
+    image: categoryAccessories,
+    title: "HLX Accessories",
+    subtitle: "Refined Details",
+    description: "Elevate your style with our premium and meticulous accessories",
+    link: "/accessories",
   },
   {
     image: heroFurniture,
-    title: "Elegant Interiors",
-    subtitle: "Sophisticated Living",
-    description: "Transform your space with premium leather furniture",
+    title: "HLX Leather Interiors",
+    subtitle: "Transform Your Space",
+    description: "Transform your space with premium leather-crafted furniture and accents designed for comfort",
+    link: "/furniture",
   },
   {
     image: heroAutomotive,
-    title: "Automotive Luxury",
-    subtitle: "Drive in Style",
-    description: "Experience unparalleled comfort with our automotive leather",
+    title: "HLX Automotive Leather",
+    subtitle: "Drive Luxury",
+    description: "Experience unparalleled comfort and drive luxury with our automotive leather",
+    link: "/automotive",
   },
 ];
 
@@ -196,6 +210,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEOHead 
+        title="HLX - Premium Leather Luxury | Footwear, Apparel & Accessories"
+        description="Discover HLX's exquisite collection of premium leather footwear, apparel, bags, accessories, furniture and automotive leather goods. Luxury crafted with genuine hide."
+        url="https://www.28hideluxe.com"
+      />
       <Header />
 
       <main className="flex-1">
@@ -320,7 +339,7 @@ const Index = () => {
 
                 <div className="flex flex-col sm:flex-row items-start gap-4">
                   <Link
-                    to={heroContent.ctaLink}
+                    to={HERO_SLIDES[currentSlide].link || heroContent.ctaLink}
                     className="group relative inline-flex items-center justify-center text-black px-8 py-4 rounded-md font-semibold hover:scale-105 transition-all duration-300 text-lg overflow-hidden shadow-2xl"
                     style={{ backgroundColor: heroContent.ctaButtonColor }}
                   >
@@ -403,6 +422,9 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Categories Grid Section */}
+        <CategoriesGrid />
+
         {/* Rest of your existing sections remain the same */}
         <section className="container mx-auto px-4 py-20">
           {/* ... existing featured products section ... */}
@@ -416,7 +438,7 @@ const Index = () => {
       <Footer />
       <CookieConsent />
 
-      <style jsx>{`
+      <style>{`
         @keyframes progress {
           from {
             width: 0%;

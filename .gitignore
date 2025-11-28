@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 *.env
+*hide-luxe-firebase-adminsdk-fbsvc-5619a30c86.json
+hide-luxe-firebase-adminsdk-fbsvc-5619a30c86.json
+firestore.rules

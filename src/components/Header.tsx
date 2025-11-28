@@ -87,13 +87,13 @@ export const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-xl backdrop-saturate-200 shadow-sm">
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo - Left */}
           <Link to="/" className="flex items-center gap-3 group">
             <img
               src={logo}
               alt="28th Hide Luxe"
-              className="h-14 w-20 rounded-full object-fill ring-accent/20 group-hover:ring-accent/40 transition-all"
+              className="h-10 md:h-14 w-auto rounded-full object-cover ring-accent/20 group-hover:ring-accent/40 transition-all"
             />
             <div className="hidden md:flex flex-col leading-tight">
               <span className="font-playfair text-base md:text-lg lg:text-xl font-bold tracking-tight leading-[1]">
@@ -107,7 +107,7 @@ export const Header = () => {
           </Link>
 
           {/* Desktop Navigation - Center (with overflow menu) */}
-          <nav className="hidden lg:flex items-center gap-4">
+          <nav className="hidden md:flex items-center gap-4">
             {visibleNav.map((item) => (
               <Link
                 key={(item as any).id ?? item.to}
@@ -262,7 +262,7 @@ export const Header = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="lg:hidden hover:bg-accent/10"
+                  className="md:hidden hover:bg-accent/10"
                 >
                   <Menu className="h-6 w-6" />
                 </Button>

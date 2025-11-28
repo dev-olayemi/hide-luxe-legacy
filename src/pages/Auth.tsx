@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { signup, login } from "@/firebase/firebaseUtils";
+import { signup, login, signInWithGoogle } from "@/firebase/firebaseUtils";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 import { Eye, EyeOff } from "lucide-react"; // If you use lucide-react or any icon lib
 import { useNavigate } from "react-router-dom";
@@ -90,6 +90,46 @@ const Auth = () => {
       <Header />
       <main className="flex-1 container mx-auto px-4 py-12 flex items-center justify-center">
         <Card className="w-full max-w-md p-8">
+          {/* Google Sign-In Button */}
+          <div className="mb-6">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full mb-2 flex items-center justify-center gap-2 border-accent/30 hover:border-accent transition-colors"
+              onClick={async () => {
+                setIsLoading(true);
+                try {
+                  await signInWithGoogle();
+                  toast({ title: "Google sign-in successful!" });
+                  navigate("/dashboard");
+                } catch (error: any) {
+                  console.error("Google sign-in error:", error);
+                  toast({
+                    title: "Google sign-in failed",
+                    description: error.message || "Please try again",
+                    variant: "destructive",
+                  });
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
+              disabled={isLoading}
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21.35 11.1H12v2.8h5.35c-.23 1.35-1.3 3.95-5.35 3.95-3.22 0-5.85-2.65-5.85-5.9s2.63-5.9 5.85-5.9c1.84 0 3.08.79 3.78 1.47l2.57-2.48C17.8 3.2 15.73 2 12 2 6.48 2 2 6.48 2 12s4.48 10 10 10c5.76 0 9.95-4.03 9.95-9.7 0-.65-.07-1.15-.6-1.2z" fill="currentColor" />
+              </svg>
+              Sign in with Google
+            </Button>
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-muted"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+          </div>
+
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
