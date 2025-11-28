@@ -268,7 +268,7 @@ const ProductDetail = () => {
                   size="sm"
                   variant="ghost"
                   onClick={() => {
-                    const WHATSAPP_NUMBER = "+2348144977227";
+                    const WHATSAPP_NUMBER = "+2349031976895";
                     const phone = WHATSAPP_NUMBER.replace(/[^\d]/g, "");
                     const productLink = `${window.location.origin}/product/${product.id}`;
                     const msg = `Hello, I would like information about this product:\n\nProduct: ${product.name}\nCategory: ${product.category}\nPrice: ₦${product.price.toLocaleString()}\nLink: ${productLink}`;

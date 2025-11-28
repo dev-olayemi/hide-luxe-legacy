@@ -177,7 +177,7 @@ export const ProductCard = ({
             aria-label="Contact seller"
             onClick={(e) => {
               e.preventDefault();
-              const WHATSAPP_NUMBER = "+2348144977227";
+              const WHATSAPP_NUMBER = "+2349031976895";
               const phone = WHATSAPP_NUMBER.replace(/[^\d]/g, "");
               const productLink = `${window.location.origin}/product/${id}`;
               const msg = `Hello, I need information about this product:\n\nProduct: ${name}\nCategory: ${category || ''}\nPrice: ₦${price.toLocaleString()}\nLink: ${productLink}`;

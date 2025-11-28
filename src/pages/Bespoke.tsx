@@ -145,7 +145,7 @@ const Bespoke = () => {
       // open WhatsApp with a short message and the request id
       const message = `Hello, I submitted a bespoke request (ref: ${docRef.id}). Please contact me.`;
       window.open(
-        `https://wa.me/+2348144977227?text=${encodeURIComponent(message)}`,
+        `https://wa.me/+2349031976895?text=${encodeURIComponent(message)}`,
         "_blank"
       );
 

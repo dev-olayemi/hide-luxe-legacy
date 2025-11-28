@@ -35,7 +35,7 @@ interface DeliveryDetails {
   additionalInfo?: string;
 }
 
-const WHATSAPP_NUMBER = "+2348144977227";
+const WHATSAPP_NUMBER = "+2349031976895";
 const SHARED_CART_PREFIX = "shared_cart_";
 
 const Cart = () => {
