@@ -261,7 +261,7 @@ const Index = () => {
           className="relative overflow-hidden bg-background"
           {...swipeHandlers}
         >
-          <div className="relative w-full h-[70vh] md:h-screen">
+          <div className="relative w-full h-[60vh] sm:h-[70vh] md:h-screen">
             {/* Slides with enhanced transitions */}
             {HERO_SLIDES.map((slide, index) => (
               <div
@@ -279,80 +279,84 @@ const Index = () => {
                   style={index === currentSlide ? parallaxStyle : {}}
                 />
 
-                {/* Dynamic gradient overlay based on slide */}
+                {/* Dynamic gradient overlay based on slide - stronger on mobile */}
                 <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/40" />
-                  <div className="absolute inset-0 backdrop-blur-[1px]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-black/40" />
+                  <div className="absolute inset-0 backdrop-blur-[0.5px]" />
                 </div>
               </div>
             ))}
 
-            {/* Enhanced Navigation */}
+            {/* Enhanced Navigation - hide on mobile */}
             <button
               onClick={prevSlide}
               aria-label="Previous slide"
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-30 flex items-center justify-center w-12 h-12 rounded-full bg-black/40 text-white hover:bg-black/60 focus:outline-none transition-all duration-300 backdrop-blur-sm border border-white/20 hover:scale-110 group"
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 hidden sm:flex items-center justify-center w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-black/40 text-white hover:bg-black/60 focus:outline-none transition-all duration-300 backdrop-blur-sm border border-white/20 hover:scale-110 group"
             >
-              <ChevronLeft className="w-6 h-6 group-hover:-translate-x-0.5 transition-transform" />
+              <ChevronLeft className="w-5 sm:w-6 h-5 sm:h-6 group-hover:-translate-x-0.5 transition-transform" />
             </button>
 
             <button
               onClick={nextSlide}
               aria-label="Next slide"
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-30 flex items-center justify-center w-12 h-12 rounded-full bg-black/40 text-white hover:bg-black/60 focus:outline-none transition-all duration-300 backdrop-blur-sm border border-white/20 hover:scale-110 group"
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 hidden sm:flex items-center justify-center w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-black/40 text-white hover:bg-black/60 focus:outline-none transition-all duration-300 backdrop-blur-sm border border-white/20 hover:scale-110 group"
             >
-              <ChevronRight className="w-6 h-6 group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight className="w-5 sm:w-6 h-5 sm:h-6 group-hover:translate-x-0.5 transition-transform" />
             </button>
 
-            {/* Autoplay Toggle */}
+            {/* Autoplay Toggle - smaller on mobile */}
             <button
               onClick={toggleAutoplay}
               aria-label={isPaused ? "Play slideshow" : "Pause slideshow"}
-              className="absolute top-6 right-6 z-30 flex items-center justify-center w-10 h-10 rounded-full bg-black/40 text-white hover:bg-black/60 focus:outline-none transition-all duration-300 backdrop-blur-sm border border-white/20"
+              className="absolute top-3 sm:top-6 right-3 sm:right-6 z-30 flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/40 text-white hover:bg-black/60 focus:outline-none transition-all duration-300 backdrop-blur-sm border border-white/20"
             >
               {isPaused ? (
-                <Play className="w-4 h-4" />
+                <Play className="w-3 sm:w-4 h-3 sm:h-4" />
               ) : (
-                <Pause className="w-4 h-4" />
+                <Pause className="w-3 sm:w-4 h-3 sm:h-4" />
               )}
             </button>
 
             {/* Enhanced Hero Content with Slide-specific Text */}
-            <div className="absolute inset-0 flex items-center px-6 md:px-12 lg:px-24 z-20">
-              <div className="text-white max-w-2xl">
-                <div className="mb-4">
-                  <span className="inline-block px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-semibold border border-white/20">
+            <div className="absolute inset-0 flex items-center justify-center md:items-center md:justify-start px-4 sm:px-6 md:px-12 lg:px-24 z-20">
+              <div className="text-white max-w-full md:max-w-2xl">
+                {/* Subtitle Tag */}
+                <div className="mb-3 sm:mb-4">
+                  <span className="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 backdrop-blur-sm rounded-full text-xs sm:text-sm font-semibold border border-white/20">
                     {HERO_SLIDES[currentSlide].subtitle}
                   </span>
                 </div>
 
-                <h1 className="font-playfair font-bold mb-6 tracking-tight">
-                  <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                {/* Main Title - responsive sizing */}
+                <h1 className="font-playfair font-bold mb-4 sm:mb-6 tracking-tight">
+                  <span className="block text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-tight md:leading-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                     {HERO_SLIDES[currentSlide].title}
                   </span>
                 </h1>
 
-                <p className="text-lg sm:text-xl md:text-2xl mb-8 max-w-xl leading-relaxed font-light opacity-90">
+                {/* Description - responsive sizing */}
+                <p className="text-sm sm:text-base md:text-lg lg:text-xl mb-6 sm:mb-8 max-w-xl leading-relaxed font-light opacity-90">
                   {HERO_SLIDES[currentSlide].description}
                 </p>
 
-                <div className="flex flex-col sm:flex-row items-start gap-4">
+                {/* CTA Buttons - stacked on mobile */}
+                <div className="flex flex-col xs:flex-row items-stretch xs:items-start gap-3 sm:gap-4">
                   <Link
                     to={HERO_SLIDES[currentSlide].link || heroContent.ctaLink}
-                    className="group relative inline-flex items-center justify-center text-black px-8 py-4 rounded-md font-semibold hover:scale-105 transition-all duration-300 text-lg overflow-hidden shadow-2xl"
+                    className="group relative inline-flex items-center justify-center text-black px-6 sm:px-8 py-3 sm:py-4 rounded-md font-semibold hover:scale-105 transition-all duration-300 text-sm sm:text-base lg:text-lg overflow-hidden shadow-2xl"
                     style={{ backgroundColor: heroContent.ctaButtonColor }}
                   >
                     <span className="relative z-10 flex items-center">
                       {heroContent.ctaText}
-                      <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                     </span>
                     <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                   </Link>
 
                   <Link
                     to={heroContent.secondaryCtaLink}
-                    className="group relative inline-flex items-center justify-center border-2 border-white text-white px-8 py-4 rounded-md font-semibold hover:bg-white hover:text-black transition-all duration-300 text-lg overflow-hidden"
+                    className="group relative inline-flex items-center justify-center border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-md font-semibold hover:bg-white hover:text-black transition-all duration-300 text-sm sm:text-base lg:text-lg overflow-hidden"
                   >
                     <span className="relative z-10">
                       {heroContent.secondaryCtaText}
@@ -374,39 +378,30 @@ const Index = () => {
               />
             </div>
 
-            {/* Enhanced Dot Indicators */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-3">
+            {/* Enhanced Dot Indicators - compact on mobile */}
+            <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-2 sm:gap-3">
               {HERO_SLIDES.map((slide, index) => (
                 <button
                   key={index}
                   onClick={() => goToSlide(index)}
-                  className="group flex flex-col items-center gap-2"
+                  className="group flex flex-col items-center gap-1 sm:gap-2"
                   aria-label={`Go to ${slide.title}`}
                 >
                   <div
                     className={`rounded-full transition-all duration-500 ${
                       index === currentSlide
-                        ? "bg-white w-12 h-2"
-                        : "bg-white/50 hover:bg-white/75 w-3 h-3"
+                        ? "bg-white w-8 sm:w-12 h-2"
+                        : "bg-white/50 hover:bg-white/75 w-2 sm:w-3 h-2 sm:h-3"
                     } group-hover:scale-110`}
                   />
-                  <span
-                    className={`text-xs font-medium text-white/80 transition-all duration-300 ${
-                      index === currentSlide
-                        ? "opacity-100"
-                        : "opacity-0 group-hover:opacity-60"
-                    }`}
-                  >
-                    {slide.title}
-                  </span>
                 </button>
               ))}
             </div>
 
-            {/* Slide Counter */}
-            <div className="absolute bottom-8 right-8 z-30">
-              <div className="bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
-                <span className="text-white font-mono text-sm">
+            {/* Slide Counter - smaller on mobile */}
+            <div className="absolute bottom-4 sm:bottom-8 right-3 sm:right-8 z-30">
+              <div className="bg-black/40 backdrop-blur-sm rounded-full px-3 sm:px-4 py-1.5 sm:py-2 border border-white/20">
+                <span className="text-white font-mono text-xs sm:text-sm">
                   {String(currentSlide + 1).padStart(2, "0")} /{" "}
                   {String(HERO_SLIDES.length).padStart(2, "0")}
                 </span>
@@ -414,8 +409,8 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Scroll Indicator */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 animate-bounce">
+          {/* Scroll Indicator - hidden on mobile to save space */}
+          <div className="hidden md:flex absolute bottom-4 left-1/2 -translate-x-1/2 z-30 animate-bounce">
             <div className="w-6 h-10 border-2 border-white/60 rounded-full flex justify-center">
               <div className="w-1 h-3 bg-white/60 rounded-full mt-2 animate-pulse" />
             </div>
