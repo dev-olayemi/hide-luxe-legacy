@@ -340,23 +340,23 @@ const Index = () => {
                   {HERO_SLIDES[currentSlide].description}
                 </p>
 
-                {/* CTA Buttons - stacked on mobile */}
-                <div className="flex flex-col xs:flex-row items-stretch xs:items-start gap-3 sm:gap-4">
+                {/* CTA Buttons - stacked on mobile, side-by-side on larger screens with controlled widths */}
+                <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 xs:gap-3 sm:gap-4 w-full xs:w-auto">
                   <Link
                     to={HERO_SLIDES[currentSlide].link || heroContent.ctaLink}
-                    className="group relative inline-flex items-center justify-center text-black px-6 sm:px-8 py-3 sm:py-4 rounded-md font-semibold hover:scale-105 transition-all duration-300 text-sm sm:text-base lg:text-lg overflow-hidden shadow-2xl"
+                    className="group relative inline-flex items-center justify-center text-black px-6 sm:px-8 lg:px-6 py-2.5 xs:py-3 sm:py-3 md:py-3 lg:py-2.5 rounded-md font-semibold hover:scale-105 transition-all duration-300 text-sm sm:text-base lg:text-sm overflow-hidden shadow-2xl w-full xs:w-auto xs:whitespace-nowrap"
                     style={{ backgroundColor: heroContent.ctaButtonColor }}
                   >
-                    <span className="relative z-10 flex items-center">
+                    <span className="relative z-10 flex items-center gap-2">
                       {heroContent.ctaText}
-                      <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </span>
                     <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                   </Link>
 
                   <Link
                     to={heroContent.secondaryCtaLink}
-                    className="group relative inline-flex items-center justify-center border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-md font-semibold hover:bg-white hover:text-black transition-all duration-300 text-sm sm:text-base lg:text-lg overflow-hidden"
+                    className="group relative inline-flex items-center justify-center border-2 border-white text-white px-6 sm:px-8 lg:px-6 py-2.5 xs:py-3 sm:py-3 md:py-3 lg:py-2.5 rounded-md font-semibold hover:bg-white hover:text-black transition-all duration-300 text-sm sm:text-base lg:text-sm overflow-hidden w-full xs:w-auto xs:whitespace-nowrap"
                   >
                     <span className="relative z-10">
                       {heroContent.secondaryCtaText}

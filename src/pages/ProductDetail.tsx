@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { useCart } from "@/contexts/CartContext";
 import { getProductById, getAllProducts } from "@/firebase/firebaseUtils";
 import { cn } from "@/lib/utils";
+import { SEOHead } from "@/components/SEOHead";
 import NotFound from "./NotFound";
 
 const ProductDetail = () => {
@@ -87,6 +88,22 @@ const ProductDetail = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEOHead
+        title={`${product.name} | HLX Premium Leather`}
+        description={product.description || `Discover ${product.name} - Premium leather products from HLX. Luxury. Leather. Legacy.`}
+        image={Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : "https://www.28hideluxe.com/og-image.jpg"}
+        url={`https://www.28hideluxe.com/product/${product.id}`}
+        type="product"
+        productData={{
+          name: product.name,
+          price: product.price,
+          image: Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : "",
+          description: product.description || product.name,
+          currency: "NGN",
+          category: product.category,
+          availability: "https://schema.org/InStock",
+        }}
+      />
       <Header />
 
       <main className="flex-1 container mx-auto px-4 py-12">

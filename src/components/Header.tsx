@@ -73,16 +73,17 @@ export const Header = () => {
   }, []);
 
   // build nav items dynamically from database only
+  // Only show short labels (<= 12 chars) in main nav, rest go to 'More'
   const navItems = categories.map((c) => ({
     to: `/category/${c.name.toLowerCase().replace(/\s+/g, "-")}`,
     label: c.name.toUpperCase(),
     id: c.id,
+    length: c.name.length,
   }));
 
-  // show first N items and collapse the rest into a "More" dropdown
   const MAX_VISIBLE = 4;
-  const visibleNav = navItems.slice(0, MAX_VISIBLE);
-  const overflowNav = navItems.slice(MAX_VISIBLE);
+  const visibleNav = navItems.filter((item) => item.length <= 12).slice(0, MAX_VISIBLE);
+  const overflowNav = navItems.filter((item) => !visibleNav.includes(item));
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-xl backdrop-saturate-200 shadow-sm">
@@ -100,19 +101,19 @@ export const Header = () => {
                 <span className="inline-block num-fix">28TH</span>{" "}
                 <span className="inline-block">HIDE LUXE</span>
               </span>
-              <span className="text-[10px] md:text-xs tracking-widest text-muted-foreground uppercase mt-0.5">
+              <span className="text-[5px] md:text-[10px] tracking-widest text-muted-foreground uppercase mt-0.5">
                 Luxury. Leather. Legacy.
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation - Center (with overflow menu) */}
-          <nav className="hidden md:flex items-center gap-4">
+          <nav className="hidden md:flex items-center gap-2 lg:gap-4">
             {visibleNav.map((item) => (
               <Link
-                key={(item as any).id ?? item.to}
+                key={item.id ?? item.to}
                 to={item.to}
-                className="text-sm font-semibold px-2 py-1 rounded hover:text-accent transition-colors"
+                className="text-xs lg:text-sm font-semibold px-2 py-1 rounded hover:text-accent transition-colors whitespace-nowrap"
               >
                 {item.label}
               </Link>
@@ -121,17 +122,17 @@ export const Header = () => {
             {overflowNav.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 text-sm font-semibold px-2 py-1 rounded hover:bg-gray-50">
+                  <button className="flex items-center gap-2 text-xs lg:text-sm font-semibold px-2 py-1 rounded bg-background hover:bg-accent/10 transition-all shadow-sm border border-accent/20">
                     More
-                    <ChevronDown className="w-4 h-4" />
+                    <ChevronDown className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56">
-                  <DropdownMenuLabel>More</DropdownMenuLabel>
+                <DropdownMenuContent align="start" className="w-56 animate-fade-in shadow-lg rounded-md border border-accent/30">
+                  <DropdownMenuLabel className="font-bold text-accent">More Categories</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {overflowNav.map((item) => (
-                    <DropdownMenuItem key={(item as any).id ?? item.to} asChild>
-                      <Link to={item.to} className="w-full block">
+                    <DropdownMenuItem key={item.id ?? item.to} asChild>
+                      <Link to={item.to} className="w-full block text-xs lg:text-sm py-2 px-3 hover:bg-accent/10 rounded transition-colors">
                         {item.label}
                       </Link>
                     </DropdownMenuItem>
@@ -372,7 +373,7 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
           <Button variant="outline" className="w-full justify-start gap-3">
             <ShoppingCart className="h-5 w-5" />
             SHOPPING CART
-            {cartCount > 0 && <Badge className="ml-auto">{cartCount}</Badge>}
+            {cartCount > 0 && <Badge className="ml-auto" content={cartCount} />}
           </Button>
         </Link>
         <Link to="/wishlist" onClick={onClose}>

@@ -8,6 +8,8 @@ import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { WhatsAppChat } from "@/components/WhatsAppChat";
 import { BackToTop } from "@/components/BackToTop";
+import { ensureMobileViewport, setThemeColor, injectStructuredData } from "@/lib/seoUtils";
+import { SEO_CONFIG } from "@/config/seoConfig";
 import Index from "./pages/Index";
 import NewArrivals from "./pages/NewArrivals";
 import Men from "./pages/Men";
@@ -50,7 +52,19 @@ function ScrollToTop() {
   return null;
 }
 
-const App = () => (
+// Initialize SEO settings globally
+const initializeSEO = () => {
+  ensureMobileViewport();
+  setThemeColor('#eab308');
+  injectStructuredData(SEO_CONFIG.organization);
+};
+
+const App = () => {
+  useEffect(() => {
+    initializeSEO();
+  }, []);
+
+  return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <CurrencyProvider>
@@ -102,6 +116,7 @@ const App = () => (
       </CurrencyProvider>
     </AuthProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

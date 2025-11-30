@@ -1,7 +1,25 @@
+# HLX Robots Configuration
+# Last updated: November 30, 2025
+
+# Allow all crawlers by default
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /*.json$
+Disallow: /api/
+Disallow: /auth
+Disallow: /dashboard
+
+# Allow specific crawlers
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 0
 
 User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
 Allow: /
 
 User-agent: Twitterbot
@@ -10,5 +28,21 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
+User-agent: LinkedInBot
 Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+# Disallow bad bots
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+# Sitemap location
+Sitemap: https://www.28hideluxe.com/sitemap.xml

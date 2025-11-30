@@ -150,17 +150,17 @@ export const Footer = () => {
                 placeholder="Your Email Address"
                 className="flex-1"
               />
-              <Button className="bg-gold hover:bg-gold/90 text-white px-6">
+              <Button className="bg-gold hover:bg-gold/90 text-white px-4 py-2 text-sm md:text-base md:px-5 md:py-2 lg:text-base lg:px-4 lg:py-2 rounded-md transition-all w-full sm:w-auto">
                 Subscribe
               </Button>
             </div>
 
             <div className="flex gap-2 mt-4 text-xs text-muted-foreground">
-              <button className="hover:text-foreground transition-colors">
+              <button className="hover:text-foreground transition-colors text-xs px-2 py-1 md:text-sm md:px-3 md:py-1 lg:text-sm lg:px-3 lg:py-1 rounded">
                 Naira
               </button>
               <span>•</span>
-              <button className="hover:text-foreground transition-colors">
+              <button className="hover:text-foreground transition-colors text-xs px-2 py-1 md:text-sm md:px-3 md:py-1 lg:text-sm lg:px-3 lg:py-1 rounded">
                 English
               </button>
             </div>
