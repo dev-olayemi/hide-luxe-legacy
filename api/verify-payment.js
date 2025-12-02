@@ -1,7 +1,8 @@
 // CommonJS server handler for express (or serverless style)
-// Requires: NODE env FLW_SECRET_KEY and FIREBASE_SERVICE_ACCOUNT (stringified JSON)
+// Uses flwConfig.cjs to pick dev vs live Flutterwave keys
 const fetch = globalThis.fetch || require("node-fetch");
 const admin = require("firebase-admin");
+const flwConfig = require("./payments/flwConfig.cjs");
 
 function initFirebase() {
   if (!admin.apps.length) {
@@ -36,9 +37,10 @@ module.exports = async (req, res) => {
       return;
     }
 
-    const FLW_SECRET = process.env.FLW_SECRET_KEY;
+    const FLW_SECRET = flwConfig.secretKey;
     if (!FLW_SECRET) {
-      res.status(500).json({ error: "FLW_SECRET_KEY not configured" });
+      console.error("Flutterwave secret missing. flwConfig:", flwConfig);
+      res.status(500).json({ error: "FLW secret not configured for current environment" });
       return;
     }
 
