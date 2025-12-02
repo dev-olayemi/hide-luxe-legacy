@@ -124,6 +124,7 @@ const Cart = () => {
   const [showDeliveryForm, setShowDeliveryForm] = useState(false);
   const [formErrors, setFormErrors] = useState<Partial<DeliveryDetails>>({});
   const [editingDeliveryForm, setEditingDeliveryForm] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [cartId] = useState(() => localStorage.getItem("cartId") || uuidv4());
   const cartLink = `${window.location.origin}/cart/${cartId}`;
@@ -463,6 +464,7 @@ const Cart = () => {
     }
 
     try {
+      setLoading(true);
       await loadFlutterwaveScript();
 
       const txRef = `hxl_${Date.now()}_${Math.random()
@@ -574,8 +576,11 @@ const Cart = () => {
           // user closed checkout
         },
       });
+      // checkout initialized, clear initiating state
+      setLoading(false);
     } catch (err) {
       console.error(err);
+      setLoading(false);
       toast({
         title: "Payment Error",
         description: "Could not start payment. Please try again.",
