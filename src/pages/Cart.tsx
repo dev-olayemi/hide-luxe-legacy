@@ -469,10 +469,19 @@ const Cart = () => {
         .toString(36)
         .slice(2, 9)}`;
 
+      const flwPublicKey = import.meta.env.VITE_FLW_PUBLIC_KEY;
+      if (!flwPublicKey) {
+        toast({
+          title: "Configuration Error",
+          description: "Flutterwave public key not configured. Contact support.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
       (window as any).FlutterwaveCheckout({
-        public_key:
-          import.meta.env.VITE_FLW_PUBLIC_KEY ||
-          "FLWPUBK_TEST-fd5d2e18c86c2f1f86c82b49242b5d42-X",
+        public_key: flwPublicKey,
         tx_ref: txRef,
         amount: total,
         currency: "NGN",
