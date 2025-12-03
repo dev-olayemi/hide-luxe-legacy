@@ -15,8 +15,9 @@ import {
 } from "@/firebase/firebaseUtils";
 import { X, Edit, Save, Trash, Send } from "lucide-react";
 
-const UPLOADCARE_PUB_KEY = "64225047133b30583838";
-const UPLOADCARE_CDN_BASE = "https://3agzabx6nu.ucarecd.net";
+const UPLOADCARE_PUB_KEY = import.meta.env.VITE_UPLOADCARE_PUB_KEY as string;
+const UPLOADCARE_CDN_BASE = import.meta.env.VITE_UPLOADCARE_CDN_BASE as string;
+
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",

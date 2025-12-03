@@ -157,11 +157,11 @@ const Index = () => {
     if (isPaused) return;
 
     const interval = setInterval(() => {
-      handleSlideTransition((prev) => (prev + 1) % HERO_SLIDES.length);
+      handleSlideTransition((currentSlide + 1) % HERO_SLIDES.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [isPaused]);
+  }, [isPaused, currentSlide]);
 
   const handleSlideTransition = (targetSlide: number) => {
     setIsTransitioning(true);
