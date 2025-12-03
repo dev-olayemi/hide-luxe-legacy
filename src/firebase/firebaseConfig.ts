@@ -16,7 +16,21 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+
+// Guard analytics so missing env values don't crash the app in dev/preview
+let analytics: ReturnType<typeof getAnalytics> | null = null;
+try {
+  if (
+    typeof window !== "undefined" &&
+    firebaseConfig.projectId &&
+    firebaseConfig.appId
+  ) {
+    analytics = getAnalytics(app);
+  }
+} catch (err) {
+  console.warn("Firebase analytics initialization failed", err);
+}
+
 const db = getFirestore(app);
 const auth = getAuth(app);
 
