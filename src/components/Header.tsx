@@ -373,7 +373,7 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
           <Button variant="outline" className="w-full justify-start gap-3">
             <ShoppingCart className="h-5 w-5" />
             SHOPPING CART
-            {cartCount > 0 && <Badge className="ml-auto" content={cartCount} />}
+            {cartCount > 0 && <Badge className="ml-auto">{cartCount}</Badge>}
           </Button>
         </Link>
         <Link to="/wishlist" onClick={onClose}>
