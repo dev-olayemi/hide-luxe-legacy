@@ -752,7 +752,6 @@ export {
   signInWithGoogle,
   getUserProfile,
   updateUserProfile,
-  setUserStorePoints,
   addProduct,
   getAllProducts,
   getProductById,
@@ -794,6 +793,18 @@ export { getAllOrders };
 export async function getAllUsers() {
   const snap = await getDocs(collection(db, "users"));
   return snap.docs.map((doc) => ({ uid: doc.id, ...doc.data() }));
+}
+
+// Store Points Operations
+async function setUserStorePoints(uid: string, points: number) {
+  try {
+    await updateDoc(doc(db, "users", uid), {
+      storePoints: points,
+      updatedAt: new Date(),
+    });
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
 }
 
 // Alias for clarity: updateUserStorePoints -> setUserStorePoints
