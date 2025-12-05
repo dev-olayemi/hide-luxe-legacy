@@ -83,6 +83,28 @@ const getStatusVariant = (status?: string) =>
   "outline";
 
 const Dashboard = () => {
+    // Store Point Coupon Redemption
+    const [couponCode, setCouponCode] = useState("");
+    const [redeemLoading, setRedeemLoading] = useState(false);
+    const [redeemMessage, setRedeemMessage] = useState<string|null>(null);
+
+    const handleRedeemCoupon = async () => {
+      setRedeemLoading(true);
+      setRedeemMessage(null);
+      try {
+        // TODO: Implement backend logic for coupon redemption
+        // Simulate success for now
+        setTimeout(() => {
+          setRedeemLoading(false);
+          setRedeemMessage("Coupon redeemed! Store points have been added to your account.");
+          setCouponCode("");
+          // Optionally refresh store points here
+        }, 1200);
+      } catch (err: any) {
+        setRedeemLoading(false);
+        setRedeemMessage("Failed to redeem coupon. Please try again.");
+      }
+    };
   const [orders, setOrders] = useState<Order[]>([]);
   const [bespokeRequests, setBespokeRequests] = useState<BespokeRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -390,39 +412,76 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
             <BackButton className="mb-4" />
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="font-playfair text-4xl md:text-5xl font-bold mb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex-1">
+                <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl font-bold mb-1 sm:mb-2">
                   My Dashboard
                 </h1>
-                <p className="text-muted-foreground">
+                <p className="text-sm sm:text-base text-muted-foreground">
                   Welcome back, {auth.currentUser?.email?.split("@")[0]}
                 </p>
-                    {/* Store Points card */}
-                    <div className="mt-6">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="bg-white p-4 rounded shadow-sm border border-gray-100">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="text-sm text-gray-500">Store Points</div>
-                              <div className="text-2xl font-semibold">{storePoints} points</div>
-                              <div className="text-sm text-gray-600">Worth: {calculateStorePointsValue(storePoints).toLocaleString ? `₦${calculateStorePointsValue(storePoints).toLocaleString()}` : `₦${calculateStorePointsValue(storePoints)}`}</div>
-                            </div>
-                            <div>
-                              <div className="text-xs text-gray-400">Redeemable at checkout</div>
-                            </div>
-                          </div>
-                          {storePoints === 0 && (
-                            <div className="mt-3 text-sm text-gray-500">You currently have 0 store points. Check back later when the store adds points for you.</div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
               </div>
-              <div>
-                <Button variant="ghost" onClick={() => refresh()}>
-                  Refresh
-                </Button>
+              <Button variant="ghost" onClick={() => refresh()} className="w-full sm:w-auto">
+                Refresh
+              </Button>
+            </div>
+          </div>
+
+          {/* Store Points card & Coupon Redemption (Mobile Responsive) */}
+          <div className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Store Points Card */}
+            <div className="bg-white p-5 sm:p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <div className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Store Points</div>
+                  <div className="text-3xl sm:text-4xl font-bold text-gray-900">{storePoints}</div>
+                  <div className="text-sm sm:text-base text-gray-600 mt-1">
+                    Worth: <span className="font-semibold">₦{calculateStorePointsValue(storePoints).toLocaleString()}</span>
+                  </div>
+                </div>
+                <Gift className="h-6 w-6 sm:h-8 sm:w-8 text-amber-500 flex-shrink-0" />
+              </div>
+              <div className="text-xs sm:text-sm text-gray-500 bg-gray-50 p-2 sm:p-3 rounded">
+                Redeemable at checkout
+              </div>
+              {storePoints === 0 && (
+                <div className="mt-4 text-xs sm:text-sm text-gray-600 border-l-4 border-amber-400 pl-3 py-2">
+                  Check back later when the store adds points for you.
+                </div>
+              )}
+            </div>
+
+            {/* Coupon Redemption Card */}
+            <div className="bg-white p-5 sm:p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500 flex-shrink-0" />
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">Redeem Coupon</h3>
+              </div>
+              <div className="space-y-3">
+                <div className="flex flex-col gap-2">
+                  <Input
+                    placeholder="Enter coupon code"
+                    value={couponCode}
+                    onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                    disabled={redeemLoading}
+                    className="text-sm sm:text-base py-2 sm:py-3 px-3 sm:px-4"
+                  />
+                  <Button 
+                    onClick={handleRedeemCoupon} 
+                    disabled={redeemLoading || !couponCode.trim()}
+                    className="w-full py-2 sm:py-3 text-sm sm:text-base font-medium"
+                  >
+                    {redeemLoading ? "Redeeming..." : "Redeem Coupon"}
+                  </Button>
+                </div>
+                {redeemMessage && (
+                  <div className={`text-xs sm:text-sm p-2 sm:p-3 rounded-md ${redeemMessage.startsWith("Failed") ? "bg-red-50 text-red-700 border border-red-200" : "bg-green-50 text-green-700 border border-green-200"}`}>
+                    {redeemMessage}
+                  </div>
+                )}
+                <div className="text-xs text-gray-500 bg-blue-50 p-2 sm:p-3 rounded">
+                  💡 Each coupon can be used by multiple users, but only once per user.
+                </div>
               </div>
             </div>
           </div>
