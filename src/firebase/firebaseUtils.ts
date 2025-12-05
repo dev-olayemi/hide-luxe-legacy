@@ -41,6 +41,7 @@ async function signup(email: string, password: string) {
       uid: user.uid,
       email,
       role: "user",
+      storePoints: 0,
       createdAt: new Date(),
       lastLogin: new Date(),
     });
@@ -80,6 +81,7 @@ async function signInWithGoogle() {
           uid: user.uid,
           email: user.email,
           role: "user",
+          storePoints: 0,
           createdAt: serverTimestamp(),
           lastLogin: serverTimestamp(),
         });
@@ -110,6 +112,19 @@ async function updateUserProfile(uid: string, updates: any) {
   try {
     await updateDoc(doc(db, "users", uid), {
       ...updates,
+      updatedAt: new Date(),
+    });
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+// Set user store points safely
+async function setUserStorePoints(uid: string, points: number) {
+  try {
+    const safePoints = Number.isFinite(points) ? Math.max(0, Math.floor(points)) : 0;
+    await updateDoc(doc(db, "users", uid), {
+      storePoints: safePoints,
       updatedAt: new Date(),
     });
   } catch (error: any) {
@@ -496,6 +511,19 @@ const getOrders = async (userId: string) => {
   }
 };
 
+// Admin: fetch all orders (used for searching/attaching orders in admin UI)
+async function getAllOrders() {
+  try {
+    const ordersRef = collection(db, "orders");
+    const q = query(ordersRef, orderBy("createdAt", "desc"));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as any) }));
+  } catch (error: any) {
+    console.error("Error fetching all orders:", error);
+    return [];
+  }
+}
+
 const getBespokeRequests = async (userId: string) => {
   try {
     const bespokeRef = collection(db, "bespokeRequests");
@@ -552,6 +580,45 @@ const updateBespokeRequest = async (id: string, updates: any) => {
   }
 };
 
+// Refund Operations
+const createRefund = async (refundData: any) => {
+  try {
+    const refundsRef = collection(db, "refunds");
+    const newRefund = {
+      ...refundData,
+      status: refundData.status || "pending",
+      createdAt: serverTimestamp(),
+    };
+    const docRef = await addDoc(refundsRef, newRefund);
+    return { id: docRef.id, ...newRefund };
+  } catch (err) {
+    console.error("Error creating refund:", err);
+    throw err;
+  }
+};
+
+const getRefunds = async (userId: string) => {
+  try {
+    const refundsRef = collection(db, "refunds");
+    const q = query(refundsRef, where("userId", "==", userId), orderBy("createdAt", "desc"));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as any), createdAt: d.data().createdAt?.toDate?.() || d.data().createdAt }));
+  } catch (err) {
+    console.error("Error fetching refunds:", err);
+    return [];
+  }
+};
+
+const updateRefund = async (refundId: string, updates: any) => {
+  try {
+    const ref = doc(db, "refunds", refundId);
+    await updateDoc(ref, { ...updates, updatedAt: serverTimestamp() });
+  } catch (err) {
+    console.error("Error updating refund:", err);
+    throw err;
+  }
+};
+
 // Image Upload (for Products)
 async function uploadImage(file: File) {
   try {
@@ -582,12 +649,124 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
+// ===== NOTIFICATION OPERATIONS =====
+
+interface Notification {
+  id?: string;
+  userId: string;
+  type: "order" | "refund" | "bespoke" | "payment" | "system" | "admin";
+  title: string;
+  message: string;
+  actionUrl?: string;
+  actionLabel?: string;
+  read: boolean;
+  createdAt: any;
+  updatedAt?: any;
+  metadata?: Record<string, any>;
+}
+
+export async function createNotification(notification: Omit<Notification, "id" | "createdAt">) {
+  try {
+    const docRef = await addDoc(collection(db, "notifications"), {
+      ...notification,
+      read: false,
+      createdAt: serverTimestamp(),
+    });
+    return docRef.id;
+  } catch (error: any) {
+    console.error("Error creating notification:", error);
+    throw new Error(error.message);
+  }
+}
+
+export async function getUserNotifications(userId: string) {
+  try {
+    const q = query(
+      collection(db, "notifications"),
+      where("userId", "==", userId),
+      orderBy("createdAt", "desc")
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as (Notification & { id: string })[];
+  } catch (error: any) {
+    console.error("Error fetching notifications:", error);
+    return [];
+  }
+}
+
+// Admin helper: fetch all notifications (for admin management)
+export async function getAllNotifications() {
+  try {
+    const snap = await getDocs(collection(db, "notifications"));
+    return snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+  } catch (err: any) {
+    console.error("Error fetching notifications:", err);
+    return [];
+  }
+}
+
+export async function markNotificationRead(notificationId: string) {
+  try {
+    await updateDoc(doc(db, "notifications", notificationId), {
+      read: true,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error: any) {
+    console.error("Error marking notification as read:", error);
+    throw new Error(error.message);
+  }
+}
+
+export async function deleteNotification(notificationId: string) {
+  try {
+    await deleteDoc(doc(db, "notifications", notificationId));
+  } catch (error: any) {
+    console.error("Error deleting notification:", error);
+    throw new Error(error.message);
+  }
+}
+
+export async function clearAllNotifications(userId: string) {
+  try {
+    const q = query(
+      collection(db, "notifications"),
+      where("userId", "==", userId)
+    );
+    const snap = await getDocs(q);
+    const deletePromises = snap.docs.map((d) => deleteDoc(d.ref));
+    await Promise.all(deletePromises);
+  } catch (error: any) {
+    console.error("Error clearing notifications:", error);
+    throw new Error(error.message);
+  }
+}
+
+export async function sendAdminMessage(userId: string, message: string, title?: string) {
+  try {
+    const notificationId = await createNotification({
+      userId,
+      type: "admin",
+      title: title || "Message from Hide Luxe",
+      message,
+      read: false,
+    });
+    return notificationId;
+  } catch (error: any) {
+    console.error("Error sending admin message:", error);
+    throw new Error(error.message);
+  }
+}
+
 export {
   signup,
   login,
   signInWithGoogle,
   getUserProfile,
   updateUserProfile,
+  setUserStorePoints,
   addProduct,
   getAllProducts,
   getProductById,
@@ -612,6 +791,9 @@ export {
   getBespokeRequests,
   getAllBespokeRequests,
   updateBespokeRequest,
+  createRefund,
+  getRefunds,
+  updateRefund,
   uploadImage,
   saveSharedCartSnapshot,
   getSharedCartSnapshot,
@@ -620,10 +802,15 @@ export {
   storage,
 };
 
+export { getAllOrders };
+
 export async function getAllUsers() {
   const snap = await getDocs(collection(db, "users"));
   return snap.docs.map((doc) => ({ uid: doc.id, ...doc.data() }));
 }
+
+// Alias for clarity: updateUserStorePoints -> setUserStorePoints
+export const updateUserStorePoints = setUserStorePoints;
 
 // Type definitions
 interface DeliveryDetails {

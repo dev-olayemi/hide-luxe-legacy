@@ -2,7 +2,6 @@
 import { useState, useRef } from "react";
 import { addProduct } from "@/firebase/firebaseUtils";
 import { toast } from "@/hooks/use-toast";
-import AdminHeader from "./AdminHeader";
 
 const UPLOADCARE_PUB_KEY = import.meta.env.VITE_UPLOADCARE_PUB_KEY as string;
 const UPLOADCARE_CDN_BASE = import.meta.env.VITE_UPLOADCARE_CDN_BASE as string;
@@ -169,8 +168,6 @@ const AdminAddProduct = () => {
 
   return (
     <div>
-      <AdminHeader />
-
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="md:flex md:items-center md:justify-between mb-6">
           <div className="flex-1 min-w-0">

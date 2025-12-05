@@ -1,7 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingBag, Gift } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { BackButton } from "@/components/BackButton";
@@ -19,9 +20,10 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
-import { db, saveSharedCartSnapshot as saveSharedCartSnapshotToFirestore } from "@/firebase/firebaseUtils";
+import { db, saveSharedCartSnapshot as saveSharedCartSnapshotToFirebase, getUserProfile, setUserStorePoints } from "@/firebase/firebaseUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
+import { calculateStorePointsValue, calculatePointsFromNGN } from "@/config/storePointsConfig";
 
 interface DeliveryDetails {
   id?: string;
@@ -118,13 +120,36 @@ const Cart = () => {
       setDeliveryDetails((prev) => ({ ...prev, ...first }));
     }
     // keep deliveryDetails in sync if selectedAddressId is already set but deliveryDetails is empty
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [savedAddresses]);
 
   const [showDeliveryForm, setShowDeliveryForm] = useState(false);
   const [formErrors, setFormErrors] = useState<Partial<DeliveryDetails>>({});
   const [editingDeliveryForm, setEditingDeliveryForm] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Store points state
+  const [userStorePoints, setUserStorePoints] = useState(0);
+  const [pointsToRedeem, setPointsToRedeem] = useState(0);
+  const [showPointsInput, setShowPointsInput] = useState(false);
+
+  // Fetch user store points
+  useEffect(() => {
+    if (!user) {
+      setUserStorePoints(0);
+      return;
+    }
+    const loadPoints = async () => {
+      try {
+        const profile = await getUserProfile(user.uid);
+        setUserStorePoints(profile?.storePoints || 0);
+      } catch (err) {
+        console.error("Failed to fetch store points:", err);
+        setUserStorePoints(0);
+      }
+    };
+    loadPoints();
+  }, [user]);
 
   const [cartId] = useState(() => localStorage.getItem("cartId") || uuidv4());
   const cartLink = `${window.location.origin}/cart/${cartId}`;
@@ -171,8 +196,8 @@ const Cart = () => {
     // store cartId so link remains stable across reloads
     try {
       localStorage.setItem('cartId', cartId);
-    } catch (e) {}
-  }, [cartItems, deliveryDetails, cartId]);
+    } catch (e) { /* empty */ }
+  }, [cartItems, deliveryDetails, cartId, saveSharedCartSnapshot]);
 
   // fetch countries list (uses restcountries for readable names)
   useEffect(() => {
@@ -395,6 +420,11 @@ const Cart = () => {
     tx_ref?: string;
   }) => {
     if (!user) throw new Error("No authenticated user");
+    
+    // Calculate discount from store points
+    const discountAmount = calculateStorePointsValue(pointsToRedeem);
+    const finalAmount = Math.max(0, (orderMeta.amount || total) - discountAmount);
+    
     // build order payload
     const orderPayload = {
       userId: user.uid,
@@ -407,7 +437,10 @@ const Cart = () => {
         image: item.image,
         category: item.category,
       })),
-      totalAmount: orderMeta.amount ?? total,
+      totalAmount: finalAmount,
+      originalAmount: orderMeta.amount ?? total,
+      storePointsRedeemed: pointsToRedeem,
+      storePointsDiscount: discountAmount,
       deliveryDetails: {
         ...deliveryDetails,
         createdAt: serverTimestamp(),
@@ -420,7 +453,7 @@ const Cart = () => {
       paymentDetails: {
         transactionId: orderMeta.transaction_id || null,
         flwRef: orderMeta.flwRef || null,
-        amount: orderMeta.amount || total,
+        amount: finalAmount,
         status: orderMeta.status || null,
       },
     };
@@ -431,12 +464,24 @@ const Cart = () => {
       orderId: orderRef.id,
       transactionId: orderMeta.transaction_id || null,
       flwRef: orderMeta.flwRef || null,
-      amount: orderMeta.amount || total,
+      amount: finalAmount,
       status: orderMeta.status || null,
       createdAt: serverTimestamp(),
       customerEmail: deliveryDetails.email,
       customerPhone: deliveryDetails.phoneNumber,
     });
+
+    // Deduct store points if any were redeemed
+    if (pointsToRedeem > 0) {
+      try {
+        const remainingPoints = userStorePoints - pointsToRedeem;
+        await setUserStorePoints(user.uid, remainingPoints);
+        setUserStorePoints(remainingPoints);
+        setPointsToRedeem(0);
+      } catch (err) {
+        console.error("Failed to deduct store points:", err);
+      }
+    }
 
     return orderRef.id;
   };
@@ -482,10 +527,14 @@ const Cart = () => {
         return;
       }
 
+      // Calculate final amount after points discount
+      const discountAmount = calculateStorePointsValue(pointsToRedeem);
+      const finalAmount = Math.max(0, total - discountAmount);
+
       (window as any).FlutterwaveCheckout({
         public_key: flwPublicKey,
         tx_ref: txRef,
-        amount: total,
+        amount: finalAmount,
         currency: "NGN",
         payment_options: "card,ussd,banktransfer,qr",
         customer: {
@@ -510,7 +559,7 @@ const Cart = () => {
             const status = response?.status;
             const txId = response?.transaction_id || response?.id || null;
             const flwRef = response?.flw_ref || null;
-            const amount = response?.amount || total;
+            const amount = response?.amount || finalAmount;
 
             if (status !== "successful") {
               toast({
@@ -742,10 +791,65 @@ const Cart = () => {
                     <span>Calculated at checkout</span>
                   </div>
                 </div>
-                <div className="border-t pt-4 mb-6">
+
+                {/* Store Points Redemption */}
+                {userStorePoints > 0 && (
+                  <div className="mb-4 p-3 bg-amber-50 rounded border border-amber-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Gift className="w-4 h-4 text-amber-600" />
+                        <span className="text-sm font-semibold">Available Points: {userStorePoints}</span>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setShowPointsInput(!showPointsInput)}
+                      >
+                        {showPointsInput ? "Hide" : "Redeem"}
+                      </Button>
+                    </div>
+                    {showPointsInput && (
+                      <div className="space-y-2">
+                        <div className="text-xs text-muted-foreground">
+                          1 point = ₦10 (up to ₦{calculateStorePointsValue(userStorePoints).toLocaleString()})
+                        </div>
+                        <div className="flex gap-2">
+                          <Input
+                            type="number"
+                            min="0"
+                            max={userStorePoints}
+                            value={pointsToRedeem}
+                            onChange={(e) => setPointsToRedeem(Math.max(0, Math.min(userStorePoints, Number(e.target.value) || 0)))}
+                            placeholder="Enter points"
+                            className="h-8"
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => setPointsToRedeem(userStorePoints)}
+                          >
+                            Max
+                          </Button>
+                        </div>
+                        {pointsToRedeem > 0 && (
+                          <div className="text-xs text-green-600 font-semibold">
+                            Discount: ₦{calculateStorePointsValue(pointsToRedeem).toLocaleString()}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="border-t pt-4 mb-6 space-y-2">
+                  {pointsToRedeem > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>Points Discount</span>
+                      <span>-₦{calculateStorePointsValue(pointsToRedeem).toLocaleString()}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>₦{total.toLocaleString()}</span>
+                    <span>₦{Math.max(0, total - calculateStorePointsValue(pointsToRedeem)).toLocaleString()}</span>
                   </div>
                 </div>
 

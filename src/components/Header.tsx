@@ -14,12 +14,15 @@ import {
   LogOut,
   LayoutDashboard,
   ChevronDown,
+  Bell,
 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import {
   Select,
   SelectContent,
@@ -55,6 +58,7 @@ export const Header = () => {
   const { cartItems, wishlistItems } = useCart();
   const { user } = useAuth();
   const { currency, setCurrency } = useCurrency();
+  const { unreadCount } = useNotifications();
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const wishlistCount = wishlistItems.length;
   const navigate = useNavigate();
@@ -235,6 +239,20 @@ export const Header = () => {
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     Dashboard
                   </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => navigate("/notifications")}
+                    className="cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2 w-full">
+                      <Bell className="h-4 w-4" />
+                      <span>Notifications</span>
+                      {unreadCount > 0 && (
+                        <Badge variant="destructive" className="ml-auto h-5 min-w-5 flex items-center justify-center text-xs">
+                          {unreadCount}
+                        </Badge>
+                      )}
+                    </div>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={async () => {
@@ -269,6 +287,9 @@ export const Header = () => {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-80 p-0">
+                <VisuallyHidden.Root>
+                  <SheetTitle>Navigation Menu</SheetTitle>
+                </VisuallyHidden.Root>
                 <MobileSidebar onClose={() => setMobileMenuOpen(false)} />
               </SheetContent>
             </Sheet>
@@ -292,6 +313,7 @@ export const Header = () => {
 const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
   const { cartItems, wishlistItems } = useCart();
   const { user } = useAuth();
+  const { unreadCount } = useNotifications();
   const [searchQuery, setSearchQuery] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -385,6 +407,19 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
             )}
           </Button>
         </Link>
+        {user && (
+          <Link to="/notifications" onClick={onClose}>
+            <Button variant="outline" className="w-full justify-start gap-3">
+              <Bell className="h-5 w-5" />
+              NOTIFICATIONS
+              {unreadCount > 0 && (
+                <Badge variant="destructive" className="ml-auto">
+                  {unreadCount}
+                </Badge>
+              )}
+            </Button>
+          </Link>
+        )}
         {user ? (
           <Link to="/dashboard" onClick={onClose}>
             <Button variant="outline" className="w-full justify-start gap-3">

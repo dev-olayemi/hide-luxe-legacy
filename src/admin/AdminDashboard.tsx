@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { getDocs, collection } from "firebase/firestore";
 import { db } from "@/firebase/firebaseUtils";
 import AdminLayout from "./AdminLayout";
+import AdminMessaging from "./AdminMessaging";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingBag, Users, Package, TrendingUp, Paintbrush, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -184,6 +185,12 @@ const AdminDashboard = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Admin Messaging Section */}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Send Notifications</h2>
+          <AdminMessaging />
+        </div>
       </div>
     </AdminLayout>
   );
