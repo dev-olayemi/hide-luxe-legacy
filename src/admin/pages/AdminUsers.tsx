@@ -1,15 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { getAllUsers, setUserStorePoints } from "@/firebase/firebaseUtils";
+import AdminLayout from "../AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Users, Search, Calendar, Mail } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const AdminUsers = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchUsers();
@@ -23,6 +26,34 @@ const AdminUsers = () => {
       console.error("Error fetching users:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleStorePointsChange = async (
+    uid: string,
+    currentPoints: number,
+    value: string
+  ) => {
+    const parsed = Number(value);
+    const nextPoints = Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0;
+    if (nextPoints === currentPoints) return;
+
+    try {
+      await setUserStorePoints(uid, nextPoints);
+      setUsers((prev) =>
+        prev.map((u) => (u.uid === uid ? { ...u, storePoints: nextPoints } : u))
+      );
+      toast({
+        title: "Store points updated",
+        description: `User now has ${nextPoints} points.`,
+      });
+    } catch (err: any) {
+      console.error("Failed to update store points", err);
+      toast({
+        title: "Update failed",
+        description: err?.message || "Could not update store points",
+        variant: "destructive",
+      });
     }
   };
 
@@ -98,7 +129,6 @@ const AdminUsers = () => {
                   <tr>
                     <th className="text-left p-4 font-semibold text-gray-700">User</th>
                     <th className="text-left p-4 font-semibold text-gray-700">Role</th>
-                    <th className="text-left p-4 font-semibold text-gray-700">Points</th>
                     <th className="text-left p-4 font-semibold text-gray-700">Joined</th>
                     <th className="text-left p-4 font-semibold text-gray-700">Last Login</th>
                   </tr>
@@ -131,25 +161,6 @@ const AdminUsers = () => {
                           <Badge variant={user.role === "admin" ? "default" : "secondary"}>
                             {user.role || "user"}
                           </Badge>
-                        </td>
-                        <td className="p-4">
-                          {editingUserId === user.uid ? (
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="number"
-                                value={String(editPoints)}
-                                onChange={(e) => setEditPoints(Number(e.target.value))}
-                                className="w-24 h-8 border px-2 rounded text-sm"
-                              />
-                              <button onClick={() => saveEditPoints(user.uid)} className="text-sm text-white bg-primary px-3 py-1 rounded">Save</button>
-                              <button onClick={cancelEditPoints} className="text-sm text-muted-foreground px-2">Cancel</button>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-3">
-                              <div className="font-medium">{user.storePoints ?? 0}</div>
-                              <button onClick={() => startEditPoints(user)} className="text-xs px-2 py-1 bg-slate-100 rounded hover:bg-slate-200">Edit</button>
-                            </div>
-                          )}
                         </td>
                         <td className="p-4">
                           <div className="flex items-center gap-1 text-sm text-gray-600">

@@ -41,7 +41,6 @@ async function signup(email: string, password: string) {
       uid: user.uid,
       email,
       role: "user",
-      storePoints: 0,
       createdAt: new Date(),
       lastLogin: new Date(),
     });
@@ -112,19 +111,6 @@ async function updateUserProfile(uid: string, updates: any) {
   try {
     await updateDoc(doc(db, "users", uid), {
       ...updates,
-      updatedAt: new Date(),
-    });
-  } catch (error: any) {
-    throw new Error(error.message);
-  }
-}
-
-// Set user store points safely
-async function setUserStorePoints(uid: string, points: number) {
-  try {
-    const safePoints = Number.isFinite(points) ? Math.max(0, Math.floor(points)) : 0;
-    await updateDoc(doc(db, "users", uid), {
-      storePoints: safePoints,
       updatedAt: new Date(),
     });
   } catch (error: any) {
@@ -800,6 +786,7 @@ export {
   auth,
   db,
   storage,
+  setUserStorePoints,
 };
 
 export { getAllOrders };
