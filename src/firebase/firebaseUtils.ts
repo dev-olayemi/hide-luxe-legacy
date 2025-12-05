@@ -37,13 +37,14 @@ async function signup(email: string, password: string) {
       password
     );
     const user = userCredential.user;
-    await setDoc(doc(db, "users", user.uid), {
-      uid: user.uid,
-      email,
-      role: "user",
-      createdAt: new Date(),
-      lastLogin: new Date(),
-    });
+  await setDoc(doc(db, "users", user.uid), {
+    uid: user.uid,
+    email,
+    role: "user",
+    storePoints: 0,
+    createdAt: new Date(),
+    lastLogin: new Date(),
+  });
     return user;
   } catch (error: any) {
     throw new Error(error.message);
@@ -80,6 +81,7 @@ async function signInWithGoogle() {
           uid: user.uid,
           email: user.email,
           role: "user",
+          storePoints: 0,
           createdAt: serverTimestamp(),
           lastLogin: serverTimestamp(),
         });
@@ -110,6 +112,17 @@ async function updateUserProfile(uid: string, updates: any) {
   try {
     await updateDoc(doc(db, "users", uid), {
       ...updates,
+      updatedAt: new Date(),
+    });
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+async function setUserStorePoints(uid: string, points: number) {
+  try {
+    await updateDoc(doc(db, "users", uid), {
+      storePoints: Math.max(0, Math.floor(points)),
       updatedAt: new Date(),
     });
   } catch (error: any) {
@@ -618,6 +631,7 @@ export {
   auth,
   db,
   storage,
+  setUserStorePoints,
 };
 
 export async function getAllUsers() {

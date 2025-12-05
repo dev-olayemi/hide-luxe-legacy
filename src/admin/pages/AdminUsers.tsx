@@ -1,16 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { getAllUsers } from "@/firebase/firebaseUtils";
+import { getAllUsers, setUserStorePoints } from "@/firebase/firebaseUtils";
 import AdminLayout from "../AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Users, Search, Calendar, Mail } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const AdminUsers = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchUsers();
@@ -24,6 +26,34 @@ const AdminUsers = () => {
       console.error("Error fetching users:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleStorePointsChange = async (
+    uid: string,
+    currentPoints: number,
+    value: string
+  ) => {
+    const parsed = Number(value);
+    const nextPoints = Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0;
+    if (nextPoints === currentPoints) return;
+
+    try {
+      await setUserStorePoints(uid, nextPoints);
+      setUsers((prev) =>
+        prev.map((u) => (u.uid === uid ? { ...u, storePoints: nextPoints } : u))
+      );
+      toast({
+        title: "Store points updated",
+        description: `User now has ${nextPoints} points.`,
+      });
+    } catch (err: any) {
+      console.error("Failed to update store points", err);
+      toast({
+        title: "Update failed",
+        description: err?.message || "Could not update store points",
+        variant: "destructive",
+      });
     }
   };
 
@@ -75,6 +105,7 @@ const AdminUsers = () => {
                   <tr>
                     <th className="text-left p-4 font-semibold text-gray-700">User</th>
                     <th className="text-left p-4 font-semibold text-gray-700">Role</th>
+                    <th className="text-left p-4 font-semibold text-gray-700">Store Points</th>
                     <th className="text-left p-4 font-semibold text-gray-700">Joined</th>
                     <th className="text-left p-4 font-semibold text-gray-700">Last Login</th>
                   </tr>
@@ -103,26 +134,43 @@ const AdminUsers = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="p-4">
-                          <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                            {user.role || "user"}
-                          </Badge>
-                        </td>
-                        <td className="p-4">
-                          <div className="flex items-center gap-1 text-sm text-gray-600">
-                            <Calendar className="h-3 w-3" />
-                            {user.createdAt?.toDate?.()
-                              ? new Date(user.createdAt.toDate()).toLocaleDateString()
-                              : "N/A"}
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          <div className="text-sm text-gray-600">
-                            {user.lastLogin?.toDate?.()
-                              ? new Date(user.lastLogin.toDate()).toLocaleDateString()
-                              : "Never"}
-                          </div>
-                        </td>
+                      <td className="p-4">
+                        <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                          {user.role || "user"}
+                        </Badge>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="number"
+                            min={0}
+                            defaultValue={user.storePoints ?? 0}
+                            className="w-24 h-9"
+                            onBlur={(e) =>
+                              handleStorePointsChange(
+                                user.uid,
+                                user.storePoints ?? 0,
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                          <Calendar className="h-3 w-3" />
+                          {user.createdAt?.toDate?.()
+                            ? new Date(user.createdAt.toDate()).toLocaleDateString()
+                            : "N/A"}
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="text-sm text-gray-600">
+                          {user.lastLogin?.toDate?.()
+                            ? new Date(user.lastLogin.toDate()).toLocaleDateString()
+                            : "Never"}
+                        </div>
+                      </td>
                       </tr>
                     ))
                   )}
