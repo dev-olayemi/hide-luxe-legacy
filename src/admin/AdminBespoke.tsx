@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState, useRef } from "react";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -136,9 +134,8 @@ const AdminBespoke: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
-      <Header />
-      <main className="flex-1 py-8 px-6">
+    <div className="min-h-screen bg-slate-50">
+      <main className="py-8 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -295,8 +292,6 @@ const AdminBespoke: React.FC = () => {
           )}
         </div>
       </main>
-
-      <Footer />
 
       {/* Modal / panel */}
       {selected && editing && (

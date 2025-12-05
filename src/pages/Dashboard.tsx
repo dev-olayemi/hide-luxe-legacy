@@ -11,6 +11,7 @@ import {
   getRefunds,
   updateRefund,
   getUserProfile,
+  redeemStorePointCoupon,
 } from "@/firebase/firebaseUtils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -92,17 +93,30 @@ const Dashboard = () => {
       setRedeemLoading(true);
       setRedeemMessage(null);
       try {
-        // TODO: Implement backend logic for coupon redemption
-        // Simulate success for now
-        setTimeout(() => {
+        if (!couponCode.trim()) {
+          setRedeemMessage("Please enter a coupon code");
           setRedeemLoading(false);
-          setRedeemMessage("Coupon redeemed! Store points have been added to your account.");
-          setCouponCode("");
-          // Optionally refresh store points here
-        }, 1200);
+          return;
+        }
+
+        const result = await redeemStorePointCoupon(
+          couponCode,
+          auth.currentUser?.uid || ""
+        );
+
+        setRedeemMessage(
+          `✓ Success! ${result.pointsAwarded} points added. Your new total: ${result.newTotal} points`
+        );
+        setCouponCode("");
+        
+        // Refresh store points display
+        await refresh();
       } catch (err: any) {
+        setRedeemMessage(
+          `✗ ${err.message || "Failed to redeem coupon. Please try again."}`
+        );
+      } finally {
         setRedeemLoading(false);
-        setRedeemMessage("Failed to redeem coupon. Please try again.");
       }
     };
   const [orders, setOrders] = useState<Order[]>([]);

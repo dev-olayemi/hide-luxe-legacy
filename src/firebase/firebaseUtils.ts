@@ -810,6 +810,197 @@ async function setUserStorePoints(uid: string, points: number) {
 // Alias for clarity: updateUserStorePoints -> setUserStorePoints
 export const updateUserStorePoints = setUserStorePoints;
 
+// Store Point Coupons Operations
+export async function createStorePointCoupon(
+  code: string,
+  value: number,
+  adminUid: string,
+  description?: string,
+  expiresAt?: Date
+) {
+  try {
+    const couponCode = code.toUpperCase().trim();
+    if (!couponCode || value <= 0) {
+      throw new Error("Invalid coupon code or value");
+    }
+
+    await setDoc(doc(db, "storePointCoupons", couponCode), {
+      code: couponCode,
+      value: value,
+      createdBy: adminUid,
+      createdAt: serverTimestamp(),
+      expiresAt: expiresAt ? new Date(expiresAt) : null,
+      description: description || "",
+      isActive: true,
+    });
+    
+    // After creating the coupon, send a notification to all users informing them
+    // about the new coupon code. This is best-effort: failures here should not
+    // prevent the coupon from being created.
+    try {
+      const users = await getAllUsers();
+      const notifPromises: Promise<any>[] = [];
+      const title = "New Store Point Coupon";
+      const message = `A new coupon ${couponCode} is available — redeem for ${value} pts.`;
+
+      users.forEach((u: any) => {
+        // skip if no uid
+        if (!u?.uid) return;
+        notifPromises.push(
+          createNotification({
+            userId: u.uid,
+            type: "admin",
+            title,
+            message,
+            actionUrl: "/account",
+            actionLabel: "Redeem",
+            read: false,
+            metadata: { couponCode, points: value },
+          })
+        );
+      });
+
+      // run in parallel but don't fail the main operation if some notifications fail
+      await Promise.allSettled(notifPromises);
+    } catch (notifErr) {
+      console.warn("Failed to create notifications for new coupon:", notifErr);
+    }
+
+    return { success: true, code: couponCode };
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+export async function getAllStorePointCoupons() {
+  try {
+    const q = query(collection(db, "storePointCoupons"));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt,
+      expiresAt: doc.data().expiresAt?.toDate?.() || doc.data().expiresAt,
+    }));
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+export async function getStorePointCoupon(code: string) {
+  try {
+    const couponCode = code.toUpperCase().trim();
+    const docRef = doc(db, "storePointCoupons", couponCode);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data() as any;
+      return {
+        id: docSnap.id,
+        ...data,
+        createdAt: data.createdAt?.toDate?.() || data.createdAt,
+        expiresAt: data.expiresAt?.toDate?.() || data.expiresAt,
+      };
+    }
+    return null;
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+export async function updateStorePointCoupon(
+  code: string,
+  updates: any
+) {
+  try {
+    const couponCode = code.toUpperCase().trim();
+    await updateDoc(doc(db, "storePointCoupons", couponCode), {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+export async function deleteStorePointCoupon(code: string) {
+  try {
+    const couponCode = code.toUpperCase().trim();
+    await deleteDoc(doc(db, "storePointCoupons", couponCode));
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+export async function checkCouponRedemption(code: string, userId: string) {
+  try {
+    const couponCode = code.toUpperCase().trim();
+    const q = query(
+      collection(db, "storePointCouponRedemptions"),
+      where("code", "==", couponCode),
+      where("userId", "==", userId)
+    );
+    const snapshot = await getDocs(q);
+    return !snapshot.empty; // true if already redeemed
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
+export async function redeemStorePointCoupon(code: string, userId: string) {
+  try {
+    const couponCode = code.toUpperCase().trim();
+
+    // Check if coupon exists
+    const coupon = await getStorePointCoupon(couponCode);
+    if (!coupon) {
+      throw new Error("Coupon not found");
+    }
+
+    // Check if coupon is active
+    if (!coupon.isActive) {
+      throw new Error("Coupon is not active");
+    }
+
+    // Check if coupon has expired
+    if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
+      throw new Error("Coupon has expired");
+    }
+
+    // Check if user already redeemed this coupon
+    const alreadyRedeemed = await checkCouponRedemption(couponCode, userId);
+    if (alreadyRedeemed) {
+      throw new Error("You have already redeemed this coupon");
+    }
+
+    // Add points to user
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) {
+      throw new Error("User not found");
+    }
+
+    const currentPoints = userSnap.data().storePoints || 0;
+    const newPoints = currentPoints + coupon.value;
+
+    await updateDoc(userRef, {
+      storePoints: newPoints,
+      updatedAt: new Date(),
+    });
+
+    // Record redemption
+    await addDoc(collection(db, "storePointCouponRedemptions"), {
+      code: couponCode,
+      userId: userId,
+      redeemedAt: serverTimestamp(),
+      pointsAwarded: coupon.value,
+    });
+
+    return { success: true, pointsAwarded: coupon.value, newTotal: newPoints };
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+
 // Type definitions
 interface DeliveryDetails {
   fullName: string;
