@@ -15,6 +15,7 @@ import {
   auth,
 } from "@/firebase/firebaseUtils";
 import { Gift, Trash2, Plus, Edit2, X, Check } from "lucide-react";
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface Coupon {
   id: string;
@@ -34,6 +35,7 @@ const AdminCoupons = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const { toast } = useToast();
+  const { formatPrice } = useCurrency();
 
   const [formData, setFormData] = useState({
     value: "",
@@ -363,8 +365,8 @@ const AdminCoupons = () => {
                             {coupon.value}{" "}
                             <span className="text-gray-400 text-sm">pts</span>
                           </p>
-                          <p className="text-xs text-gray-400">
-                            Worth ₦{(coupon.value * 10).toLocaleString()}
+                            <p className="text-xs text-gray-400">
+                            Worth {formatPrice(coupon.value * 10)}
                           </p>
                         </div>
 

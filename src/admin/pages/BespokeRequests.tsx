@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { User, Mail, Phone, Calendar, Package, DollarSign, Clock, FileText, Image as ImageIcon } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const BespokeRequests = () => {
   const [items, setItems] = useState<any[]>([]);
@@ -67,6 +68,8 @@ const BespokeRequests = () => {
   const filteredItems = filter === "all" 
     ? items 
     : items.filter((item) => item.status === filter);
+
+  const { formatPrice } = useCurrency();
 
   if (loading) {
     return (
@@ -157,7 +160,7 @@ const BespokeRequests = () => {
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <div className="text-sm text-muted-foreground">Budget</div>
-                      <div className="font-medium">₦{request.budget ? Number(request.budget).toLocaleString() : "—"}</div>
+                      <div className="font-medium">{request.budget ? formatPrice(Number(request.budget)) : "—"}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

@@ -9,11 +9,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Paintbrush, Calendar, User, Phone, Mail } from "lucide-react";
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const AdminBespoke = () => {
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     fetchRequests();
@@ -154,7 +156,7 @@ const AdminBespoke = () => {
                       <h4 className="font-semibold mb-3">Project Details</h4>
                       <div className="space-y-1 text-sm text-gray-600">
                         <p><strong>Category:</strong> {request.category}</p>
-                        {request.budget && <p><strong>Budget:</strong> ₦{request.budget.toLocaleString()}</p>}
+                        {request.budget && <p><strong>Budget:</strong> {formatPrice(Number(request.budget))}</p>}
                         {request.deadline && <p><strong>Deadline:</strong> {request.deadline}</p>}
                       </div>
                     </div>

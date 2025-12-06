@@ -6,6 +6,7 @@ import AdminLayout from "./AdminLayout";
 import AdminMessaging from "./AdminMessaging";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingBag, Users, Package, TrendingUp, Paintbrush, AlertCircle } from "lucide-react";
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { Link } from "react-router-dom";
 
 const AdminDashboard = () => {
@@ -23,6 +24,8 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  const { formatPrice } = useCurrency();
 
   const fetchDashboardData = async () => {
     try {
@@ -68,7 +71,7 @@ const AdminDashboard = () => {
   const statCards = [
     {
       title: "Total Revenue",
-      value: `₦${stats.revenue.toLocaleString()}`,
+      value: stats.revenue,
       icon: TrendingUp,
       color: "from-green-500 to-emerald-600",
       link: "/admin/orders",
@@ -145,7 +148,7 @@ const AdminDashboard = () => {
                     </div>
                   </CardHeader>
                   <CardContent className="pt-6">
-                    <div className="text-3xl font-bold text-gray-900">{stat.value}</div>
+                    <div className="text-3xl font-bold text-gray-900">{stat.title === 'Total Revenue' ? formatPrice(Number(stat.value || 0)) : stat.value}</div>
                   </CardContent>
                 </Card>
               </Link>
@@ -170,7 +173,7 @@ const AdminDashboard = () => {
                       <p className="text-xs text-gray-400">{order.createdAt.toLocaleDateString()}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold">₦{order.totalAmount?.toLocaleString()}</p>
+                      <p className="font-bold">{formatPrice(Number(order.totalAmount || 0))}</p>
                       <span className={`text-xs px-2 py-1 rounded ${
                         order.status === "completed" ? "bg-green-100 text-green-700" :
                         order.status === "pending" ? "bg-yellow-100 text-yellow-700" :

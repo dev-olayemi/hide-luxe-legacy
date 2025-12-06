@@ -4,72 +4,90 @@
 export type DeliveryOption = 'delivery' | 'pickup';
 
 // State-based delivery fees in NGN
-// Fees are based on distance/logistics zones from Lagos
 export const NIGERIAN_STATE_DELIVERY_FEES: Record<string, number> = {
-  // Lagos - Local delivery
+  // LAGOS - Same city (Intra-Lagos)
   "Lagos": 2500,
-  
-  // Zone 1 - South West (Closest to Lagos)
-  "Ogun": 3500,
+
+  // ZONE 1 – South West (Very Close | 50–350 km)
+  "Ogun": 3000,
   "Oyo": 4000,
   "Osun": 4500,
   "Ondo": 4500,
   "Ekiti": 5000,
-  
-  // Zone 2 - South South / South East
-  "Edo": 5500,
+
+  // ZONE 2 – South South & South East (Mid-range | 300–650 km)
+  "Edo": 5000,
   "Delta": 5500,
-  "Rivers": 6000,
+  "Rivers": 6000,        // Port Harcourt
   "Bayelsa": 6500,
-  "Akwa Ibom": 7000,
-  "Cross River": 7000,
-  "Anambra": 6000,
-  "Imo": 6500,
-  "Abia": 6500,
+  "Akwa Ibom": 6500,     // Uyo
+  "Cross River": 7000,   // Calabar – a bit farther
+  "Abia": 6000,
+  "Anambra": 5500,       // Onitsha / Awka
+  "Imo": 6000,           // Owerri
   "Enugu": 6000,
   "Ebonyi": 6500,
-  
-  // Zone 3 - North Central
-  "Kwara": 5000,
+
+  // ZONE 3 – North Central (Abuja & around | 500–800 km)
+  "Kwara": 5000,         // Ilorin
   "Kogi": 5500,
   "Niger": 6000,
-  "Benue": 6500,
-  "Plateau": 7000,
-  "Nasarawa": 7000,
+  "Benue": 6500,         // Makurdi
+  "Plateau": 7000,       // Jos
+  "Nasarawa": 6500,
   "Federal Capital Territory": 6500,
-  "FCT": 6500,
-  
-  // Zone 4 - North West
-  "Kaduna": 7500,
+  "FCT": 6500,           // Abuja
+
+  // ZONE 4 – North West (700–950 km)
+  "Kaduna": 7000,
   "Kano": 8000,
   "Katsina": 8500,
   "Jigawa": 8500,
-  "Zamfara": 9000,
-  "Sokoto": 9500,
   "Kebbi": 9000,
-  
-  // Zone 5 - North East (Furthest from Lagos)
+  "Sokoto": 9500,
+  "Zamfara": 9000,       // Gusau
+
+  // ZONE 5 – North East (Furthest | 900–1200+ km)
+  "Adamawa": 9500,       // Yola / Jimeta
   "Bauchi": 8500,
+  "Borno": 10500,        // Maiduguri – highest risk & distance
   "Gombe": 9000,
-  "Taraba": 9000,
-  "Adamawa": 9500,
-  "Yobe": 10000,
-  "Borno": 10500,
+  "Taraba": 9500,        // Jalingo
+  "Yobe": 10000,         // Damaturu
 };
 
-// Default fee for unlisted states or international
-export const DEFAULT_DELIVERY_FEE = 8000;
+// Fallback if state name is misspelled or not found
+export const DEFAULT_DELIVERY_FEE = 7500;
 
-// International delivery is not supported (they should contact seller)
-export const INTERNATIONAL_DELIVERY_SUPPORTED = false;
-
-// Pickup location details
+// Free pickup option in Lagos
 export const PICKUP_LOCATION = {
-  address: "28th Hide Luxe Store",
+  address: "28th Hide Luxe Store, Lekki Phase 1",
   city: "Lagos",
   state: "Lagos",
   country: "Nigeria",
-  note: "Contact us for exact pickup location and timing",
+  phone: "+234 903 197 6895",
+  note: "Call or WhatsApp 30 mins before arrival. Open Mon–Sat, 10AM–6PM",
+};
+
+// Optional: You can add this helper to normalize state names
+export const normalizeStateName = (state: string): string => {
+  const map: Record<string, string> = {
+    "abuja": "Federal Capital Territory",
+    "fct": "Federal Capital Territory",
+    "portharcourt": "Rivers",
+    "ph": "Rivers",
+    "owerri": "Imo",
+    "enugu": "Enugu",
+    "asaba": "Delta",
+    "benin": "Edo",
+    "calabar": "Cross River",
+    "uyo": "Akwa Ibom",
+    "jos": "Plateau",
+    "kano": "Kano",
+    "kaduna": "Kaduna",
+    "maiduguri": "Borno",
+  };
+  return map[state.toLowerCase()] || state;
 };
 
 /**

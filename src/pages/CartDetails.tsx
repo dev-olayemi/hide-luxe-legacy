@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { getSharedCartSnapshot } from "@/firebase/firebaseUtils";
 
 // Fetch shared cart snapshot saved by the cart page
@@ -53,6 +54,7 @@ const CartDetails = () => {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+  const { formatPrice } = useCurrency();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -129,7 +131,7 @@ const CartDetails = () => {
                         {item.category}
                       </p>
                       <p className="font-semibold">
-                        ₦{item.price.toLocaleString()}
+                        {formatPrice(item.price)}
                       </p>
                       <p className="text-sm mt-2">
                         Quantity:{" "}
@@ -148,7 +150,7 @@ const CartDetails = () => {
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>₦{total.toLocaleString()}</span>
+                    <span>{formatPrice(total)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-muted-foreground">
                     <span>Shipping</span>
@@ -158,7 +160,7 @@ const CartDetails = () => {
                 <div className="border-t pt-4 mb-6">
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>₦{total.toLocaleString()}</span>
+                    <span>{formatPrice(total)}</span>
                   </div>
                 </div>
               </Card>

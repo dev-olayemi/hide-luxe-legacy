@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import {
   addDoc,
   collection,
@@ -20,7 +21,7 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
-import { db, saveSharedCartSnapshot as saveSharedCartSnapshotToFirebase, getUserProfile, setUserStorePoints as setUserStorePointsFirebase } from "@/firebase/firebaseUtils";
+import { db, saveSharedCartSnapshot as saveSharedCartSnapshotToFirebase, getUserProfile, setUserStorePoints as setUserStorePointsFirebase, createNotification } from "@/firebase/firebaseUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
 import { calculateStorePointsValue, calculatePointsFromNGN } from "@/config/storePointsConfig";
@@ -157,6 +158,10 @@ const Cart = () => {
 
   const [cartId] = useState(() => localStorage.getItem("cartId") || uuidv4());
   const cartLink = `${window.location.origin}/cart/${cartId}`;
+
+  const { formatPrice, currency } = useCurrency();
+
+  const formatNGN = (n: number) => `₦${n.toLocaleString()}`;
 
   // Persist a snapshot of the cart + delivery details for seller preview/share
   const saveSharedCartSnapshot = async (items: any[], delivery: DeliveryDetails | null) => {
@@ -486,6 +491,21 @@ const Cart = () => {
 
     // write order and payment docs
     const orderRef = await addDoc(collection(db, "orders"), orderPayload);
+    // create a user notification about the new order so it appears in their dashboard
+    try {
+      await createNotification({
+        userId: user.uid,
+        type: "order",
+        title: "Order Received",
+        message: `Your order ${orderRef.id} was received. Tap to view details.`,
+        actionUrl: `/order-success/${orderRef.id}`,
+        actionLabel: "View Order",
+        read: false,
+        metadata: { orderId: orderRef.id, amount: finalAmount },
+      });
+    } catch (e) {
+      console.warn("Failed to create order notification", e);
+    }
     await addDoc(collection(db, "payments"), {
       orderId: orderRef.id,
       transactionId: orderMeta.transaction_id || null,
@@ -730,7 +750,7 @@ const Cart = () => {
                         {item.category}
                       </p>
                       <p className="font-semibold">
-                        ₦{item.price.toLocaleString()}
+                        {formatPrice(item.price)}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
@@ -878,7 +898,7 @@ const Cart = () => {
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>₦{total.toLocaleString()}</span>
+                    <span>{formatPrice(total)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Delivery</span>
@@ -886,7 +906,10 @@ const Cart = () => {
                       {deliveryOption === 'pickup' 
                         ? 'Free (Pickup)' 
                         : deliveryDetails.state && deliveryDetails.country?.toLowerCase() === 'nigeria'
-                          ? formatDeliveryFee(calculateDeliveryFee(deliveryDetails.state, deliveryDetails.country || 'Nigeria'))
+                          ? (() => {
+                              const fee = calculateDeliveryFee(deliveryDetails.state, deliveryDetails.country || 'Nigeria');
+                              return fee === null ? formatDeliveryFee(fee) : formatPrice(fee as number);
+                            })()
                           : <span className="text-muted-foreground">Select Nigerian state</span>
                       }
                     </span>
@@ -912,7 +935,7 @@ const Cart = () => {
                     {showPointsInput && (
                       <div className="space-y-2">
                         <div className="text-xs text-muted-foreground">
-                          1 point = ₦10 (up to ₦{calculateStorePointsValue(userStorePoints).toLocaleString()})
+                          1 point = {formatPrice(10)} (up to {formatPrice(calculateStorePointsValue(userStorePoints))})
                         </div>
                         <div className="flex gap-2">
                           <Input
@@ -933,7 +956,7 @@ const Cart = () => {
                         </div>
                         {pointsToRedeem > 0 && (
                           <div className="text-xs text-green-600 font-semibold">
-                            Discount: ₦{calculateStorePointsValue(pointsToRedeem).toLocaleString()}
+                            Discount: {formatPrice(calculateStorePointsValue(pointsToRedeem))}
                           </div>
                         )}
                       </div>
@@ -945,7 +968,7 @@ const Cart = () => {
                   {pointsToRedeem > 0 && (
                     <div className="flex justify-between text-sm text-green-600">
                       <span>Points Discount</span>
-                      <span>-₦{calculateStorePointsValue(pointsToRedeem).toLocaleString()}</span>
+                      <span>-{formatPrice(calculateStorePointsValue(pointsToRedeem))}</span>
                     </div>
                   )}
                   {(() => {
@@ -958,7 +981,7 @@ const Cart = () => {
                     return (
                       <div className="flex justify-between font-bold text-lg">
                         <span>Total</span>
-                        <span>₦{grandTotal.toLocaleString()}</span>
+                        <span>{formatPrice(grandTotal)}</span>
                       </div>
                     );
                   })()}

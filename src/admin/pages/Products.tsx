@@ -23,11 +23,13 @@ import {
   ImageIcon
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const Products = () => {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     fetchProducts();
@@ -77,6 +79,7 @@ const Products = () => {
   }
 
   return (
+    // currency
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -153,7 +156,7 @@ const Products = () => {
               
               <div className="flex items-center justify-between">
                 <span className="text-xl font-bold">
-                  ₦{Number(p.price ?? 0).toLocaleString()}
+                  {formatPrice(Number(p.price ?? 0))}
                 </span>
                 <span className="text-sm text-muted-foreground">
                   Stock: {p.stock ?? 0}

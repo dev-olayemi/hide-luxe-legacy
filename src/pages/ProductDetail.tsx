@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useCart } from "@/contexts/CartContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { getProductById, getAllProducts } from "@/firebase/firebaseUtils";
 import { cn } from "@/lib/utils";
 import { SEOHead } from "@/components/SEOHead";
@@ -68,6 +69,7 @@ const ProductDetail = () => {
   }
 
   const inWishlist = isInWishlist(product.id);
+  const { formatPrice } = useCurrency();
 
   const handleAddToCart = () => {
     if (product.sizes && product.sizes.length > 0 && !selectedSize) {
@@ -173,7 +175,7 @@ const ProductDetail = () => {
               </div>
 
               <p className="text-3xl font-semibold mb-6">
-                ₦{product.price.toLocaleString()}
+                {formatPrice(product.price)}
               </p>
             </div>
 
@@ -374,13 +376,13 @@ const ProductDetail = () => {
                     {/* Price */}
                     <div className="flex items-center gap-2">
                       <div className="text-sm font-bold text-gray-900">
-                        ₦{(p.price || 0).toLocaleString()}
-                      </div>
-                      {p.originalPrice > p.price && (
-                        <div className="text-xs text-gray-500 line-through">
-                          ₦{(p.originalPrice || 0).toLocaleString()}
+                          {formatPrice(p.price || 0)}
                         </div>
-                      )}
+                        {p.originalPrice > p.price && (
+                          <div className="text-xs text-gray-500 line-through">
+                            {formatPrice(p.originalPrice || 0)}
+                          </div>
+                        )}
                     </div>
                   </div>
                 </Link>

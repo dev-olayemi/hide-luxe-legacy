@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Footprints, Shirt, Backpack, Sparkles, Sofa, Zap } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/firebase/firebaseConfig';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface CategoryItem {
   id: string; // slug
@@ -376,14 +377,7 @@ export const CategoriesGrid = () => {
 
                   {/* Price */}
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="text-sm font-bold text-gray-900">
-                      ₦{(p.price || 0).toLocaleString()}
-                    </div>
-                    {p.originalPrice > p.price && (
-                      <div className="text-xs text-gray-500 line-through">
-                        ₦{(p.originalPrice || 0).toLocaleString()}
-                      </div>
-                    )}
+                            <CurrencyPrices price={p.price} originalPrice={p.originalPrice} />
                   </div>
 
                   {/* Stock Status */}
@@ -419,5 +413,17 @@ export const CategoriesGrid = () => {
         </div>
       </div>
     </section>
+  );
+};
+
+const CurrencyPrices: React.FC<{ price?: number; originalPrice?: number }> = ({ price = 0, originalPrice = 0 }) => {
+  const { formatPrice } = useCurrency();
+  return (
+    <>
+      <div className="text-sm font-bold text-gray-900">{formatPrice(price)}</div>
+      {originalPrice > price && (
+        <div className="text-xs text-gray-500 line-through">{formatPrice(originalPrice)}</div>
+      )}
+    </>
   );
 };

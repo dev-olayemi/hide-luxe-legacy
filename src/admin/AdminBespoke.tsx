@@ -12,6 +12,7 @@ import {
   updateBespokeRequest,
 } from "@/firebase/firebaseUtils";
 import { X, Edit, Save, Trash, Send } from "lucide-react";
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const UPLOADCARE_PUB_KEY = import.meta.env.VITE_UPLOADCARE_PUB_KEY as string;
 const UPLOADCARE_CDN_BASE = import.meta.env.VITE_UPLOADCARE_CDN_BASE as string;
@@ -32,6 +33,7 @@ const AdminBespoke: React.FC = () => {
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const { toast } = useToast();
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     load();
@@ -238,7 +240,7 @@ const AdminBespoke: React.FC = () => {
                           <div className="text-xs text-muted-foreground">
                             Budget
                           </div>
-                          <div className="font-medium">₦{r.budget ?? "—"}</div>
+                          <div className="font-medium">{r.budget ? formatPrice(Number(r.budget)) : "—"}</div>
                         </div>
                         <div>
                           <div className="text-xs text-muted-foreground">

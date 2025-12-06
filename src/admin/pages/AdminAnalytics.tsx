@@ -5,6 +5,7 @@ import { db } from "@/firebase/firebaseUtils";
 import AdminLayout from "../AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, ShoppingBag, Users, DollarSign, Package, Paintbrush } from "lucide-react";
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const AdminAnalytics = () => {
   const [stats, setStats] = useState({
@@ -52,7 +53,7 @@ const AdminAnalytics = () => {
   const statCards = [
     {
       title: "Total Revenue",
-      value: `₦${stats.totalRevenue.toLocaleString()}`,
+      value: stats.totalRevenue,
       icon: DollarSign,
       color: "from-green-500 to-emerald-600",
       bgColor: "bg-green-50",
@@ -132,6 +133,7 @@ const AdminAnalytics = () => {
                 </CardHeader>
                 <CardContent className="pt-6">
                   <div className="text-3xl font-bold text-gray-900">{stat.value}</div>
+                  <div className="text-3xl font-bold text-gray-900">{stat.title === 'Total Revenue' ? formatPrice(Number(stat.value || 0)) : stat.value}</div>
                 </CardContent>
               </Card>
             );
@@ -147,7 +149,7 @@ const AdminAnalytics = () => {
               <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
                 <span className="text-gray-700">Average Order Value</span>
                 <span className="font-bold text-lg">
-                  ₦{stats.totalOrders > 0 ? Math.round(stats.totalRevenue / stats.totalOrders).toLocaleString() : 0}
+                  {stats.totalOrders > 0 ? formatPrice(Math.round(stats.totalRevenue / stats.totalOrders)) : formatPrice(0)}
                 </span>
               </div>
               <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">

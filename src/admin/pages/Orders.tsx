@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "@/firebase/firebaseUtils";
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 type Order = {
   id: string;
@@ -47,6 +48,8 @@ const Orders: React.FC = () => {
       mounted = false;
     };
   }, []);
+
+  const { formatPrice } = useCurrency();
 
   return (
     <div>
@@ -123,7 +126,7 @@ const Orders: React.FC = () => {
               <div>
                 <div className="text-xs text-muted-foreground">Total Amount</div>
                 <div className="text-xl font-bold">
-                  ₦{Number(o.totalAmount ?? 0).toLocaleString()}
+                  {formatPrice(Number(o.totalAmount ?? 0))}
                 </div>
               </div>
               <div>

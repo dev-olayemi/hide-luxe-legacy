@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { getDocs, collection, query, orderBy, limit } from "firebase/firestore";
 import { db } from "@/firebase/firebaseUtils";
 import { ShoppingBag, Users, Package, Paintbrush } from "lucide-react";
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const StatCard: React.FC<{ 
   title: string; 
@@ -31,6 +32,7 @@ const Dashboard: React.FC = () => {
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [recentBespoke, setRecentBespoke] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     fetchDashboardData();
@@ -126,7 +128,7 @@ const Dashboard: React.FC = () => {
         />
         <StatCard 
           title="Total Sales" 
-          value={`₦${stats.sales.toLocaleString()}`} 
+          value={formatPrice(Number(stats.sales || 0))} 
           icon={Package}
           color="bg-green-500"
         />
@@ -156,7 +158,7 @@ const Dashboard: React.FC = () => {
                   <div>
                     <div className="font-medium">#{order.id.slice(0, 8)}</div>
                     <div className="text-xs text-gray-500">
-                      {order.userEmail} — ₦{order.totalAmount?.toLocaleString()}
+                      {order.userEmail} — {formatPrice(Number(order.totalAmount || 0))}
                     </div>
                     <div className="text-xs text-gray-400">
                       {order.createdAt.toLocaleDateString()}

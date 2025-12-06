@@ -26,6 +26,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { calculateStorePointsValue } from "@/config/storePointsConfig";
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface OrderItem {
   id: string;
@@ -152,6 +153,7 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -449,8 +451,8 @@ const Dashboard = () => {
                 <div>
                   <div className="text-xs sm:text-sm font-medium text-gray-500 mb-1">Store Points</div>
                   <div className="text-3xl sm:text-4xl font-bold text-gray-900">{storePoints}</div>
-                  <div className="text-sm sm:text-base text-gray-600 mt-1">
-                    Worth: <span className="font-semibold">₦{calculateStorePointsValue(storePoints).toLocaleString()}</span>
+                    <div className="text-sm sm:text-base text-gray-600 mt-1">
+                    Worth: <span className="font-semibold">{formatPrice(calculateStorePointsValue(storePoints))}</span>
                   </div>
                 </div>
                 <Gift className="h-6 w-6 sm:h-8 sm:w-8 text-amber-500 flex-shrink-0" />
@@ -558,7 +560,7 @@ const Dashboard = () => {
                     <p className="text-xs md:text-sm text-green-700 font-medium">Store Points</p>
                     <p className="text-2xl md:text-3xl font-bold mt-1 text-green-700">{storePoints}</p>
                     <p className="text-xs text-green-600 font-semibold mt-1">
-                      ₦{calculateStorePointsValue(storePoints).toLocaleString()}
+                      {formatPrice(calculateStorePointsValue(storePoints))}
                     </p>
                   </div>
                   <div className="h-12 w-12 md:h-14 md:w-14 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0 ml-2">
@@ -657,7 +659,7 @@ const Dashboard = () => {
                               </div>
                               <div className="flex items-center gap-2 sm:gap-4">
                                 <span className="font-bold text-sm md:text-base">
-                                  {formatCurrency(item.price)}
+                                  {formatPrice(item.price)}
                                 </span>
                                 {item.image && (
                                   <button
@@ -676,13 +678,15 @@ const Dashboard = () => {
                           <div className="pt-3 flex justify-between items-center">
                             <span className="text-sm md:text-base font-bold">Total</span>
                             <span className="text-lg md:text-2xl font-bold text-primary">
-                              {formatCurrency(order.totalAmount)}
+                              {formatPrice(order.totalAmount)}
                             </span>
                           </div>
 
                           <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 md:gap-3">
                             <div className="text-xs md:text-sm text-muted-foreground">
-                              Delivery: {order.deliveryDetails?.city ?? "—"}
+                              Delivery: {(
+                                order.deliveryDetails?.address || order.deliveryDetails?.street || ""
+                              ) + (order.deliveryDetails?.city ? ", " + order.deliveryDetails.city : "") + (order.deliveryDetails?.state ? ", " + order.deliveryDetails.state : "") || "—"}
                             </div>
                             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                               <Button

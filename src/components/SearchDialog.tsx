@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { getAllProducts } from "@/firebase/firebaseUtils";
 
 interface SearchDialogProps {
@@ -74,7 +75,7 @@ export const SearchDialog = ({ searchQuery, onSearchChange }: SearchDialogProps)
                 <p className="font-medium text-sm">{product.name}</p>
                 <p className="text-xs text-muted-foreground">{product.category}</p>
               </div>
-              <p className="font-semibold">₦{Number(product.price || 0).toLocaleString()}</p>
+              <CurrencyPrice price={Number(product.price || 0)} />
             </div>
           ))}
         </div>
@@ -87,4 +88,9 @@ export const SearchDialog = ({ searchQuery, onSearchChange }: SearchDialogProps)
       )}
     </div>
   );
+};
+
+const CurrencyPrice: React.FC<{ price: number }> = ({ price }) => {
+  const { formatPrice } = useCurrency();
+  return <p className="font-semibold">{formatPrice(price)}</p>;
 };

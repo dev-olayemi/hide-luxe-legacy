@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Package, Calendar, User, CreditCard, MapPin, Phone } from "lucide-react";
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState<any[]>([]);
@@ -58,6 +59,7 @@ const AdminOrders = () => {
   };
 
   const filteredOrders = filter === "all" ? orders : orders.filter((o) => o.status === filter);
+  const { formatPrice } = useCurrency();
 
   if (loading) {
     return (
@@ -128,7 +130,7 @@ const AdminOrders = () => {
                       </Badge>
                       <div className="text-right">
                         <div className="text-sm text-gray-500">Total</div>
-                        <div className="text-xl font-bold">₦{order.totalAmount?.toLocaleString()}</div>
+                        <div className="text-xl font-bold">{formatPrice(Number(order.totalAmount ?? 0))}</div>
                       </div>
                     </div>
                   </div>
@@ -181,11 +183,11 @@ const AdminOrders = () => {
                           <div className="flex-1">
                             <p className="font-medium">{item.name}</p>
                             <p className="text-sm text-gray-500">
-                              Qty: {item.quantity} × ₦{item.price?.toLocaleString()}
+                              Qty: {item.quantity} × {formatPrice(item.price)}
                             </p>
                           </div>
                           <div className="font-semibold">
-                            ₦{((item.quantity || 1) * (item.price || 0)).toLocaleString()}
+                            {formatPrice((item.quantity || 1) * (item.price || 0))}
                           </div>
                         </div>
                       ))}

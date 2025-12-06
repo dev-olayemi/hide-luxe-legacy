@@ -8,10 +8,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Package } from "lucide-react";
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     fetchProducts();
@@ -102,7 +104,7 @@ const AdminProducts = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-bold">
-                      ₦{p.price?.toLocaleString()}
+                      {formatPrice(Number(p.price ?? 0))}
                     </span>
                     <span className="text-sm text-gray-500">
                       Stock: {p.stock}

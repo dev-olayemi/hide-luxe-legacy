@@ -11,12 +11,14 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Package, User, MapPin, CreditCard, Calendar } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const OrderDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     if (!id) return;
@@ -119,20 +121,20 @@ const OrderDetails = () => {
                   <div className="flex-1">
                     <div className="font-medium">{item.name}</div>
                     <div className="text-sm text-muted-foreground">
-                      Qty: {item.quantity} × ₦{item.price?.toLocaleString()}
+                      Qty: {item.quantity} × {formatPrice(item.price)}
                     </div>
                     {item.size && <div className="text-xs text-muted-foreground">Size: {item.size}</div>}
                     {item.color && <div className="text-xs text-muted-foreground">Color: {item.color}</div>}
                   </div>
                   <div className="font-semibold">
-                    ₦{((item.price || 0) * (item.quantity || 1)).toLocaleString()}
+                    {formatPrice((item.price || 0) * (item.quantity || 1))}
                   </div>
                 </div>
               ))}
               <Separator />
               <div className="flex justify-between text-lg font-bold">
                 <span>Total</span>
-                <span>₦{Number(order.totalAmount || 0).toLocaleString()}</span>
+                <span>{formatPrice(Number(order.totalAmount || 0))}</span>
               </div>
             </div>
           </CardContent>
