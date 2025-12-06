@@ -236,7 +236,7 @@ export const generateLocalBusinessSchema = () => {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     name: SEO_CONFIG.brand,
-    image: 'https://www.28hideluxe.com/og-image.jpg',
+    image: 'https://www.28hideluxe.com/logo.png',
     description: SEO_CONFIG.description,
     url: SEO_CONFIG.website,
     telephone: SEO_CONFIG.contact.phone,
