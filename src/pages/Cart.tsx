@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Trash2, Plus, Minus, ShoppingBag, Gift } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingBag, Gift, MapPin, Package } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { BackButton } from "@/components/BackButton";
@@ -20,10 +20,11 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
-import { db, saveSharedCartSnapshot as saveSharedCartSnapshotToFirebase, getUserProfile, setUserStorePoints } from "@/firebase/firebaseUtils";
+import { db, saveSharedCartSnapshot as saveSharedCartSnapshotToFirebase, getUserProfile, setUserStorePoints as setUserStorePointsFirebase } from "@/firebase/firebaseUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
 import { calculateStorePointsValue, calculatePointsFromNGN } from "@/config/storePointsConfig";
+import { calculateDeliveryFee, formatDeliveryFee, PICKUP_LOCATION, DeliveryOption } from "@/config/deliveryConfig";
 
 interface DeliveryDetails {
   id?: string;
@@ -129,23 +130,26 @@ const Cart = () => {
   const [loading, setLoading] = useState(false);
 
   // Store points state
-  const [userStorePoints, setUserStorePoints] = useState(0);
+  const [userStorePoints, setUserStorePointsState] = useState(0);
   const [pointsToRedeem, setPointsToRedeem] = useState(0);
   const [showPointsInput, setShowPointsInput] = useState(false);
+
+  // Delivery option state
+  const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>('delivery');
 
   // Fetch user store points
   useEffect(() => {
     if (!user) {
-      setUserStorePoints(0);
+      setUserStorePointsState(0);
       return;
     }
     const loadPoints = async () => {
       try {
         const profile = await getUserProfile(user.uid);
-        setUserStorePoints(profile?.storePoints || 0);
+        setUserStorePointsState(profile?.storePoints || 0);
       } catch (err) {
         console.error("Failed to fetch store points:", err);
-        setUserStorePoints(0);
+        setUserStorePointsState(0);
       }
     };
     loadPoints();
@@ -173,7 +177,7 @@ const Cart = () => {
 
     // Try saving to Firestore so sellers on other devices can access
     try {
-      await saveSharedCartSnapshotToFirestore(cartId, payload);
+      await saveSharedCartSnapshotToFirebase(cartId, payload);
     } catch (err) {
       console.warn("Failed to save shared snapshot to Firestore", err);
     }
@@ -330,15 +334,12 @@ const Cart = () => {
 
   const validateDeliveryDetails = (): boolean => {
     const errors: Partial<DeliveryDetails> = {};
-    const required = [
-      "fullName",
-      "email",
-      "phoneNumber",
-      "address",
-      "city",
-      "state",
-      "country",
-    ];
+    
+    // For pickup, only require contact info
+    const required = deliveryOption === 'pickup' 
+      ? ["fullName", "email", "phoneNumber"]
+      : ["fullName", "email", "phoneNumber", "address", "city", "state", "country"];
+    
     required.forEach((field) => {
       if (!deliveryDetails[field as keyof DeliveryDetails]) {
         errors[field as keyof DeliveryDetails] = `${field
@@ -346,6 +347,12 @@ const Cart = () => {
           .toLowerCase()} is required`;
       }
     });
+    
+    // For delivery, validate that country is Nigeria (international not supported)
+    if (deliveryOption === 'delivery' && deliveryDetails.country && deliveryDetails.country.toLowerCase() !== 'nigeria') {
+      errors.country = 'Only Nigerian delivery is supported. Choose pickup or contact seller.';
+    }
+    
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -421,9 +428,17 @@ const Cart = () => {
   }) => {
     if (!user) throw new Error("No authenticated user");
     
+    // Calculate delivery fee
+    const deliveryFee = deliveryOption === 'pickup' 
+      ? 0 
+      : (deliveryDetails.state && deliveryDetails.country?.toLowerCase() === 'nigeria'
+          ? (calculateDeliveryFee(deliveryDetails.state, deliveryDetails.country || 'Nigeria') || 0)
+          : 0);
+    
     // Calculate discount from store points
     const discountAmount = calculateStorePointsValue(pointsToRedeem);
-    const finalAmount = Math.max(0, (orderMeta.amount || total) - discountAmount);
+    const subtotal = orderMeta.amount || total;
+    const finalAmount = Math.max(0, subtotal + deliveryFee - discountAmount);
     
     // build order payload
     const orderPayload = {
@@ -437,14 +452,25 @@ const Cart = () => {
         image: item.image,
         category: item.category,
       })),
+      subtotalAmount: subtotal,
+      deliveryFee,
+      deliveryOption,
       totalAmount: finalAmount,
       originalAmount: orderMeta.amount ?? total,
       storePointsRedeemed: pointsToRedeem,
       storePointsDiscount: discountAmount,
-      deliveryDetails: {
-        ...deliveryDetails,
-        createdAt: serverTimestamp(),
-      },
+      deliveryDetails: deliveryOption === 'pickup' 
+        ? { 
+            ...PICKUP_LOCATION,
+            fullName: deliveryDetails.fullName,
+            email: deliveryDetails.email,
+            phoneNumber: deliveryDetails.phoneNumber,
+            createdAt: serverTimestamp(),
+          }
+        : {
+            ...deliveryDetails,
+            createdAt: serverTimestamp(),
+          },
       status: orderMeta.status === "successful" ? "processing" : "pending",
       paymentStatus: orderMeta.status === "successful" ? "paid" : "pending",
       createdAt: serverTimestamp(),
@@ -475,8 +501,8 @@ const Cart = () => {
     if (pointsToRedeem > 0) {
       try {
         const remainingPoints = userStorePoints - pointsToRedeem;
-        await setUserStorePoints(user.uid, remainingPoints);
-        setUserStorePoints(remainingPoints);
+        await setUserStorePointsFirebase(user.uid, remainingPoints);
+        setUserStorePointsState(remainingPoints);
         setPointsToRedeem(0);
       } catch (err) {
         console.error("Failed to deduct store points:", err);
@@ -527,9 +553,16 @@ const Cart = () => {
         return;
       }
 
-      // Calculate final amount after points discount
+      // Calculate delivery fee
+      const deliveryFee = deliveryOption === 'pickup' 
+        ? 0 
+        : (deliveryDetails.state && deliveryDetails.country?.toLowerCase() === 'nigeria'
+            ? (calculateDeliveryFee(deliveryDetails.state, deliveryDetails.country || 'Nigeria') || 0)
+            : 0);
+      
+      // Calculate final amount after points discount and delivery
       const discountAmount = calculateStorePointsValue(pointsToRedeem);
-      const finalAmount = Math.max(0, total - discountAmount);
+      const finalAmount = Math.max(0, total + deliveryFee - discountAmount);
 
       (window as any).FlutterwaveCheckout({
         public_key: flwPublicKey,
@@ -781,14 +814,82 @@ const Cart = () => {
                 <h2 className="font-playfair text-2xl font-bold mb-4">
                   Order Summary
                 </h2>
+
+                {/* Delivery Option Selection */}
+                <div className="mb-4 space-y-3">
+                  <Label className="text-sm font-semibold">Delivery Option</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setDeliveryOption('delivery')}
+                      className={`p-3 rounded border text-left transition-all ${
+                        deliveryOption === 'delivery' 
+                          ? 'border-primary bg-primary/5 ring-2 ring-primary/20' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <Package className="w-4 h-4" />
+                        <span className="font-medium text-sm">Delivery</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {deliveryDetails.state && deliveryDetails.country?.toLowerCase() === 'nigeria'
+                          ? formatDeliveryFee(calculateDeliveryFee(deliveryDetails.state, deliveryDetails.country || 'Nigeria'))
+                          : 'Select state for price'
+                        }
+                      </p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDeliveryOption('pickup')}
+                      className={`p-3 rounded border text-left transition-all ${
+                        deliveryOption === 'pickup' 
+                          ? 'border-primary bg-primary/5 ring-2 ring-primary/20' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <MapPin className="w-4 h-4" />
+                        <span className="font-medium text-sm">Self Pickup</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Free - Lagos</p>
+                    </button>
+                  </div>
+                  
+                  {deliveryOption === 'pickup' && (
+                    <div className="p-3 bg-muted/50 rounded text-sm">
+                      <div className="font-medium mb-1">Pickup Location:</div>
+                      <div className="text-muted-foreground">
+                        {PICKUP_LOCATION.address}, {PICKUP_LOCATION.city}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {PICKUP_LOCATION.note}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {deliveryOption === 'delivery' && deliveryDetails.country && deliveryDetails.country.toLowerCase() !== 'nigeria' && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded text-sm text-amber-800">
+                      International shipping requires contacting the seller directly.
+                    </div>
+                  )}
+                </div>
+
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
                     <span>₦{total.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>Shipping</span>
-                    <span>Calculated at checkout</span>
+                  <div className="flex justify-between text-sm">
+                    <span>Delivery</span>
+                    <span>
+                      {deliveryOption === 'pickup' 
+                        ? 'Free (Pickup)' 
+                        : deliveryDetails.state && deliveryDetails.country?.toLowerCase() === 'nigeria'
+                          ? formatDeliveryFee(calculateDeliveryFee(deliveryDetails.state, deliveryDetails.country || 'Nigeria'))
+                          : <span className="text-muted-foreground">Select Nigerian state</span>
+                      }
+                    </span>
                   </div>
                 </div>
 
@@ -847,10 +948,20 @@ const Cart = () => {
                       <span>-₦{calculateStorePointsValue(pointsToRedeem).toLocaleString()}</span>
                     </div>
                   )}
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Total</span>
-                    <span>₦{Math.max(0, total - calculateStorePointsValue(pointsToRedeem)).toLocaleString()}</span>
-                  </div>
+                  {(() => {
+                    const deliveryFee = deliveryOption === 'pickup' 
+                      ? 0 
+                      : (deliveryDetails.state && deliveryDetails.country?.toLowerCase() === 'nigeria'
+                          ? (calculateDeliveryFee(deliveryDetails.state, deliveryDetails.country || 'Nigeria') || 0)
+                          : 0);
+                    const grandTotal = Math.max(0, total + deliveryFee - calculateStorePointsValue(pointsToRedeem));
+                    return (
+                      <div className="flex justify-between font-bold text-lg">
+                        <span>Total</span>
+                        <span>₦{grandTotal.toLocaleString()}</span>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {!showDeliveryForm ? (
