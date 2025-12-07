@@ -25,6 +25,7 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
     if (!id) return;
@@ -51,6 +52,11 @@ const ProductDetail = () => {
 
     fetchProduct();
   }, [id]);
+
+  // reset selected image when product changes
+  useEffect(() => {
+    setSelectedImageIndex(0);
+  }, [product?.id]);
 
   if (loading) {
     return (
@@ -124,7 +130,7 @@ const ProductDetail = () => {
               <img
                 src={
                   Array.isArray(product.images) && product.images.length > 0
-                    ? product.images[0]
+                    ? product.images[selectedImageIndex]
                     : "/placeholder.png"
                 }
                 alt={product.name}
@@ -136,7 +142,10 @@ const ProductDetail = () => {
                 {product.images.map((img, idx) => (
                   <div
                     key={idx}
-                    className="aspect-square bg-muted rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-accent transition-colors"
+                    onClick={() => setSelectedImageIndex(idx)}
+                    className={`aspect-square bg-muted rounded-lg overflow-hidden cursor-pointer transition-colors border-2 ${
+                      idx === selectedImageIndex ? 'border-accent ring-2 ring-accent/20' : 'border-transparent hover:border-accent'
+                    }`}
                   >
                     <img
                       src={img}
