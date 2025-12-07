@@ -32,6 +32,7 @@ const ProductList = () => {
           id={p.id}
           name={p.name}
           price={p.price}
+          discount={p.discount}
           image={
             Array.isArray(p.images) && p.images.length > 0
               ? p.images[0]

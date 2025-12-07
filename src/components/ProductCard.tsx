@@ -18,6 +18,7 @@ interface ProductCardProps {
   id: string;
   name: string;
   price: number;
+  discount?: number;
   image: string;
   category?: string;
   isNew?: boolean;
@@ -30,6 +31,7 @@ export const ProductCard = ({
   id,
   name,
   price,
+  discount,
   image,
   category,
   isNew,
@@ -41,6 +43,9 @@ export const ProductCard = ({
   const { toast } = useToast();
   const { formatPrice } = useCurrency();
   const inWishlist = isInWishlist(id);
+
+  // Calculate discounted price
+  const discountedPrice = discount ? price - (price * discount) / 100 : price;
 
   const handleAddToCart = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -109,6 +114,12 @@ export const ProductCard = ({
             NEW
           </Badge>
         )}
+
+        {discount && (
+          <Badge className="absolute left-3 top-10 bg-red-500 text-white font-semibold">
+            {discount}% OFF
+          </Badge>
+        )}
       </div>
 
       <CardContent className="p-4">
@@ -125,8 +136,15 @@ export const ProductCard = ({
         )}
 
         <div className="flex items-center justify-between mb-3">
-          <div className="text-lg font-bold text-neutral-900">
-            {formatPrice(price)}
+          <div className="flex items-center gap-2">
+            <div className="text-lg font-bold text-neutral-900">
+              {formatPrice(discountedPrice)}
+            </div>
+            {discount && (
+              <div className="text-xs line-through text-muted-foreground">
+                {formatPrice(price)}
+              </div>
+            )}
           </div>
           <div className="text-xs text-muted-foreground">
             {availableCount != null

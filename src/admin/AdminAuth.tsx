@@ -10,7 +10,7 @@ import {
 import { auth, db } from "@/firebase/firebaseUtils";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
-const ADMIN_EMAILS = ["muhammednetr@gmail.com", "muhammedt3ch@gmail.com"];
+const ADMIN_EMAILS = ["muhammednetr@gmail.com", "muhammedt3ch@gmail.com", "28hideluxe@gmail.com"];
 
 const AdminAuth = () => {
   const [email, setEmail] = useState("");

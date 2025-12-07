@@ -59,6 +59,7 @@ const Wishlist = () => {
                 id={product.id}
                 name={product.name}
                 price={product.price}
+                discount={product.discount}
                 image={
                   Array.isArray(product.images) && product.images.length > 0
                     ? product.images[0]
