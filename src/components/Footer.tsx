@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MapPin, Mail, Phone, ExternalLink } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import logoFull from "@/assets/logo-full-new.png";
@@ -27,21 +27,12 @@ export const Footer = () => {
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-muted-foreground" />
                 <a
-                  href="tel:+2349031976895"
+                  href="tel:+2348144977227"
                   className="text-foreground hover:text-accent transition-colors"
                 >
                   +234 814 497 7227
                 </a>
               </div>
-
-              <a
-                href="https://maps.google.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-accent hover:underline text-sm mt-2"
-              >
-                Get direction <ExternalLink className="h-3 w-3" />
-              </a>
             </div>
           </div>
 

@@ -8,6 +8,8 @@ import { TrendingUp, ShoppingBag, Users, DollarSign, Package, Paintbrush } from 
 import { useCurrency } from '@/contexts/CurrencyContext';
 
 const AdminAnalytics = () => {
+  const { formatPrice } = useCurrency();
+
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
