@@ -5,6 +5,7 @@ import { ArrowRight, Footprints, Shirt, Backpack, Sparkles, Sofa, Zap } from 'lu
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/firebase/firebaseConfig';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import OptimizedImage from './OptimizedImage';
 
 interface CategoryItem {
   id: string; // slug
@@ -377,7 +378,6 @@ export const CategoriesGrid = () => {
                     width={600}
                     height={600}
                     style={{ objectFit: 'cover' }}
-                    onError={undefined}
                   />
                   {p.isNew && (
                     <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded">
