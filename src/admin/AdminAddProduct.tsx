@@ -13,7 +13,6 @@ const AdminAddProduct = () => {
     description: "",
     category: "",
     price: "" as number | "",
-    discount: "" as number | "",
     stock: "" as number | "",
     careInstructions: "",
     isLimited: false,
@@ -126,7 +125,7 @@ const AdminAddProduct = () => {
     }
 
     try {
-      const productPayload: any = {
+      await addProduct({
         name: formData.name,
         description: formData.description,
         category: formData.category,
@@ -139,11 +138,7 @@ const AdminAddProduct = () => {
         isLimited: formData.isLimited,
         createdAt: new Date(),
         updatedAt: new Date(),
-      };
-      if (formData.discount) {
-        productPayload.discount = Number(formData.discount);
-      }
-      await addProduct(productPayload);
+      });
 
       toast({ title: "Product added successfully!" });
 
@@ -153,7 +148,6 @@ const AdminAddProduct = () => {
         description: "",
         category: "",
         price: "",
-        discount: "",
         stock: "",
         careInstructions: "",
         isLimited: false,
@@ -262,30 +256,7 @@ const AdminAddProduct = () => {
                   />
                 </div>
 
-                <div>
-                  <label
-                    htmlFor="discount"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Discount (%) <span className="text-xs text-gray-500">(optional)</span>
-                  </label>
-                  <input
-                    type="number"
-                    id="discount"
-                    value={formData.discount}
-                    onChange={(e) =>
-                      handleInputChange(
-                        "discount",
-                        e.target.value === "" ? "" : Number(e.target.value)
-                      )
-                    }
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    placeholder="0"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                  />
-                </div>
+                {/* discount removed; use central AddProduct page for discount management */}
 
                 <div className="sm:col-span-2">
                   <label

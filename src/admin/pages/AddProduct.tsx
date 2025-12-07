@@ -27,6 +27,7 @@ const AddProduct = () => {
     description: "",
     category: "",
     price: "",
+    discount: "",
     stock: "",
     images: [] as string[],
     sizes: [] as string[],
@@ -42,6 +43,12 @@ const AddProduct = () => {
   const [currentSize, setCurrentSize] = useState("");
   const [currentColor, setCurrentColor] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  // Derived pricing values & validation
+  const priceNum = Number(formData.price) || 0;
+  const discountNum = formData.discount !== "" ? Number(formData.discount) : 0;
+  const discountValid = formData.discount === "" || (discountNum >= 0 && discountNum <= 100);
+  const discountedPrice = discountNum ? Math.max(0, priceNum - (priceNum * discountNum) / 100) : priceNum;
 
   useEffect(() => {
     fetchCategories();
@@ -156,14 +163,26 @@ const AddProduct = () => {
     e.preventDefault();
     setLoading(true);
 
+    // validate discount
+    if (!discountValid) {
+      toast({ title: "Invalid discount", description: "Discount must be between 0 and 100", variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+
     try {
-      await addDoc(collection(db, "products"), {
+      const payload: any = {
         ...formData,
         price: Number(formData.price),
         stock: Number(formData.stock),
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+      };
+      if (formData.discount !== undefined && formData.discount !== "") {
+        payload.discount = Number(formData.discount);
+      }
+
+      await addDoc(collection(db, "products"), payload);
 
       toast({ title: "Product added successfully!" });
       navigate("/admin/products");
@@ -277,7 +296,26 @@ const AddProduct = () => {
                 />
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
+              {/* Price/Discount/Stock moved to Pricing card for clarity */}
+              <div className="space-y-2">
+                <Label htmlFor="stock">Stock Quantity *</Label>
+                <Input
+                  id="stock"
+                  type="number"
+                  value={formData.stock}
+                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                  required
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Pricing</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="price">Price (₦) *</Label>
                   <Input
@@ -288,15 +326,26 @@ const AddProduct = () => {
                     required
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="stock">Stock Quantity *</Label>
+                  <Label htmlFor="discount">Discount (%)</Label>
                   <Input
-                    id="stock"
+                    id="discount"
                     type="number"
-                    value={formData.stock}
-                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                    required
+                    value={formData.discount}
+                    onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
+                    placeholder="e.g., 20"
+                    min={0}
+                    max={100}
                   />
+                  {!discountValid && (
+                    <p className="text-sm text-destructive">Discount must be between 0 and 100</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Discounted Price</Label>
+                  <div className="text-lg font-bold">₦{discountedPrice.toLocaleString()}</div>
                 </div>
               </div>
             </CardContent>

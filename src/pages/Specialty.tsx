@@ -32,6 +32,7 @@ const Specialty = () => {
                 id={product.id}
                 name={product.name}
                 price={product.price}
+                discount={product.discount}
                 image={product.image}
                 category={product.category}
                 isNew={product.isNew}

@@ -46,6 +46,7 @@ export const ProductCard = ({
 
   // Calculate discounted price
   const discountedPrice = discount ? price - (price * discount) / 100 : price;
+  const savings = discount ? price - discountedPrice : 0;
 
   const handleAddToCart = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -136,13 +137,20 @@ export const ProductCard = ({
         )}
 
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="text-lg font-bold text-neutral-900">
-              {formatPrice(discountedPrice)}
+          <div className="flex flex-col">
+            <div className="flex items-baseline gap-3">
+              <div className="text-lg font-bold text-neutral-900">
+                {formatPrice(discountedPrice)}
+              </div>
+              {discount && (
+                <div className="text-xs line-through text-muted-foreground">
+                  {formatPrice(price)}
+                </div>
+              )}
             </div>
-            {discount && (
-              <div className="text-xs line-through text-muted-foreground">
-                {formatPrice(price)}
+            {discount && savings > 0 && (
+              <div className="text-xs text-emerald-700 font-medium mt-1">
+                Save {formatPrice(savings)} ({discount}% off)
               </div>
             )}
           </div>

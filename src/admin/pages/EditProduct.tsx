@@ -28,6 +28,7 @@ const EditProduct = () => {
     description: "",
     category: "",
     price: "",
+    discount: "",
     stock: "",
     images: [] as string[],
     sizes: [] as string[],
@@ -42,6 +43,12 @@ const EditProduct = () => {
   const [currentImage, setCurrentImage] = useState("");
   const [currentSize, setCurrentSize] = useState("");
   const [currentColor, setCurrentColor] = useState("");
+
+  // Derived pricing values & validation
+  const priceNum = Number(formData.price) || 0;
+  const discountNum = formData.discount !== undefined && formData.discount !== "" ? Number(formData.discount) : 0;
+  const discountValid = formData.discount === undefined || formData.discount === "" || (discountNum >= 0 && discountNum <= 100);
+  const discountedPrice = discountNum ? Math.max(0, priceNum - (priceNum * discountNum) / 100) : priceNum;
 
   useEffect(() => {
     fetchCategories();
@@ -62,6 +69,7 @@ const EditProduct = () => {
           description: data.description || "",
           category: data.category || "",
           price: data.price?.toString() || "",
+          discount: data.discount?.toString() || "",
           stock: data.stock?.toString() || "",
           images: data.images || [],
           sizes: data.sizes || [],
@@ -165,13 +173,24 @@ const EditProduct = () => {
     if (!id) return;
     setLoading(true);
 
+    // validate discount
+    const discountNum = formData.discount === undefined || formData.discount === "" ? null : Number(formData.discount);
+    if (discountNum !== null && (isNaN(discountNum) || discountNum < 0 || discountNum > 100)) {
+      toast({ title: "Invalid discount", description: "Discount must be between 0 and 100", variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+
     try {
-      await updateDoc(doc(db, "products", id), {
+      const payload: any = {
         ...formData,
         price: Number(formData.price),
         stock: Number(formData.stock),
         updatedAt: new Date(),
-      });
+      };
+      if (discountNum !== null) payload.discount = discountNum;
+
+      await updateDoc(doc(db, "products", id), payload);
 
       toast({ title: "Product updated successfully!" });
       navigate("/admin/products");
@@ -317,11 +336,52 @@ const EditProduct = () => {
               </div>
             </CardContent>
           </Card>
+ 
+            <Card>
+              <CardHeader>
+                <CardTitle>Pricing</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="price">Price (₦) *</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      required
+                    />
+                  </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Product Images</CardTitle>
-            </CardHeader>
+                  <div className="space-y-2">
+                    <Label htmlFor="discount">Discount (%)</Label>
+                    <Input
+                      id="discount"
+                      type="number"
+                      value={formData.discount}
+                      onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
+                      placeholder="e.g., 20"
+                      min={0}
+                      max={100}
+                    />
+                    {!discountValid && (
+                      <p className="text-sm text-destructive">Discount must be between 0 and 100</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Discounted Price</Label>
+                    <div className="text-lg font-bold">₦{discountedPrice.toLocaleString()}</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Product Images</CardTitle>
+              </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex gap-2">
                 <Input
