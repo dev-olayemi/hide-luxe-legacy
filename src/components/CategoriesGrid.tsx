@@ -181,7 +181,7 @@ export const CategoriesGrid = () => {
           const items = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
           
           // Sort based on sortBy
-          let sorted = [...items];
+          const sorted = [...items];
           if (sortBy === 'name') {
             sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
           } else if (sortBy === 'rating') {
@@ -398,9 +398,12 @@ export const CategoriesGrid = () => {
                     <span className="text-gray-500">({p.reviews || 0})</span>
                   </div>
 
-                  {/* Price */}
+                  {/* Price (show discounted price as main, base price as strike-through when discount exists) */}
                   <div className="flex items-center gap-2 mb-2">
-                            <CurrencyPrices price={p.price} originalPrice={p.originalPrice} />
+                    <CurrencyPrices
+                      price={p.discount ? p.price - (p.price * p.discount) / 100 : p.price}
+                      originalPrice={p.discount ? p.price : p.originalPrice}
+                    />
                   </div>
 
                   {/* Stock Status */}
