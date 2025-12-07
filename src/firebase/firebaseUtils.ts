@@ -1001,6 +1001,82 @@ export async function redeemStorePointCoupon(code: string, userId: string) {
   }
 }
 
+// ===== COLLECTIONS MANAGEMENT =====
+
+export interface CollectionItem {
+  id?: string;
+  name: string;
+  title: string;
+  description: string;
+  image?: string;
+  link?: string;
+  featured?: boolean;
+  order?: number;
+  createdAt?: any;
+  updatedAt?: any;
+}
+
+export async function getAllCollections(): Promise<CollectionItem[]> {
+  try {
+    const snap = await getDocs(collection(db, "collections"));
+    const items = snap.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    } as CollectionItem));
+    // Sort by order field
+    items.sort((a, b) => (a.order || 0) - (b.order || 0));
+    return items;
+  } catch (error: any) {
+    console.error("Error fetching collections:", error);
+    return [];
+  }
+}
+
+export async function createCollection(
+  collectionData: Omit<CollectionItem, "id" | "createdAt" | "updatedAt">
+): Promise<CollectionItem> {
+  try {
+    const docRef = await addDoc(collection(db, "collections"), {
+      ...collectionData,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    return {
+      id: docRef.id,
+      ...collectionData,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+  } catch (error: any) {
+    console.error("Error creating collection:", error);
+    throw error;
+  }
+}
+
+export async function updateCollection(
+  collectionId: string,
+  updates: Partial<CollectionItem>
+): Promise<void> {
+  try {
+    await updateDoc(doc(db, "collections", collectionId), {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error: any) {
+    console.error("Error updating collection:", error);
+    throw error;
+  }
+}
+
+export async function deleteCollection(collectionId: string): Promise<void> {
+  try {
+    await deleteDoc(doc(db, "collections", collectionId));
+  } catch (error: any) {
+    console.error("Error deleting collection:", error);
+    throw error;
+  }
+}
+
 // Type definitions
 interface DeliveryDetails {
   fullName: string;
