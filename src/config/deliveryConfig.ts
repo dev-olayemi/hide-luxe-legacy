@@ -61,7 +61,7 @@ export const DEFAULT_DELIVERY_FEE = 7500;
 
 // Free pickup option in Lagos
 export const PICKUP_LOCATION = {
-  address: "28th Hide Luxe Store, Lekki Phase 1",
+  address: "28th Hide Luxe Store (Contact us)",
   city: "Lagos",
   state: "Lagos",
   country: "Nigeria",
