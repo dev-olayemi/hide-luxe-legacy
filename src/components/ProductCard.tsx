@@ -91,11 +91,12 @@ export const ProductCard = ({
           to={`/product/${id}`}
           className="block w-full h-full flex items-center justify-center"
         >
-          <img
+          <OptimizedImage
             src={image}
             alt={name}
             className="max-h-full max-w-full object-contain"
-            loading="lazy"
+            width={560}
+            height={560}
           />
         </Link>
 

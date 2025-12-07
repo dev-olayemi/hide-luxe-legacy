@@ -369,14 +369,15 @@ export const CategoriesGrid = () => {
                 className="group block bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
               >
                 {/* Product Image */}
-                <div className="w-full aspect-square bg-gray-100 overflow-hidden relative">
-                  <img
+                  <div className="w-full aspect-square bg-gray-100 overflow-hidden relative">
+                  <OptimizedImage
                     src={p.image || p.thumbnail || (p.images && p.images[0])}
                     alt={p.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    onError={(e) => {
-                      e.currentTarget.src = '/collections/cool-brown-bag.jpg';
-                    }}
+                    width={600}
+                    height={600}
+                    style={{ objectFit: 'cover' }}
+                    onError={undefined}
                   />
                   {p.isNew && (
                     <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded">

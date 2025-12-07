@@ -127,7 +127,8 @@ const ProductDetail = () => {
           {/* Product Image */}
           <div className="space-y-4">
             <div className="aspect-square bg-muted rounded-lg overflow-hidden">
-              <img
+              {/* Main image uses OptimizedImage for lazy loading & decoding */}
+              <OptimizedImage
                 src={
                   Array.isArray(product.images) && product.images.length > 0
                     ? product.images[selectedImageIndex]
@@ -135,6 +136,9 @@ const ProductDetail = () => {
                 }
                 alt={product.name}
                 className="w-full h-full object-cover"
+                width={900}
+                height={900}
+                priority={true}
               />
             </div>
             {product.images && product.images.length > 1 && (
@@ -147,10 +151,12 @@ const ProductDetail = () => {
                       idx === selectedImageIndex ? 'border-accent ring-2 ring-accent/20' : 'border-transparent hover:border-accent'
                     }`}
                   >
-                    <img
+                    <OptimizedImage
                       src={img}
                       alt={`${product.name} ${idx + 1}`}
                       className="w-full h-full object-cover"
+                      width={200}
+                      height={200}
                     />
                   </div>
                 ))}
