@@ -71,6 +71,12 @@ const ProductDetail = () => {
   const inWishlist = isInWishlist(product.id);
   const { formatPrice } = useCurrency();
 
+  // Compute discounted price when discount exists
+  const discountedPrice = product?.discount
+    ? product.price - (product.price * product.discount) / 100
+    : product.price;
+  const savings = product?.discount ? product.price - discountedPrice : 0;
+
   const handleAddToCart = () => {
     if (product.sizes && product.sizes.length > 0 && !selectedSize) {
       alert("Please select a size");
@@ -79,7 +85,7 @@ const ProductDetail = () => {
     addToCart({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: discountedPrice,
       image:
         Array.isArray(product.images) && product.images.length > 0
           ? product.images[0]
@@ -174,9 +180,16 @@ const ProductDetail = () => {
                 </span>
               </div>
 
-              <p className="text-3xl font-semibold mb-6">
-                {formatPrice(product.price)}
-              </p>
+              <div className="flex items-baseline gap-3 mb-6">
+                <p className="text-3xl font-semibold">
+                  {formatPrice(discountedPrice)}
+                </p>
+                {product.discount && (
+                  <p className="text-sm text-muted-foreground line-through">
+                    {formatPrice(product.price)}
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="prose prose-sm">
@@ -290,7 +303,7 @@ const ProductDetail = () => {
                     const WHATSAPP_NUMBER = "+2349031976895";
                     const phone = WHATSAPP_NUMBER.replace(/[^\d]/g, "");
                     const productLink = `${window.location.origin}/product/${product.id}`;
-                    const msg = `Hello, I would like information about this product:\n\nProduct: ${product.name}\nCategory: ${product.category}\nPrice: ₦${product.price.toLocaleString()}\nLink: ${productLink}`;
+                    const msg = `Hello, I would like information about this product:\n\nProduct: ${product.name}\nCategory: ${product.category}\nPrice: ₦${discountedPrice.toLocaleString()}\nLink: ${productLink}`;
                     const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
                     window.open(url, "_blank");
                   }}

@@ -55,7 +55,7 @@ export const ProductCard = ({
       addToCart({
         id,
         name,
-        price,
+        price: discountedPrice,
         image,
         category: category || "",
       });
