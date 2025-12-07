@@ -125,6 +125,27 @@ export const CategoriesGrid = () => {
   React.useEffect(() => {
     const fetchCategories = async () => {
       try {
+        // First try to fetch from 'collections' collection (admin-managed)
+        const collectionsSnap = await getDocs(collection(db, 'collections'));
+        if (!collectionsSnap.empty) {
+          const items: CategoryItem[] = collectionsSnap.docs.map((d) => {
+            const data = d.data() as any;
+            return {
+              id: data.name || d.id,
+              name: data.name || data.title || d.id,
+              title: data.title || data.name || d.id,
+              description: data.description || '',
+              image: data.image,
+              featured: data.featured ?? true,
+            };
+          });
+          // Sort by order if available
+          items.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+          setCategories(items);
+          return;
+        }
+
+        // Fallback to categories collection
         const q = collection(db, 'categories');
         const snap = await getDocs(q);
         if (!snap.empty) {
@@ -210,7 +231,8 @@ export const CategoriesGrid = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {categories.filter((cat) => cat.featured).map((category, index) => {
             const slug = category.id || slugify(category.name);
-            const imageUrl = `/collections/${collectionImageMap[slug] || collectionImageMap['specialty']}`;
+            // Use image from database if available, otherwise fallback
+            const imageUrl = category.image || `/collections/${collectionImageMap[slug] || collectionImageMap['specialty']}`;
             return (
               <Link
                 key={slug}
@@ -246,7 +268,7 @@ export const CategoriesGrid = () => {
 
                 {/* Badge */}
                 <div className="absolute top-4 right-4 px-3 py-1 bg-white text-gray-900 text-xs font-bold rounded-full">
-                  {categories.filter((c) => c.featured).indexOf(category) + 1}/{categories.filter((c) => c.featured).length}
+                  {index + 1}/{categories.filter((c) => c.featured).length}
                 </div>
               </Link>
             );
@@ -257,7 +279,8 @@ export const CategoriesGrid = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {categories.filter((cat) => !cat.featured).map((category) => {
             const slug = category.id || slugify(category.name);
-            const imageUrl = `/collections/${collectionImageMap[slug] || collectionImageMap['specialty']}`;
+            // Use image from database if available, otherwise fallback
+            const imageUrl = category.image || `/collections/${collectionImageMap[slug] || collectionImageMap['specialty']}`;
             return (
               <Link
                 key={slug}
