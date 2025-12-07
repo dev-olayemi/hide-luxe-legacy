@@ -6,10 +6,8 @@ import {
   getDocs,
   deleteDoc,
   doc,
-  query,
-  orderBy,
 } from "firebase/firestore";
-import { db } from "@/firebase/firebaseUtils";
+import { db } from "@/firebase/firebaseConfig";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,12 +36,15 @@ const Products = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const q = query(
-        collection(db, "products"),
-        orderBy("createdAt", "desc")
-      );
-      const snap = await getDocs(q);
+      // Fetch all products without ordering to avoid index issues
+      const snap = await getDocs(collection(db, "products"));
       const list = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+      // Sort by createdAt client-side if available
+      list.sort((a, b) => {
+        const aTime = a.createdAt?.toMillis?.() || a.createdAt || 0;
+        const bTime = b.createdAt?.toMillis?.() || b.createdAt || 0;
+        return bTime - aTime;
+      });
       setItems(list);
     } catch (err: any) {
       console.error("Failed to load products", err);
