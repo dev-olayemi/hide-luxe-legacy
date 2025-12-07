@@ -25,7 +25,7 @@ import { db, saveSharedCartSnapshot as saveSharedCartSnapshotToFirebase, getUser
 import { useAuth } from "@/contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
 import { calculateStorePointsValue, calculatePointsFromNGN } from "@/config/storePointsConfig";
-import { calculateDeliveryFee, formatDeliveryFee, PICKUP_LOCATION, DeliveryOption } from "@/config/deliveryConfig";
+import { calculateDeliveryFee, formatDeliveryFee, PICKUP_LOCATION, DeliveryOption, getNigerianStates } from "@/config/deliveryConfig";
 
 interface DeliveryDetails {
   id?: string;
@@ -91,7 +91,7 @@ const Cart = () => {
         address: "",
         city: "",
         state: "",
-        country: "",
+        country: "Nigeria",
         additionalInfo: "",
       } as DeliveryDetails;
 
@@ -208,95 +208,188 @@ const Cart = () => {
     } catch (e) { /* empty */ }
   }, [cartItems, deliveryDetails, cartId, saveSharedCartSnapshot]);
 
-  // fetch countries list (uses restcountries for readable names)
+  // fetch countries list (uses restcountries for readable names) with cache and timeout
   useEffect(() => {
+    let mounted = true;
+    const CACHE_KEY = "countries_cache_v1";
+    const TTL = 1000 * 60 * 60 * 24; // 24h
+
+    const localFallback = [
+      "Nigeria",
+      "United States",
+      "United Kingdom",
+      "Ghana",
+      "Kenya",
+      "South Africa",
+    ];
+
+    const loadFromCache = (): string[] | null => {
+      try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.ts || !parsed.items) return null;
+        if (Date.now() - parsed.ts > TTL) return null;
+        return parsed.items;
+      } catch (e) {
+        return null;
+      }
+    };
+
+    const saveToCache = (items: string[]) => {
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items }));
+      } catch (e) {
+        /* ignore */
+      }
+    };
+
+    const fetchWithTimeout = (url: string, opts: RequestInit = {}, timeout = 3000) =>
+      Promise.race([
+        fetch(url, opts),
+        new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), timeout)),
+      ]);
+
     (async () => {
       setCountryLoading(true);
       try {
-        let names: string[] = [];
+        const cached = loadFromCache();
+        if (cached) {
+          if (mounted) setCountries(cached);
+          setCountryLoading(false);
+          return;
+        }
 
-        // Try restcountries first (preferred)
+        // Try REST Countries with a short timeout
         try {
-          const res = await fetch("https://restcountries.com/v3.1/all");
+          const res = await fetchWithTimeout("https://restcountries.com/v3.1/all", {}, 3000) as Response;
           if (res.ok) {
             const data = await res.json();
             if (Array.isArray(data)) {
-              names = data.map((c: any) => c?.name?.common).filter(Boolean);
+              const names = data.map((c: any) => c?.name?.common).filter(Boolean);
+              const items = Array.from(new Set(["Nigeria", ...names])).sort();
+              if (mounted) setCountries(items);
+              saveToCache(items);
+              setCountryLoading(false);
+              return;
             }
-          } else {
-            console.warn("restcountries responded with", res.status);
           }
         } catch (e) {
-          console.warn("restcountries fetch failed:", e);
+          // fallthrough to fallback
         }
 
-        // Fallback to countriesnow if restcountries didn't return usable data
-        if (names.length === 0) {
-          try {
-            const res2 = await fetch(
-              "https://countriesnow.space/api/v0.1/countries/"
-            );
-            if (res2.ok) {
-              const json2 = await res2.json();
-              const data2 = json2?.data || json2?.countries || [];
-              if (Array.isArray(data2)) {
-                names = data2
-                  .map((c: any) => c.country || c.name || c.countryName)
-                  .filter(Boolean);
-              }
-            } else {
-              console.warn("countriesnow responded with", res2.status);
+        // Secondary attempt: countriesnow (short timeout)
+        try {
+          const res2 = await fetchWithTimeout("https://countriesnow.space/api/v0.1/countries/", {}, 3000) as Response;
+          if (res2.ok) {
+            const json2 = await res2.json();
+            const data2 = json2?.data || json2?.countries || [];
+            if (Array.isArray(data2)) {
+              const names = data2.map((c: any) => c.country || c.name || c.countryName).filter(Boolean);
+              const items = Array.from(new Set(["Nigeria", ...names])).sort();
+              if (mounted) setCountries(items);
+              saveToCache(items);
+              setCountryLoading(false);
+              return;
             }
-          } catch (e) {
-            console.warn("countriesnow fetch failed:", e);
           }
+        } catch (e) {
+          // fallthrough to fallback
         }
 
-        // Final small local fallback so UI still works if both APIs fail
-        if (names.length === 0) {
-          names = [
-            "Nigeria",
-            "United States",
-            "United Kingdom",
-            "Ghana",
-            "Kenya",
-            "South Africa",
-          ];
-        }
-
-        // normalize and sort
-        setCountries(Array.from(new Set(names)).sort());
+        // Final fallback
+        if (mounted) setCountries(localFallback);
+        saveToCache(localFallback);
       } catch (err) {
         console.error("countries fetch error", err);
-        setCountries(["Nigeria", "United States", "United Kingdom"]);
+        if (mounted) setCountries(localFallback);
       } finally {
-        setCountryLoading(false);
+        if (mounted) setCountryLoading(false);
       }
     })();
+
+    return () => { mounted = false; };
   }, []);
 
-  // fetch states for selected country using countriesnow.space
+  // fetch states for selected country (cached + fast Nigeria path)
   const fetchStatesForCountry = useCallback(async (countryName: string) => {
     if (!countryName) {
       setStates([]);
       return;
     }
+
+    // Fast path: local Nigerian states list
+    if (countryName.toLowerCase().includes("nigeria")) {
+      try {
+        const ns = getNigerianStates();
+        setStates(ns);
+        return;
+      } catch (err) {
+        console.warn("failed to load local Nigerian states", err);
+      }
+    }
+
+    const CACHE_KEY = `states_cache_${countryName.replace(/[^a-z0-9]/gi, '_')}`;
+    const TTL = 1000 * 60 * 60 * 24; // 24h
+
+    const loadFromCache = (): string[] | null => {
+      try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.ts || !parsed.items) return null;
+        if (Date.now() - parsed.ts > TTL) return null;
+        return parsed.items;
+      } catch (e) {
+        return null;
+      }
+    };
+
+    const saveToCache = (items: string[]) => {
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items }));
+      } catch (e) {
+        /* ignore */
+      }
+    };
+
+    const fetchWithTimeout = (url: string, opts: RequestInit = {}, timeout = 3000) =>
+      Promise.race([
+        fetch(url, opts),
+        new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), timeout)),
+      ]);
+
     try {
       setStates([]);
-      const res = await fetch(
-        "https://countriesnow.space/api/v0.1/countries/states",
-        {
+      const cached = loadFromCache();
+      if (cached) {
+        setStates(cached);
+        return;
+      }
+
+      // Try countriesnow API (short timeout)
+      try {
+        const res = await fetchWithTimeout("https://countriesnow.space/api/v0.1/countries/states", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ country: countryName }),
+        }, 3000) as Response;
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json && json.data && json.data.states) {
+            const items = json.data.states.map((s: any) => s.name);
+            setStates(items);
+            saveToCache(items);
+            return;
+          }
         }
-      );
-      const json = await res.json();
-      if (json && json.data && json.data.states) {
-        setStates(json.data.states.map((s: any) => s.name));
-      } else {
-        setStates([]);
+      } catch (e) {
+        console.warn('states api failed or timed out', e);
       }
+
+      // fallback: empty list (other countries not supported live)
+      setStates([]);
     } catch (err) {
       console.error("states fetch error", err);
       setStates([]);
@@ -1233,7 +1326,8 @@ const DeliveryManager: React.FC<DeliveryManagerProps> = ({
 
                 <div className="space-y-2">
                   <Label>Country *</Label>
-                  <select
+                  <input
+                    list="countries-list"
                     name="country"
                     className="input"
                     value={localAddr.country || ""}
@@ -1245,23 +1339,19 @@ const DeliveryManager: React.FC<DeliveryManagerProps> = ({
                       });
                       onChange(e);
                     }}
-                  >
-                    <option value="">Select country</option>
-                    {countryLoading ? (
-                      <option>Loading...</option>
-                    ) : (
-                      countries.map((c) => (
-                        <option key={c} value={c}>
-                          {c}
-                        </option>
-                      ))
-                    )}
-                  </select>
+                    placeholder={countryLoading ? 'Loading countries...' : 'Select or type a country'}
+                  />
+                  <datalist id="countries-list">
+                    {countries.map((c) => (
+                      <option key={c} value={c} />
+                    ))}
+                  </datalist>
                 </div>
 
                 <div className="space-y-2">
                   <Label>State / Region *</Label>
-                  <select
+                  <input
+                    list="states-list"
                     name="state"
                     className="input"
                     value={localAddr.state || ""}
@@ -1269,14 +1359,13 @@ const DeliveryManager: React.FC<DeliveryManagerProps> = ({
                       setLocalAddr({ ...localAddr, state: e.target.value });
                       onChange(e);
                     }}
-                  >
-                    <option value="">Select state</option>
+                    placeholder={states.length === 0 ? 'Select country first or type state' : 'Select or type a state'}
+                  />
+                  <datalist id="states-list">
                     {(states || []).map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
+                      <option key={s} value={s} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
 
                 <div className="space-y-2">
