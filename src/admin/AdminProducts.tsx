@@ -41,11 +41,21 @@ const AdminProducts = () => {
       return;
     try {
       await deleteProduct(id);
+      // Remove from UI immediately
       setProducts(products.filter((p) => p.id !== id));
-      toast({ title: "Product deleted successfully" });
-    } catch (error) {
+      toast({ 
+        title: "Success",
+        description: "Product deleted successfully" 
+      });
+    } catch (error: any) {
       console.error("Error deleting product:", error);
-      toast({ title: "Error deleting product", variant: "destructive" });
+      toast({ 
+        title: "Error",
+        description: error.message || "Failed to delete product",
+        variant: "destructive" 
+      });
+      // Refresh products to sync with DB
+      await fetchProducts();
     }
   };
 

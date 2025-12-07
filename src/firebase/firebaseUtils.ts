@@ -168,11 +168,12 @@ async function updateProduct(productId: string, updates: any) {
 
 async function deleteProduct(productId: string) {
   try {
-    const userRole = (await getUserProfile(auth.currentUser!.uid)).role;
-    if (userRole !== "admin") throw new Error("Admin access required");
+    if (!productId) throw new Error("Product ID is required");
     await deleteDoc(doc(db, "products", productId));
+    return { success: true };
   } catch (error: any) {
-    throw new Error(error.message);
+    console.error("Error deleting product:", error);
+    throw new Error(error.message || "Failed to delete product");
   }
 }
 
