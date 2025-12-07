@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { getAllProducts, deleteProduct } from "@/firebase/firebaseUtils";
+import { deleteProduct } from "@/firebase/firebaseUtils";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/firebase/firebaseConfig";
 import AdminAddProduct from "./AdminAddProduct";
 import { toast } from "@/hooks/use-toast";
 import AdminLayout from "./AdminLayout";
@@ -21,7 +23,11 @@ const AdminProducts = () => {
 
   const fetchProducts = async () => {
     try {
-      const data = await getAllProducts();
+      const snapshot = await getDocs(collection(db, "products"));
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       setProducts(data);
     } catch (error) {
       console.error("Error fetching products:", error);

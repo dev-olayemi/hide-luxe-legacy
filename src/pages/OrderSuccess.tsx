@@ -608,14 +608,14 @@ const OrderSuccess = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-1 container mx-auto px-4 py-12">
-          <Card className="max-w-4xl w-full mx-auto p-6 text-center">
-          <CheckCircle2 className="w-16 h-16 mx-auto mb-6 text-green-500" />
-          <h1 className="font-playfair text-3xl font-bold mb-4">
+      <main className="flex-1 container mx-auto px-4 py-6 sm:py-12">
+        <Card className="max-w-4xl w-full mx-auto p-4 sm:p-6 text-center">
+          <CheckCircle2 className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6 text-green-500" />
+          <h1 className="font-playfair text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
             {order ? "Order Successful!" : "Payment Received"}
           </h1>
 
-          <p className="text-muted-foreground mb-6">
+          <p className="text-muted-foreground mb-4 sm:mb-6 text-sm sm:text-base">
             {order
               ? "Thank you for your order. We'll send you updates about your delivery."
               : verifyError
@@ -623,31 +623,28 @@ const OrderSuccess = () => {
               : "We received payment. Verifying..."}
           </p>
 
-          <div className="text-left mb-6">
-            <h2 className="font-semibold mb-2">Order Summary</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <p><strong>Order ID:</strong> {order?.id ?? "—"}</p>
+          <div className="text-left mb-4 sm:mb-6">
+            <h2 className="font-semibold mb-2 text-sm sm:text-base">Order Summary</h2>
+            <div className="grid grid-cols-1 gap-3 sm:gap-4 mb-4 text-xs sm:text-sm">
+              <div className="space-y-1">
+                <p className="break-all"><strong>Order ID:</strong> {order?.id ?? "—"}</p>
                 <p><strong>Status:</strong> {order?.status ?? "—"}</p>
-                <p><strong>tx_ref:</strong> {txRef ?? "—"}</p>
-                <p><strong>transaction_id:</strong> {transactionId ?? "—"}</p>
               </div>
-              <div>
+              <div className="space-y-1">
                 <p><strong>Order Date:</strong> {formatDateDisplay(parseOrderDate(order?.createdAt) || new Date())}</p>
-                <p><strong>Payment Date:</strong> {formatDateDisplay(parseOrderDate(order?.paymentDetails?.paidAt) || parseOrderDate(order?.paymentDetails?.createdAt) || new Date())}</p>
                 <p><strong>Expected Delivery:</strong> {formatDateDisplay(addDays(parseOrderDate(order?.createdAt) || new Date(), 5))}</p>
-                <p><strong>Support:</strong> 28hideluxe@gmail.com | +234 903 197 6895</p>
+                <p className="break-all"><strong>Support:</strong> 28hideluxe@gmail.com | +234 814 497 7227</p>
               </div>
             </div>
 
-            <h3 className="font-semibold mb-2">Delivery / Pickup</h3>
+            <h3 className="font-semibold mb-2 text-sm sm:text-base">Delivery / Pickup</h3>
             {order?.deliveryOption === 'pickup' || order?.deliveryDetails?.pickup ? (
-              <div className="mb-4">
+              <div className="mb-4 text-xs sm:text-sm space-y-1">
                 <p><strong>Pickup:</strong> {order?.deliveryDetails?.address ?? order?.deliveryDetails?.pickupLocation ?? 'Pickup at store'}</p>
                 <p><strong>Delivery Fee:</strong> {formatPrice(Number(deliveryFee || 0))}</p>
               </div>
             ) : (
-              <div className="mb-4">
+              <div className="mb-4 text-xs sm:text-sm space-y-1">
                 <p><strong>Delivery To:</strong> {order?.deliveryDetails?.fullName || order?.deliveryDetails?.name || order?.deliveryDetails?.firstName || order?.userEmail || '—'}</p>
                 <p>{order?.deliveryDetails?.address || order?.deliveryDetails?.street || order?.deliveryDetails?.line1 || ''}</p>
                 <p>{order?.deliveryDetails?.city || order?.deliveryDetails?.town || ''} {order?.deliveryDetails?.state ? ', ' + (order.deliveryDetails.state || order.deliveryDetails.stateName) : ''}</p>
@@ -655,14 +652,14 @@ const OrderSuccess = () => {
               </div>
             )}
 
-            <h3 className="font-semibold mb-2">Items</h3>
+            <h3 className="font-semibold mb-2 text-sm sm:text-base">Items</h3>
             <div className="overflow-x-auto mb-4">
-              <table className="w-full text-left text-sm">
+              <table className="w-full text-left text-xs sm:text-sm">
                 <thead>
                   <tr>
                     <th className="py-2">Item</th>
-                    <th className="py-2">Qty</th>
-                    <th className="py-2">Unit</th>
+                    <th className="py-2 hidden sm:table-cell">Qty</th>
+                    <th className="py-2 hidden sm:table-cell">Unit</th>
                     <th className="py-2">Total</th>
                   </tr>
                 </thead>
@@ -670,16 +667,17 @@ const OrderSuccess = () => {
                   {(Array.isArray(order?.items) && order.items.length > 0 ? order.items : []).map((it: any) => (
                     <tr key={it.id ?? it.name} className="border-t">
                       <td className="py-2">
-                        <div className="flex items-center gap-3">
-                          {it.image ? <img src={it.image} alt={it.name} className="w-12 h-12 object-cover" /> : null}
-                          <div>
-                            <div className="font-medium">{it.name}</div>
-                            {it.category ? <div className="text-xs text-muted-foreground">{it.category}</div> : null}
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          {it.image ? <img src={it.image} alt={it.name} className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded" /> : null}
+                          <div className="min-w-0">
+                            <div className="font-medium truncate">{it.name}</div>
+                            <div className="text-xs text-muted-foreground sm:hidden">x{it.quantity ?? 1}</div>
+                            {it.category ? <div className="text-xs text-muted-foreground hidden sm:block">{it.category}</div> : null}
                           </div>
                         </div>
                       </td>
-                      <td className="py-2">{it.quantity ?? 1}</td>
-                      <td className="py-2">{formatPrice(Number(it.price ?? 0))}</td>
+                      <td className="py-2 hidden sm:table-cell">{it.quantity ?? 1}</td>
+                      <td className="py-2 hidden sm:table-cell">{formatPrice(Number(it.price ?? 0))}</td>
                       <td className="py-2">{formatPrice(Number((it.price ?? 0) * (it.quantity ?? 1)))}</td>
                     </tr>
                   ))}
@@ -687,22 +685,22 @@ const OrderSuccess = () => {
               </table>
             </div>
 
-            <div className="text-right">
+            <div className="text-right text-xs sm:text-sm space-y-1">
               <p><strong>Subtotal:</strong> {formatPrice(order?.subtotalAmount ?? order?.subtotal ?? order?.items?.reduce?.((s: number, i: any) => s + (i.price || 0) * (i.quantity || 1), 0) ?? 0)}</p>
               <p><strong>Delivery:</strong> {formatPrice(Number(deliveryFee || order?.deliveryFee || order?.deliveryDetails?.deliveryFee || 0))}</p>
               {order?.storePointsRedeemed > 0 && (
                 <p className="text-green-600"><strong>Points Discount:</strong> -{formatPrice(order?.storePointsDiscount ?? calculateStorePointsValue(order?.storePointsRedeemed))}</p>
               )}
-              <p className="text-lg font-semibold">Total: {formatPrice(order?.totalAmount ?? order?.paymentDetails?.amount ?? 0)}</p>
+              <p className="text-base sm:text-lg font-semibold">Total: {formatPrice(order?.totalAmount ?? order?.paymentDetails?.amount ?? 0)}</p>
             </div>
           </div>
 
-          <div className="flex gap-4 justify-center">
-            <Button onClick={downloadReceipt}>Download Receipt</Button>
-            <Button variant="outline" asChild>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <Button onClick={downloadReceipt} className="w-full sm:w-auto">Download Receipt</Button>
+            <Button variant="outline" asChild className="w-full sm:w-auto">
               <Link to="/">Continue Shopping</Link>
             </Button>
-            <Button asChild>
+            <Button asChild className="w-full sm:w-auto">
               <Link to="/dashboard">View Order Status</Link>
             </Button>
           </div>
