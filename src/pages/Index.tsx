@@ -279,7 +279,7 @@ const Index = () => {
 
       <Footer />
 
-      <style jsx>{`
+      <style>{`
         ${HERO_SLIDES.map((_, i) => `
           @keyframes progress${i} {
             from { width: 0%; }
