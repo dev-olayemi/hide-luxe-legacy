@@ -118,7 +118,7 @@ const Contact = () => {
                 
                 <div className="space-y-6">
                   <div className="flex items-start gap-4">
-                    <MapPin className="h-6 w-6 text-accent flex-shrink-0 mt-1" />
+                    {/* <MapPin className="h-6 w-6 text-accent flex-shrink-0 mt-1" />
                     <div>
                       <h3 className="font-semibold mb-2">Our Locations</h3>
                       <p className="text-muted-foreground text-sm mb-3">
@@ -127,7 +127,7 @@ const Contact = () => {
                       <p className="text-muted-foreground text-sm">
                         <strong>Abuja:</strong> 5 Kandi Close, Hotel De Horizon, Wuse 2 Abuja
                       </p>
-                    </div>
+                    </div> */}
                   </div>
 
                   <div className="flex items-center gap-4">
@@ -138,7 +138,7 @@ const Contact = () => {
                         href="mailto:info@28thhideluxe.com"
                         className="text-muted-foreground hover:text-accent transition-colors"
                       >
-                        info@28thhideluxe.com
+                          28hideluxe@gmail.com
                       </a>
                     </div>
                   </div>
