@@ -21,7 +21,8 @@ import {
   Megaphone,
   MoreHorizontal,
   Gift,
-  Image
+  Image,
+  Mail
 } from "lucide-react";
 import { useState } from "react";
 
@@ -46,6 +47,7 @@ const AdminHeader = () => {
   // Secondary items in "More" dropdown
   const secondaryNavItems = [
     { path: "/admin/collections", label: "Collections", icon: Image },
+    { path: "/admin/contacts", label: "Contacts", icon: Mail },
     { path: "/admin/notifications", label: "Notifications", icon: Megaphone },
     { path: "/admin/coupons", label: "Coupons", icon: Gift },
     { path: "/admin/bespoke", label: "Bespoke", icon: Palette },

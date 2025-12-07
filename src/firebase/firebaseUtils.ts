@@ -1077,6 +1077,118 @@ export async function deleteCollection(collectionId: string): Promise<void> {
   }
 }
 
+// ===== CONTACT SUBMISSIONS MANAGEMENT =====
+
+export interface ContactSubmission {
+  id?: string;
+  name: string;
+  email: string;
+  phone?: string;
+  message: string;
+  status: 'unread' | 'read' | 'replied';
+  createdAt?: any;
+  respondedAt?: any;
+  adminNotes?: string;
+}
+
+export async function getAllContactSubmissions(): Promise<ContactSubmission[]> {
+  try {
+    const snap = await getDocs(
+      query(
+        collection(db, 'contactSubmissions'),
+        orderBy('createdAt', 'desc')
+      )
+    );
+    const items = snap.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    } as ContactSubmission));
+    return items;
+  } catch (error: any) {
+    console.error('Error fetching contact submissions:', error);
+    return [];
+  }
+}
+
+export async function getContactSubmission(submissionId: string): Promise<ContactSubmission | null> {
+  try {
+    const docSnap = await getDoc(doc(db, 'contactSubmissions', submissionId));
+    if (docSnap.exists()) {
+      return {
+        id: docSnap.id,
+        ...docSnap.data(),
+      } as ContactSubmission;
+    }
+    return null;
+  } catch (error: any) {
+    console.error('Error fetching contact submission:', error);
+    return null;
+  }
+}
+
+export async function updateContactSubmission(
+  submissionId: string,
+  updates: Partial<ContactSubmission>
+): Promise<void> {
+  try {
+    await updateDoc(doc(db, 'contactSubmissions', submissionId), {
+      ...updates,
+      respondedAt: updates.status === 'replied' ? serverTimestamp() : undefined,
+    });
+  } catch (error: any) {
+    console.error('Error updating contact submission:', error);
+    throw error;
+  }
+}
+
+export async function deleteContactSubmission(submissionId: string): Promise<void> {
+  try {
+    await deleteDoc(doc(db, 'contactSubmissions', submissionId));
+  } catch (error: any) {
+    console.error('Error deleting contact submission:', error);
+    throw error;
+  }
+}
+
+export async function markContactAsRead(submissionId: string): Promise<void> {
+  try {
+    await updateContactSubmission(submissionId, { status: 'read' });
+  } catch (error: any) {
+    console.error('Error marking contact as read:', error);
+    throw error;
+  }
+}
+
+export async function markContactAsReplied(
+  submissionId: string,
+  adminNotes: string
+): Promise<void> {
+  try {
+    await updateContactSubmission(submissionId, {
+      status: 'replied',
+      adminNotes,
+    });
+  } catch (error: any) {
+    console.error('Error marking contact as replied:', error);
+    throw error;
+  }
+}
+
+export async function getUnreadContactCount(): Promise<number> {
+  try {
+    const snap = await getDocs(
+      query(
+        collection(db, 'contactSubmissions'),
+        where('status', '==', 'unread')
+      )
+    );
+    return snap.size;
+  } catch (error: any) {
+    console.error('Error getting unread contact count:', error);
+    return 0;
+  }
+}
+
 // Type definitions
 interface DeliveryDetails {
   fullName: string;
