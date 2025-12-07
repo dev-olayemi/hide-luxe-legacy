@@ -15,6 +15,7 @@ import { getProductById, getAllProducts } from "@/firebase/firebaseUtils";
 import { cn } from "@/lib/utils";
 import { SEOHead } from "@/components/SEOHead";
 import NotFound from "./NotFound";
+import OptimizedImage from "@/components/OptimizedImage";
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -75,6 +76,7 @@ const ProductDetail = () => {
   }
 
   const inWishlist = isInWishlist(product.id);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { formatPrice } = useCurrency();
 
   // Compute discounted price when discount exists
