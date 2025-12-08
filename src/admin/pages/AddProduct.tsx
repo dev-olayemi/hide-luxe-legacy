@@ -181,6 +181,13 @@ const AddProduct = () => {
       if (formData.discount !== undefined && formData.discount !== "") {
         payload.discount = Number(formData.discount);
       }
+      // Only save specifications and care if not empty
+      if (typeof formData.specifications === 'string' && formData.specifications.trim() === '') {
+        delete payload.specifications;
+      }
+      if (typeof formData.care === 'string' && formData.care.trim() === '') {
+        delete payload.care;
+      }
 
       await addDoc(collection(db, "products"), payload);
 

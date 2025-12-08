@@ -336,26 +336,76 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            {/* Product Details */}
+            {/* Product Details and Care Instructions from DB (specifications/care fields) */}
             <div className="border-t pt-6 space-y-4 text-sm">
-              <div>
-                <h3 className="font-semibold mb-2">Product Details</h3>
-                <ul className="space-y-1 text-muted-foreground">
-                  <li>• Premium handcrafted leather</li>
-                  <li>• Made in Nigeria</li>
-                  <li>• Leather sole with rubber heel</li>
-                  <li>• Professional craftsmanship</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Care Instructions</h3>
-                <ul className="space-y-1 text-muted-foreground">
-                  <li>• Wipe clean with a soft cloth</li>
-                  <li>• Use leather conditioner regularly</li>
-                  <li>• Store in a cool, dry place</li>
-                  <li>• Avoid prolonged exposure to water</li>
-                </ul>
-              </div>
+              {/* Parse specifications (Product Details) */}
+              {(() => {
+                let details: string[] = [];
+                if (Array.isArray(product.specifications)) {
+                  details = product.specifications.filter(Boolean);
+                } else if (typeof product.specifications === 'string') {
+                  details = product.specifications.split(/\r?\n|,/).map(s => s.trim()).filter(Boolean);
+                }
+                if (details.length > 0) {
+                  return (
+                    <div>
+                      <h3 className="font-semibold mb-2">Product Details</h3>
+                      <ul className="space-y-1 text-muted-foreground">
+                        {details.map((item, idx) => (
+                          <li key={idx}>• {item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+              {/* Parse care */}
+              {(() => {
+                let care: string[] = [];
+                if (Array.isArray(product.care)) {
+                  care = product.care.filter(Boolean);
+                } else if (typeof product.care === 'string') {
+                  care = product.care.split(/\r?\n|,/).map(s => s.trim()).filter(Boolean);
+                }
+                if (care.length > 0) {
+                  return (
+                    <div>
+                      <h3 className="font-semibold mb-2">Care Instructions</h3>
+                      <ul className="space-y-1 text-muted-foreground">
+                        {care.map((item, idx) => (
+                          <li key={idx}>• {item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+              {/* Fallback to general text for all leather products */}
+              {((!product.specifications || (Array.isArray(product.specifications) && product.specifications.length === 0) || (typeof product.specifications === 'string' && product.specifications.trim() === '')) &&
+                (!product.care || (Array.isArray(product.care) && product.care.length === 0) || (typeof product.care === 'string' && product.care.trim() === ''))) && (
+                <>
+                  <div>
+                    <h3 className="font-semibold mb-2">Product Details</h3>
+                    <ul className="space-y-1 text-muted-foreground">
+                      <li>• Crafted with premium genuine leather and quality materials</li>
+                      <li>• Designed for durability, comfort, and timeless style</li>
+                      <li>• Suitable for both formal and casual occasions</li>
+                      <li>• Expertly finished for a luxurious look and feel</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-2">Care Instructions</h3>
+                    <ul className="space-y-1 text-muted-foreground">
+                      <li>• Clean gently with a soft, dry or slightly damp cloth</li>
+                      <li>• Use a leather conditioner to maintain suppleness</li>
+                      <li>• Store in a cool, dry place away from direct sunlight</li>
+                      <li>• Avoid excessive moisture and harsh chemicals</li>
+                    </ul>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
