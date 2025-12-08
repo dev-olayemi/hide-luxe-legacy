@@ -13,6 +13,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { getProductById, getAllProducts } from "@/firebase/firebaseUtils";
 import { cn } from "@/lib/utils";
+import { getColorHex } from "@/lib/colorUtils";
 import { SEOHead } from "@/components/SEOHead";
 import NotFound from "./NotFound";
 import OptimizedImage from "@/components/OptimizedImage";
@@ -27,6 +28,7 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [colorHexMap, setColorHexMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!id) return;
@@ -58,6 +60,24 @@ const ProductDetail = () => {
   useEffect(() => {
     setSelectedImageIndex(0);
   }, [product?.id]);
+
+  // Fetch color hex values when product colors change
+  useEffect(() => {
+    if (!product || !product.colors || product.colors.length === 0) return;
+
+    const fetchColorHexes = async () => {
+      const hexMap: Record<string, string> = {};
+      for (const color of product.colors) {
+        const colorValue = typeof color === 'string' ? color : color.value || color.label;
+        if (colorValue) {
+          hexMap[colorValue] = await getColorHex(colorValue);
+        }
+      }
+      setColorHexMap(hexMap);
+    };
+
+    fetchColorHexes();
+  }, [product]);
 
   if (loading) {
     return (
@@ -221,11 +241,12 @@ const ProductDetail = () => {
                   value={selectedColor}
                   onValueChange={setSelectedColor}
                 >
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 flex-wrap">
                     {product.colors.map((color: any) => {
                       const colorValue = typeof color === 'string' ? color : color.value || color.label;
-                      const colorHex = typeof color === 'object' ? color.hex : undefined;
                       const colorLabel = typeof color === 'string' ? color : color.label;
+                      // Use fetched hex from colorHexMap, or provided hex, or generate from name
+                      const colorHex = colorHexMap[colorValue] || (typeof color === 'object' ? color.hex : undefined);
                       
                       return (
                         <div key={colorValue} className="flex flex-col items-center gap-2">
@@ -242,10 +263,10 @@ const ProductDetail = () => {
                                 ? "border-accent ring-2 ring-accent ring-offset-2"
                                 : "border-border hover:border-accent/50"
                             )}
-                            style={{ backgroundColor: colorHex || colorValue }}
+                            style={{ backgroundColor: colorHex || '#CCCCCC' }}
                             title={colorLabel}
                           />
-                          <span className="text-xs text-muted-foreground capitalize">
+                          <span className="text-xs text-muted-foreground capitalize text-center max-w-12">
                             {colorLabel}
                           </span>
                         </div>
