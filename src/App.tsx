@@ -21,6 +21,7 @@ import Furniture from "./pages/Furniture";
 import Automotive from "./pages/Automotive";
 import Specialty from "./pages/Specialty";
 import Category from "./pages/Category";
+import CategoryShowcase from "./pages/CategoryShowcase";
 import Cart from "./pages/Cart";
 import Wishlist from "./pages/Wishlist";
 import Auth from "./pages/Auth";
@@ -89,6 +90,7 @@ const App = () => {
                   <Route path="/furniture" element={<Furniture />} />
                   <Route path="/automotive" element={<Automotive />} />
                   <Route path="/specialty" element={<Specialty />} />
+                  <Route path="/category-showcase/:categoryName" element={<CategoryShowcase />} />
                   <Route path="/category/:categoryName" element={<Category />} />
                   <Route path="/cart" element={<Cart />} />
                   {/* Support legacy/shared cart links like /cart/:cartId for sellers */}

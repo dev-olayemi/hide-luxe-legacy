@@ -2,9 +2,40 @@ import { Link } from "react-router-dom";
 import { Mail, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "@/firebase/firebaseConfig";
+import { toast } from "sonner";
 import logoFull from "@/assets/logo-full-new.png";
 
 export const Footer = () => {
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !email.includes("@")) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await addDoc(collection(db, "newsletterSubscriptions"), {
+        email: email.toLowerCase(),
+        subscribedAt: new Date(),
+        status: "active",
+      });
+      toast.success("Successfully subscribed to our newsletter!");
+      setEmail("");
+    } catch (error) {
+      console.error("Error subscribing:", error);
+      toast.error("Failed to subscribe. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
     <footer className="border-t bg-muted/30 mt-16">
       <div className="container mx-auto px-4 py-12">
@@ -135,23 +166,33 @@ export const Footer = () => {
               Sign up to get first dibs on new arrivals, sales, exclusive
               content, events and more!
             </p>
-            <div className="flex gap-2">
-              <Input
-                type="email"
-                placeholder="Your Email Address"
-                className="flex-1"
-              />
-              <Button className="bg-gold hover:bg-gold/90 text-white px-4 py-2 text-sm md:text-base md:px-5 md:py-2 lg:text-base lg:px-4 lg:py-2 rounded-md transition-all w-full sm:w-auto">
-                Subscribe
-              </Button>
-            </div>
+            <form onSubmit={handleSubscribe} className="space-y-3">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Input
+                  type="email"
+                  placeholder="Your Email Address"
+                  className="flex-1 text-sm"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isSubmitting}
+                  required
+                />
+                <Button 
+                  type="submit"
+                  className="bg-gold hover:bg-gold/90 text-white px-4 py-2 text-sm rounded-md transition-all whitespace-nowrap"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Subscribing..." : "Subscribe"}
+                </Button>
+              </div>
+            </form>
 
             <div className="flex gap-2 mt-4 text-xs text-muted-foreground">
-              <button className="hover:text-foreground transition-colors text-xs px-2 py-1 md:text-sm md:px-3 md:py-1 lg:text-sm lg:px-3 lg:py-1 rounded">
+              <button className="hover:text-foreground transition-colors text-xs px-2 py-1 rounded">
                 Naira
               </button>
               <span>•</span>
-              <button className="hover:text-foreground transition-colors text-xs px-2 py-1 md:text-sm md:px-3 md:py-1 lg:text-sm lg:px-3 lg:py-1 rounded">
+              <button className="hover:text-foreground transition-colors text-xs px-2 py-1 rounded">
                 English
               </button>
             </div>

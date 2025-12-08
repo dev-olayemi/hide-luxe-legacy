@@ -16,7 +16,7 @@ interface NewsletterSubscription {
   status?: string;
 }
 
-const Subscriptions = () => {
+const AdminSubscriptions = () => {
   const [subscriptions, setSubscriptions] = useState<NewsletterSubscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -196,4 +196,4 @@ const Subscriptions = () => {
   );
 };
 
-export default Subscriptions;
+export default AdminSubscriptions;
