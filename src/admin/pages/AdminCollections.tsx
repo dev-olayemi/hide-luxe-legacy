@@ -23,6 +23,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Plus,
   Trash2,
   Edit,
@@ -30,8 +37,20 @@ import {
   ImageIcon,
   ArrowRight,
   Grip,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+
+// Category page links available for collections
+const CATEGORY_LINKS = [
+  { label: "Footwear", value: "/category-showcase/footwear" },
+  { label: "Apparel & Outerwear", value: "/category-showcase/apparel-&-outerwear" },
+  { label: "Bags & Travel", value: "/category-showcase/bags-&-travel" },
+  { label: "Accessories", value: "/category-showcase/accessories" },
+  { label: "Leather Interiors", value: "/category-showcase/leather-interiors" },
+  { label: "Automotive Leather", value: "/category-showcase/automotive-leather" },
+  { label: "Custom/Bespoke", value: "/category-showcase/custom-bespoke" },
+];
 
 interface CollectionItem {
   id: string;
@@ -60,6 +79,8 @@ const AdminCollections = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCollection, setEditingCollection] = useState<CollectionItem | null>(null);
   const [formData, setFormData] = useState<Omit<CollectionItem, "id">>(defaultCollection);
+  const [imageLoadError, setImageLoadError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
 
   useEffect(() => {
     fetchCollections();
@@ -90,6 +111,8 @@ const AdminCollections = () => {
       ...defaultCollection,
       order: collections.length,
     });
+    setImageLoadError(false);
+    setImageLoading(false);
     setIsDialogOpen(true);
   };
 
@@ -104,6 +127,8 @@ const AdminCollections = () => {
       featured: col.featured,
       order: col.order,
     });
+    setImageLoadError(false);
+    setImageLoading(false);
     setIsDialogOpen(true);
   };
 
@@ -224,32 +249,79 @@ const AdminCollections = () => {
                   id="image"
                   placeholder="https://... or /collections/image.jpg"
                   value={formData.image}
-                  onChange={(e) =>
-                    setFormData({ ...formData, image: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setFormData({ ...formData, image: e.target.value });
+                    setImageLoadError(false);
+                  }}
                 />
                 {formData.image && (
-                  <img
-                    src={formData.image}
-                    alt="Preview"
-                    className="w-full h-32 object-cover rounded-lg mt-2"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                  />
+                  <div className="space-y-2">
+                    {imageLoadError && (
+                      <div className="flex items-center gap-2 p-2 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                        <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                        <span>Failed to load image. Check the URL and try again.</span>
+                      </div>
+                    )}
+                    {imageLoading && (
+                      <div className="flex items-center justify-center h-32 bg-muted rounded-lg">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                      </div>
+                    )}
+                    {!imageLoading && !imageLoadError && (
+                      <img
+                        src={formData.image}
+                        alt="Preview"
+                        className="w-full h-32 object-cover rounded-lg"
+                        onLoad={() => setImageLoading(false)}
+                        onError={() => {
+                          setImageLoadError(true);
+                          setImageLoading(false);
+                        }}
+                        onLoadStart={() => setImageLoading(true)}
+                      />
+                    )}
+                  </div>
                 )}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="link">Link URL (optional)</Label>
-                <Input
-                  id="link"
-                  placeholder="/category/footwear"
-                  value={formData.link}
-                  onChange={(e) =>
-                    setFormData({ ...formData, link: e.target.value })
-                  }
-                />
+                <div className="flex gap-2">
+                  <Select
+                    value={formData.link || "none"}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, link: value === "none" ? "" : value })
+                    }
+                  >
+                    <SelectTrigger id="link" className="flex-1">
+                      <SelectValue placeholder="Select a category page" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No link</SelectItem>
+                      {CATEGORY_LINKS.map((cat) => (
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {formData.link && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFormData({ ...formData, link: "" })}
+                      className="px-3"
+                    >
+                      Clear
+                    </Button>
+                  )}
+                </div>
+                {formData.link && (
+                  <p className="text-xs text-muted-foreground">
+                    Selected: <code className="bg-muted px-1 rounded">{formData.link}</code>
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center justify-between">
