@@ -400,16 +400,21 @@ export const CategoriesGrid = () => {
                   </div>
 
                   {/* Price (show discounted price as main, base price as strike-through when discount exists) */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <CurrencyPrices
-                      price={p.discount ? p.price - (p.price * p.discount) / 100 : p.price}
-                      originalPrice={p.discount ? p.price : p.originalPrice}
-                    />
+                  <div className="flex flex-col items-start gap-1 mb-2 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap min-w-0">
+                      <CurrencyPrices
+                        price={p.discount ? p.price - (p.price * p.discount) / 100 : p.price}
+                        originalPrice={p.discount ? p.price : p.originalPrice}
+                      />
+                    </div>
+                    {p.discount && (
+                      <span className="inline-block bg-green-100 text-green-700 text-[10px] font-semibold px-2 py-0.5 rounded mt-1">Save {p.discount}%</span>
+                    )}
                   </div>
 
-                  {/* Stock Status */}
+                  {/* Stock Status (show Out of Stock if stock/quantity < 1) */}
                   <div className="text-xs font-medium">
-                    {p.inStock ? (
+                    {(typeof p.stock === 'number' ? p.stock : (typeof p.quantity === 'number' ? p.quantity : 1)) > 0 ? (
                       <span className="text-green-600">In Stock</span>
                     ) : (
                       <span className="text-red-600">Out of Stock</span>

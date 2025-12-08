@@ -403,16 +403,23 @@ const ProductDetail = () => {
                       <span className="text-gray-500">({p.reviews || 0})</span>
                     </div>
 
-                    {/* Price */}
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm font-bold text-gray-900">
-                          {formatPrice(p.price || 0)}
-                        </div>
-                        {p.originalPrice > p.price && (
-                          <div className="text-xs text-gray-500 line-through">
-                            {formatPrice(p.originalPrice || 0)}
-                          </div>
+                    {/* Price (show discounted price as main, base price as strike-through when discount exists) */}
+                    <div className="flex flex-col items-start gap-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap min-w-0">
+                        {/* Discounted price logic */}
+                        {p.discount ? (
+                          <>
+                            <span className="text-sm font-bold text-gray-900 whitespace-nowrap">{formatPrice(p.price - (p.price * p.discount) / 100)}</span>
+                            <span className="text-xs text-gray-500 line-through whitespace-nowrap">{formatPrice(p.price)}</span>
+                          </>
+                        ) : (
+                          <span className="text-sm font-bold text-gray-900 whitespace-nowrap">{formatPrice(p.price || 0)}</span>
                         )}
+                      </div>
+                      {/* Savings badge */}
+                      {p.discount && (
+                        <span className="inline-block bg-green-100 text-green-700 text-[10px] font-semibold px-2 py-0.5 rounded mt-1">Save {p.discount}%</span>
+                      )}
                     </div>
                   </div>
                 </Link>
