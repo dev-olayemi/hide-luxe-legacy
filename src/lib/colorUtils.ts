@@ -24,6 +24,9 @@ const colorNameMap: Record<string, string> = {
   'navy': '#000080',
   'fuchsia': '#FF00FF',
   'purple': '#800080',
+  'orange': '#FFA500',
+  'pink': '#FFC0CB',
+  'brown': '#A52A2A',
 
   // Shades and tints
   'light gray': '#D3D3D3',
@@ -48,11 +51,12 @@ const colorNameMap: Record<string, string> = {
   'dark brown': '#654321',
   'light orange': '#FFD9B3',
   'dark orange': '#FF8C00',
+  'coral': '#FF7F50',
+  'salmon': '#FA8072',
 
   // Common leather/fashion colors
   'beige': '#F5F5DC',
   'tan': '#D2B48C',
-  'brown': '#A52A2A',
   'cream': '#FFFDD0',
   'ivory': '#FFFFF0',
   'khaki': '#F0E68C',
@@ -62,8 +66,6 @@ const colorNameMap: Record<string, string> = {
   'burgundy': '#800020',
   'wine': '#722F37',
   'charcoal': '#36454F',
-  'coral': '#FF7F50',
-  'salmon': '#FA8072',
   'peach': '#FFDAB9',
   'apricot': '#FBCF8A',
   'mustard': '#FFDB58',
@@ -112,6 +114,27 @@ export async function getColorHex(colorInput: string): Promise<string> {
     return colorNameMap[lowerColor];
   }
 
+  // Try partial match for compound colors (e.g., "light blue" -> "light" + "blue")
+  const words = lowerColor.split(/\s+/);
+  if (words.length > 1) {
+    // Try exact compound match first
+    if (colorNameMap[lowerColor]) {
+      return colorNameMap[lowerColor];
+    }
+    // Try progressively longer compounds
+    for (let i = words.length; i > 1; i--) {
+      const compound = words.slice(0, i).join(' ');
+      if (colorNameMap[compound]) {
+        return colorNameMap[compound];
+      }
+    }
+    // Try last word as main color
+    const mainColor = words[words.length - 1];
+    if (colorNameMap[mainColor]) {
+      return colorNameMap[mainColor];
+    }
+  }
+
   // Try the ntc.js API (Name That Color) as fallback
   try {
     const response = await fetch(`https://chir.mmuchz.com/ntc.js?hex=${encodeURIComponent(trimmed)}&n=1`);
@@ -122,20 +145,7 @@ export async function getColorHex(colorInput: string): Promise<string> {
       }
     }
   } catch (error) {
-    console.warn(`Failed to fetch color for "${colorInput}":`, error);
-  }
-
-  // Try Color Namer API as another fallback
-  try {
-    const response = await fetch(`https://api.color.pizza/v1/${encodeURIComponent(trimmed)}`);
-    if (response.ok) {
-      const data = await response.json();
-      if (data && data.hex) {
-        return data.hex;
-      }
-    }
-  } catch (error) {
-    console.warn(`Failed to fetch color from Color Pizza API:`, error);
+    console.warn(`Failed to fetch color from ntc.js for "${colorInput}":`, error);
   }
 
   // Final fallback: generate a hash-based color from the input string

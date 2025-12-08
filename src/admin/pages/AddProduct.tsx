@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X, Plus, ArrowLeft, FolderPlus, Upload, Loader2 } from "lucide-react";
+import { getColorHex } from "@/lib/colorUtils";
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -43,6 +44,8 @@ const AddProduct = () => {
   const [currentSize, setCurrentSize] = useState("");
   const [currentColor, setCurrentColor] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [colorHexMap, setColorHexMap] = useState<Record<string, string>>({});
+  const [loadingColorHex, setLoadingColorHex] = useState(false);
 
   // Derived pricing values & validation
   const priceNum = Number(formData.price) || 0;
@@ -148,10 +151,22 @@ const AddProduct = () => {
     setFormData({ ...formData, sizes: formData.sizes.filter((s) => s !== size) });
   };
 
-  const addColor = () => {
+  const addColor = async () => {
     if (currentColor && !formData.colors.includes(currentColor)) {
-      setFormData({ ...formData, colors: [...formData.colors, currentColor] });
-      setCurrentColor("");
+      setLoadingColorHex(true);
+      try {
+        // Fetch hex color for display
+        const hex = await getColorHex(currentColor);
+        setColorHexMap({ ...colorHexMap, [currentColor]: hex });
+        setFormData({ ...formData, colors: [...formData.colors, currentColor] });
+        setCurrentColor("");
+        toast({ title: `Color "${currentColor}" added successfully!` });
+      } catch (error) {
+        console.error("Error adding color:", error);
+        toast({ title: `Failed to add color "${currentColor}"`, variant: "destructive" });
+      } finally {
+        setLoadingColorHex(false);
+      }
     }
   };
 
@@ -454,24 +469,54 @@ const AddProduct = () => {
                 <Label>Available Colors</Label>
                 <div className="flex gap-2 mt-2">
                   <Input
-                    placeholder="e.g., Black, Brown"
+                    placeholder="e.g., Black, Brown, Deep blue"
                     value={currentColor}
                     onChange={(e) => setCurrentColor(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addColor())}
+                    disabled={loadingColorHex}
                   />
-                  <Button type="button" onClick={addColor}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add
+                  <Button type="button" onClick={addColor} disabled={loadingColorHex}>
+                    {loadingColorHex ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add
+                      </>
+                    )}
                   </Button>
                 </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.colors.map((color, idx) => (
-                    <Badge key={idx} variant="secondary" className="gap-2">
-                      {color}
-                      <X className="h-3 w-3 cursor-pointer" onClick={() => removeColor(color)} />
-                    </Badge>
-                  ))}
+                {loadingColorHex && (
+                  <p className="text-xs text-blue-600 mt-2">Detecting color...</p>
+                )}
+                <div className="flex flex-wrap gap-3 mt-4">
+                  {formData.colors.map((color, idx) => {
+                    const hexColor = colorHexMap[color] || '#CCCCCC';
+                    return (
+                      <div key={idx} className="flex flex-col items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-8 h-8 rounded-full border-2 border-gray-300 shadow-sm"
+                            style={{ backgroundColor: hexColor }}
+                            title={`${color} - ${hexColor}`}
+                          />
+                          <Badge variant="secondary" className="gap-2">
+                            {color}
+                            <X className="h-3 w-3 cursor-pointer hover:text-red-600" onClick={() => removeColor(color)} />
+                          </Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
+                {formData.colors.length > 0 && (
+                  <p className="text-xs text-gray-500 mt-3">
+                    {formData.colors.length} color{formData.colors.length !== 1 ? 's' : ''} added
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
