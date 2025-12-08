@@ -40,9 +40,10 @@ const Category = () => {
         setCategoryDisplayName(resolvedName);
 
         const allProducts = await getAllProducts();
-        const filtered = allProducts.filter(
-          (p: any) => p.category?.toLowerCase() === resolvedName.toLowerCase()
-        );
+        const filtered = allProducts.filter((p: any) => {
+          const cats = p.categories || (p.category ? [p.category] : []);
+          return cats.some((cat: string) => cat.toLowerCase() === resolvedName.toLowerCase());
+        });
         setProducts(filtered);
       } catch (error) {
         console.error("Failed to fetch products", error);

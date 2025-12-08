@@ -15,6 +15,7 @@ interface Product {
   image?: string;
   images?: string[];
   category?: string;
+  categories?: string[];
   isNew?: boolean;
   discount?: number;
   originalPrice?: number;
@@ -34,12 +35,11 @@ export const NewArrivalsShowcase: React.FC<NewArrivalsShowcaseProps> = ({ catego
       try {
         let q;
         if (category) {
-          // Fetch products from specific category
+          // Fetch all products when filtering by category, will filter client-side
           q = query(
             collection(db, 'products'),
-            where('category', '==', category),
             orderBy('createdAt', 'desc'),
-            limit(12)
+            limit(50)
           );
         } else {
           // Fetch new arrivals if no category
@@ -51,11 +51,20 @@ export const NewArrivalsShowcase: React.FC<NewArrivalsShowcaseProps> = ({ catego
           );
         }
         
-        const snapshot = await getDocs(q);
-        const productsData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...(doc.data() as any)
-        } as Product));
+        let productsData = await getDocs(q).then(snapshot =>
+          snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...(doc.data() as any)
+          } as Product))
+        );
+        
+        // If filtering by category, filter client-side to check categories array
+        if (category) {
+          productsData = productsData.filter(product => {
+            const cats = product.categories || (product.category ? [product.category] : []);
+            return cats.includes(category);
+          }).slice(0, 12);
+        }
         
         setProducts(productsData);
       } catch (error) {
@@ -66,8 +75,7 @@ export const NewArrivalsShowcase: React.FC<NewArrivalsShowcaseProps> = ({ catego
           if (category) {
             fallbackQ = query(
               collection(db, 'products'),
-              where('category', '==', category),
-              limit(12)
+              limit(50)
             );
           } else {
             fallbackQ = query(
@@ -76,11 +84,21 @@ export const NewArrivalsShowcase: React.FC<NewArrivalsShowcaseProps> = ({ catego
               limit(4)
             );
           }
-          const snapshot = await getDocs(fallbackQ);
-          const productsData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...(doc.data() as any)
-          } as Product));
+          let productsData = await getDocs(fallbackQ).then(snapshot =>
+            snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...(doc.data() as any)
+            } as Product))
+          );
+          
+          // Filter by category in fallback too
+          if (category) {
+            productsData = productsData.filter(product => {
+              const cats = product.categories || (product.category ? [product.category] : []);
+              return cats.includes(category);
+            }).slice(0, 12);
+          }
+          
           setProducts(productsData);
         } catch (fallbackError) {
           console.error('Fallback also failed:', fallbackError);

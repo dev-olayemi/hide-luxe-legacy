@@ -26,7 +26,7 @@ const AddProduct = () => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    category: "",
+    categories: [] as string[],
     price: "",
     discount: "",
     stock: "",
@@ -178,6 +178,13 @@ const AddProduct = () => {
     e.preventDefault();
     setLoading(true);
 
+    // validate at least one category selected
+    if (formData.categories.length === 0) {
+      toast({ title: "Please select at least one category", variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+
     // validate discount
     if (!discountValid) {
       toast({ title: "Invalid discount", description: "Discount must be between 0 and 100", variant: "destructive" });
@@ -293,17 +300,32 @@ const AddProduct = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category *</Label>
-                  <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label>Categories * (Select multiple)</Label>
+                  <div className="grid grid-cols-2 gap-3 border rounded-lg p-3">
+                    {categories.map((cat) => (
+                      <label key={cat} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.categories.includes(cat)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFormData({
+                                ...formData,
+                                categories: [...formData.categories, cat],
+                              });
+                            } else {
+                              setFormData({
+                                ...formData,
+                                categories: formData.categories.filter((c) => c !== cat),
+                              });
+                            }
+                          }}
+                          className="w-4 h-4 rounded"
+                        />
+                        <span className="text-sm">{cat}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
 
