@@ -633,7 +633,7 @@ const OrderSuccess = () => {
               <div className="space-y-1">
                 <p><strong>Order Date:</strong> {formatDateDisplay(parseOrderDate(order?.createdAt) || new Date())}</p>
                 <p><strong>Expected Delivery:</strong> {formatDateDisplay(addDays(parseOrderDate(order?.createdAt) || new Date(), 5))}</p>
-                <p className="break-all"><strong>Support:</strong> 28hideluxe@gmail.com | +234 814 497 7227</p>
+                <p className="break-all"><strong>Support:</strong> 28hideluxe@gmail.com | +234 903 197 6895</p>
               </div>
             </div>
 
