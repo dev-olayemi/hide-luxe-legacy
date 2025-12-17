@@ -8,7 +8,7 @@ const ProductList = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getAllProducts().then((data) => {
+    getAllProducts({ liveOnly: true }).then((data) => {
       setProducts(data);
       setLoading(false);
     });
@@ -40,6 +40,8 @@ const ProductList = () => {
           }
           category={p.category}
           isNew={p.isNew}
+          isAvailable={p.isAvailable !== false}
+          availabilityReason={p.availabilityReason}
         />
       ))}
     </div>

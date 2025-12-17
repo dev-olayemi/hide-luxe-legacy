@@ -18,7 +18,7 @@ export const SearchDialog = ({ searchQuery, onSearchChange }: SearchDialogProps)
   const navigate = useNavigate();
 
   useEffect(() => {
-    getAllProducts().then(setAllProducts);
+    getAllProducts({ liveOnly: true }).then(setAllProducts);
   }, []);
 
   useEffect(() => {

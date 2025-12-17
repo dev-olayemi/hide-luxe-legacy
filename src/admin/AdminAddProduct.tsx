@@ -16,6 +16,9 @@ const AdminAddProduct = () => {
     stock: "" as number | "",
     careInstructions: "",
     isLimited: false,
+    isAvailable: true,
+    availabilityReason: "",
+    isLive: true,
   });
   const [sizes, setSizes] = useState<string[]>([]);
   const [sizeInput, setSizeInput] = useState("");
@@ -136,6 +139,9 @@ const AdminAddProduct = () => {
         colors,
         careInstructions: formData.careInstructions,
         isLimited: formData.isLimited,
+        isAvailable: formData.isAvailable,
+        availabilityReason: formData.availabilityReason,
+        isLive: formData.isLive,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -151,6 +157,9 @@ const AdminAddProduct = () => {
         stock: "",
         careInstructions: "",
         isLimited: false,
+        isAvailable: true,
+        availabilityReason: "",
+        isLive: true,
       });
       setSizes([]);
       setSizeInput("");
@@ -329,6 +338,63 @@ const AdminAddProduct = () => {
                     Limited Stock Item
                   </label>
                 </div>
+
+                <div className="flex items-center">
+                  <input
+                    id="isLive"
+                    type="checkbox"
+                    checked={formData.isLive}
+                    onChange={(e) =>
+                      handleInputChange("isLive", e.target.checked)
+                    }
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <label
+                    htmlFor="isLive"
+                    className="ml-2 block text-sm text-gray-900"
+                  >
+                    Publish Product Live (Visible to Customers)
+                  </label>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    id="isAvailable"
+                    type="checkbox"
+                    checked={formData.isAvailable}
+                    onChange={(e) =>
+                      handleInputChange("isAvailable", e.target.checked)
+                    }
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <label
+                    htmlFor="isAvailable"
+                    className="ml-2 block text-sm text-gray-900"
+                  >
+                    Product Available for Purchase
+                  </label>
+                </div>
+
+                {!formData.isAvailable && (
+                  <div className="sm:col-span-2">
+                    <label
+                      htmlFor="availabilityReason"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Reason for Unavailability
+                    </label>
+                    <input
+                      type="text"
+                      id="availabilityReason"
+                      value={formData.availabilityReason}
+                      onChange={(e) =>
+                        handleInputChange("availabilityReason", e.target.value)
+                      }
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      placeholder="e.g., Temporarily out of stock, Discontinued, Coming soon"
+                    />
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">

@@ -132,11 +132,18 @@ async function addProduct(productData: any) {
   }
 }
 
-async function getAllProducts() {
+async function getAllProducts(options?: { liveOnly?: boolean; adminView?: boolean }) {
   try {
     const q = query(collection(db, "products"));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({ ...(doc.data() as any), id: doc.id }));
+    let products = snapshot.docs.map((doc) => ({ ...(doc.data() as any), id: doc.id }));
+    
+    // Filter for live products only if not admin view
+    if (options?.liveOnly && !options?.adminView) {
+      products = products.filter((product: any) => product.isLive !== false);
+    }
+    
+    return products;
   } catch (error: any) {
     throw new Error(error.message);
   }

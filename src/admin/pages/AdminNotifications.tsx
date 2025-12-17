@@ -26,7 +26,7 @@ const AdminNotifications: React.FC = () => {
   }, []);
 
   const fetchData = async () => {
-    const [n, u, p] = await Promise.all([getAllNotifications(), getAllUsers(), getAllProducts()]);
+    const [n, u, p] = await Promise.all([getAllNotifications(), getAllUsers(), getAllProducts({ adminView: true })]);
     setNotifications(n || []);
     setUsers(u || []);
     setProducts(p || []);

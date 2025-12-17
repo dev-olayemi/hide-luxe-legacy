@@ -15,6 +15,9 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 const AdminProducts = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<'name' | 'price' | 'createdAt' | 'updatedAt'>('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [filterBy, setFilterBy] = useState<'all' | 'live' | 'draft' | 'available' | 'unavailable'>('all');
   const { formatPrice } = useCurrency();
 
   useEffect(() => {
@@ -24,10 +27,59 @@ const AdminProducts = () => {
   const fetchProducts = async () => {
     try {
       const snapshot = await getDocs(collection(db, "products"));
-      const data = snapshot.docs.map((doc) => ({
+      let data = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
+
+      // Apply filtering
+      if (filterBy !== 'all') {
+        data = data.filter((p: any) => {
+          switch (filterBy) {
+            case 'live':
+              return p.isLive !== false;
+            case 'draft':
+              return p.isLive === false;
+            case 'available':
+              return p.isAvailable !== false;
+            case 'unavailable':
+              return p.isAvailable === false;
+            default:
+              return true;
+          }
+        });
+      }
+
+      // Apply sorting
+      data.sort((a: any, b: any) => {
+        let aValue: any, bValue: any;
+        
+        switch (sortBy) {
+          case 'name':
+            aValue = a.name?.toLowerCase() || '';
+            bValue = b.name?.toLowerCase() || '';
+            break;
+          case 'price':
+            aValue = Number(a.price) || 0;
+            bValue = Number(b.price) || 0;
+            break;
+          case 'createdAt':
+            aValue = a.createdAt?.toDate?.() || new Date(a.createdAt);
+            bValue = b.createdAt?.toDate?.() || new Date(b.createdAt);
+            break;
+          case 'updatedAt':
+            aValue = a.updatedAt?.toDate?.() || new Date(a.updatedAt);
+            bValue = b.updatedAt?.toDate?.() || new Date(b.updatedAt);
+            break;
+          default:
+            return 0;
+        }
+
+        if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+        return 0;
+      });
+
       setProducts(data);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -79,6 +131,56 @@ const AdminProducts = () => {
           <p className="text-gray-500 mt-1">Manage your product catalog</p>
         </div>
 
+        {/* Sorting and Filtering Controls */}
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <div className="flex flex-wrap gap-4 items-center">
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">Filter:</label>
+              <select
+                value={filterBy}
+                onChange={(e) => setFilterBy(e.target.value as any)}
+                className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="all">All Products</option>
+                <option value="live">Live Only</option>
+                <option value="draft">Draft Only</option>
+                <option value="available">Available Only</option>
+                <option value="unavailable">Unavailable Only</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">Sort by:</label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="createdAt">Date Created</option>
+                <option value="updatedAt">Date Updated</option>
+                <option value="name">Name</option>
+                <option value="price">Price</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">Order:</label>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+                className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="desc">Newest First</option>
+                <option value="asc">Oldest First</option>
+              </select>
+            </div>
+
+            <Button onClick={fetchProducts} variant="outline" size="sm">
+              Apply Filters
+            </Button>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {products.length === 0 ? (
             <Card className="col-span-full">
@@ -108,6 +210,16 @@ const AdminProducts = () => {
                   {p.isLimited && (
                     <Badge className="absolute top-2 right-2 bg-red-500">
                       Limited
+                    </Badge>
+                  )}
+                  {p.isAvailable === false && (
+                    <Badge className="absolute top-2 left-2 bg-gray-500">
+                      Unavailable
+                    </Badge>
+                  )}
+                  {p.isLive === false && (
+                    <Badge className="absolute top-10 left-2 bg-orange-500">
+                      Draft
                     </Badge>
                   )}
                 </div>

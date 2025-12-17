@@ -26,6 +26,8 @@ interface ProductCardProps {
   sizes?: string[];
   colors?: ColorOption[];
   availableCount?: number | null;
+  isAvailable?: boolean;
+  availabilityReason?: string;
 }
 
 export const ProductCard = ({
@@ -39,6 +41,8 @@ export const ProductCard = ({
   sizes = [],
   colors = [],
   availableCount = null,
+  isAvailable = true,
+  availabilityReason,
 }: ProductCardProps) => {
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const { toast } = useToast();
@@ -51,6 +55,14 @@ export const ProductCard = ({
 
   const handleAddToCart = (e?: React.MouseEvent) => {
     e?.preventDefault();
+    if (!isAvailable) {
+      toast({
+        title: "Product not available",
+        description: availabilityReason || "This product is currently not available for purchase.",
+        variant: "destructive",
+      });
+      return;
+    }
     try {
       // addToCart expects the item object without `quantity` (CartContext handles quantities)
       addToCart({
@@ -188,9 +200,14 @@ export const ProductCard = ({
         </div>
 
         <div className="flex gap-3 items-center">
-          <Button onClick={handleAddToCart} className="flex-1">
+          <Button 
+            onClick={handleAddToCart} 
+            className="flex-1"
+            disabled={!isAvailable}
+            variant={isAvailable ? "default" : "secondary"}
+          >
             <ShoppingCart className="h-4 w-4 mr-2" />
-            Add
+            {isAvailable ? "Add" : "Unavailable"}
           </Button>
 
           <Link to={`/product/${id}`} className="w-24">

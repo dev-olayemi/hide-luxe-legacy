@@ -15,12 +15,15 @@ import { getProductById, getAllProducts } from "@/firebase/firebaseUtils";
 import { cn } from "@/lib/utils";
 import { getColorHex } from "@/lib/colorUtils";
 import { SEOHead } from "@/components/SEOHead";
+import { useToast } from "@/hooks/use-toast";
 import NotFound from "./NotFound";
 import OptimizedImage from "@/components/OptimizedImage";
+import { ProductCard } from "@/components/ProductCard";
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
+  const { toast } = useToast();
 
   const [product, setProduct] = useState<any | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
@@ -40,7 +43,7 @@ const ProductDetail = () => {
         
         if (data) {
           // Fetch all products to find related ones
-          const allProducts = await getAllProducts();
+          const allProducts = await getAllProducts({ liveOnly: true });
           const related = allProducts
             .filter((p: any) => p.id !== id && p.category === data.category)
             .slice(0, 6);
@@ -106,8 +109,20 @@ const ProductDetail = () => {
   const savings = product?.discount ? product.price - discountedPrice : 0;
 
   const handleAddToCart = () => {
+    if (product.isAvailable === false) {
+      toast({
+        title: "Product not available",
+        description: product.availabilityReason || "This product is currently not available for purchase.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (product.sizes && product.sizes.length > 0 && !selectedSize) {
-      alert("Please select a size");
+      toast({
+        title: "Please select a size",
+        description: "You must select a size before adding this product to cart.",
+        variant: "destructive",
+      });
       return;
     }
     addToCart({
@@ -119,6 +134,10 @@ const ProductDetail = () => {
           ? product.images[0]
           : "",
       category: product.category,
+    });
+    toast({
+      title: "Added to cart",
+      description: `${product.name} has been added to your cart.`,
     });
   };
 
@@ -313,9 +332,14 @@ const ProductDetail = () => {
 
             {/* Action Buttons */}
             <div className="flex gap-4 pt-4 items-center">
-              <Button size="lg" className="flex-1" onClick={handleAddToCart}>
+              <Button 
+                size="lg" 
+                className="flex-1" 
+                onClick={handleAddToCart}
+                disabled={product.isAvailable === false}
+              >
                 <ShoppingCart className="mr-2 h-5 w-5" />
-                Add to Cart
+                {product.isAvailable === false ? "Not Available" : "Add to Cart"}
               </Button>
 
               <div className="flex flex-col gap-2">
@@ -439,61 +463,21 @@ const ProductDetail = () => {
             <h2 className="text-2xl md:text-3xl font-bold mb-8 text-gray-900">You May Also Like</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {relatedProducts.map((p: any) => (
-                <Link
+                <ProductCard
                   key={p.id}
-                  to={`/product/${p.id}`}
-                  className="group block bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
-                >
-                  {/* Product Image */}
-                  <div className="w-full aspect-square bg-gray-100 overflow-hidden relative">
-                    <img
-                      src={p.image || p.thumbnail || (p.images && p.images[0])}
-                      alt={p.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      onError={(e) => {
-                        e.currentTarget.src = '/collections/cool-brown-bag.jpg';
-                      }}
-                    />
-                    {p.isNew && (
-                      <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded">
-                        NEW
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Product Info */}
-                  <div className="p-3">
-                    <h4 className="text-xs md:text-sm font-semibold text-gray-900 line-clamp-2 mb-1">
-                      {p.name}
-                    </h4>
-                    <div className="text-xs text-gray-600 mb-2">{p.subcategory}</div>
-
-                    {/* Rating */}
-                    <div className="flex items-center gap-1 text-xs mb-2">
-                      <span>⭐ {p.rating || 0}</span>
-                      <span className="text-gray-500">({p.reviews || 0})</span>
-                    </div>
-
-                    {/* Price (show discounted price as main, base price as strike-through when discount exists) */}
-                    <div className="flex flex-col items-start gap-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap min-w-0">
-                        {/* Discounted price logic */}
-                        {p.discount ? (
-                          <>
-                            <span className="text-sm font-bold text-gray-900 whitespace-nowrap">{formatPrice(p.price - (p.price * p.discount) / 100)}</span>
-                            <span className="text-xs text-gray-500 line-through whitespace-nowrap">{formatPrice(p.price)}</span>
-                          </>
-                        ) : (
-                          <span className="text-sm font-bold text-gray-900 whitespace-nowrap">{formatPrice(p.price || 0)}</span>
-                        )}
-                      </div>
-                      {/* Savings badge */}
-                      {p.discount && (
-                        <span className="inline-block bg-green-100 text-green-700 text-[10px] font-semibold px-2 py-0.5 rounded mt-1">Save {p.discount}%</span>
-                      )}
-                    </div>
-                  </div>
-                </Link>
+                  id={p.id}
+                  name={p.name}
+                  price={p.price}
+                  discount={p.discount}
+                  image={p.image || p.thumbnail || (p.images && p.images[0])}
+                  category={p.category || p.subcategory}
+                  isNew={p.isNew}
+                  isAvailable={p.isAvailable !== false}
+                  availabilityReason={p.availabilityReason}
+                  sizes={p.sizes}
+                  colors={p.colors}
+                  availableCount={typeof p.stock === 'number' ? p.stock : undefined}
+                />
               ))}
             </div>
           </div>

@@ -67,6 +67,11 @@ const Wishlist = () => {
                 }
                 category={product.category}
                 isNew={product.isNew}
+                isAvailable={product.isAvailable !== false}
+                availabilityReason={product.availabilityReason}
+                sizes={product.sizes}
+                colors={product.colors?.map(c => typeof c === 'string' ? { label: c, value: c } : c)}
+                availableCount={product.stock}
               />
             ))}
           </div>

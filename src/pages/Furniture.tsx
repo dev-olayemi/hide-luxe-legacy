@@ -1,10 +1,43 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
-import { getProductsByCategory } from "@/lib/products";
+import { getAllProducts } from "@/firebase/firebaseUtils";
 
 const Furniture = () => {
-  const products = getProductsByCategory("Furniture");
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const allProducts = await getAllProducts({ liveOnly: true });
+        const furnitureProducts = allProducts.filter((p: any) => 
+          p.category?.toLowerCase().includes('furniture') || 
+          p.categories?.some((cat: string) => cat.toLowerCase().includes('furniture'))
+        );
+        setProducts(furnitureProducts);
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-gray-400">Loading products...</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -36,6 +69,11 @@ const Furniture = () => {
                 image={product.image}
                 category={product.category}
                 isNew={product.isNew}
+                isAvailable={product.isAvailable !== false}
+                availabilityReason={product.availabilityReason}
+                sizes={product.sizes}
+                colors={product.colors?.map(c => typeof c === 'string' ? { label: c, value: c } : c)}
+                availableCount={product.stock}
               />
             ))
           )}

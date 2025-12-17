@@ -38,6 +38,9 @@ const EditProduct = () => {
     specifications: "",
     isLimited: false,
     isFeatured: false,
+    isAvailable: true,
+    availabilityReason: "",
+    isLive: true,
   });
 
   const [currentImage, setCurrentImage] = useState("");
@@ -79,6 +82,9 @@ const EditProduct = () => {
           specifications: data.specifications || "",
           isLimited: data.isLimited || false,
           isFeatured: data.isFeatured || false,
+          isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
+          availabilityReason: data.availabilityReason || "",
+          isLive: data.isLive !== undefined ? data.isLive : true,
         });
       } else {
         toast({ title: "Product not found", variant: "destructive" });
@@ -546,7 +552,38 @@ const EditProduct = () => {
                   />
                   <span>Featured Product</span>
                 </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.isLive}
+                    onChange={(e) => setFormData({ ...formData, isLive: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                  <span>Publish Live (Visible to Customers)</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.isAvailable}
+                    onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                  <span>Available for Purchase</span>
+                </label>
               </div>
+
+              {!formData.isAvailable && (
+                <div className="mt-4">
+                  <Label htmlFor="availabilityReason">Reason for Unavailability</Label>
+                  <Input
+                    id="availabilityReason"
+                    value={formData.availabilityReason}
+                    onChange={(e) => setFormData({ ...formData, availabilityReason: e.target.value })}
+                    placeholder="e.g., Temporarily out of stock, Discontinued, Coming soon"
+                    className="mt-1"
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
 

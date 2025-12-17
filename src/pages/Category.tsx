@@ -39,7 +39,7 @@ const Category = () => {
 
         setCategoryDisplayName(resolvedName);
 
-        const allProducts = await getAllProducts();
+        const allProducts = await getAllProducts({ liveOnly: true });
         const filtered = allProducts.filter((p: any) => {
           const cats = p.categories || (p.category ? [p.category] : []);
           return cats.some((cat: string) => cat.toLowerCase() === resolvedName.toLowerCase());
@@ -95,6 +95,11 @@ const Category = () => {
                   }
                   category={product.category}
                   isNew={product.isNew}
+                  isAvailable={product.isAvailable !== false}
+                  availabilityReason={product.availabilityReason}
+                  sizes={product.sizes}
+                  colors={product.colors?.map(c => typeof c === 'string' ? { label: c, value: c } : c)}
+                  availableCount={product.stock}
                 />
               ))
             )}

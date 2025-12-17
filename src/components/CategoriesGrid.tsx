@@ -6,6 +6,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/firebase/firebaseConfig';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import OptimizedImage from './OptimizedImage';
+import { ProductCard } from './ProductCard';
 
 interface CategoryItem {
   id: string; // slug
@@ -364,64 +365,21 @@ export const CategoriesGrid = () => {
           {/* Product Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {products.map((p) => (
-              <Link
+              <ProductCard
                 key={p.id}
-                to={`/product/${p.id}`}
-                className="group block bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
-              >
-                {/* Product Image */}
-                  <div className="w-full aspect-square bg-gray-100 overflow-hidden relative">
-                  <OptimizedImage
-                    src={p.image || p.thumbnail || (p.images && p.images[0])}
-                    alt={p.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    width={600}
-                    height={600}
-                    style={{ objectFit: 'cover' }}
-                  />
-                  {p.isNew && (
-                    <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded">
-                      NEW
-                    </div>
-                  )}
-                </div>
-
-                {/* Product Info */}
-                <div className="p-3">
-                  <h4 className="text-xs md:text-sm font-semibold text-gray-900 line-clamp-2 mb-1">
-                    {p.name}
-                  </h4>
-                  <div className="text-xs text-gray-600 mb-2">{p.subcategory}</div>
-
-                  {/* Rating & Reviews */}
-                  <div className="flex items-center gap-1 text-xs mb-2">
-                    <span>⭐ {p.rating || 0}</span>
-                    <span className="text-gray-500">({p.reviews || 0})</span>
-                  </div>
-
-                  {/* Price (show discounted price as main, base price as strike-through when discount exists) */}
-                  <div className="flex flex-col items-start gap-1 mb-2 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap min-w-0">
-                      <CurrencyPrices
-                        price={p.discount ? p.price - (p.price * p.discount) / 100 : p.price}
-                        originalPrice={p.discount ? p.price : p.originalPrice}
-                      />
-                    </div>
-                    {p.discount && (
-                      <span className="inline-block bg-green-100 text-green-700 text-[10px] font-semibold px-2 py-0.5 rounded mt-1">Save {p.discount}%</span>
-                    )}
-                  </div>
-
-                  {/* Stock Status (show Out of Stock if stock/quantity < 1) */}
-                  <div className="text-xs font-medium">
-                    {(typeof p.stock === 'number' ? p.stock : (typeof p.quantity === 'number' ? p.quantity : 1)) > 0 ? (
-                      <span className="text-green-600">In Stock</span>
-                    ) : (
-                      <span className="text-red-600">Out of Stock</span>
-                    )}
-                  </div>
-                </div>
-              </Link>
+                id={p.id}
+                name={p.name}
+                price={p.price}
+                discount={p.discount}
+                image={p.image || p.thumbnail || (p.images && p.images[0])}
+                category={p.category || p.subcategory}
+                isNew={p.isNew}
+                isAvailable={p.isAvailable !== false}
+                availabilityReason={p.availabilityReason}
+                sizes={p.sizes}
+                colors={p.colors}
+                availableCount={typeof p.stock === 'number' ? p.stock : (typeof p.quantity === 'number' ? p.quantity : undefined)}
+              />
             ))}
           </div>
 
