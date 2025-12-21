@@ -180,7 +180,8 @@ const ProductCard: React.FC<any> = ({
           {/* Out of Stock Overlay */}
           {!isAvailable && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">Out of Stock</span>
+              <span className="text-white font-bold text-lg">{availabilityReason}</span>
+              {/* <p className="text-xs text-red-600 mt-2"></p> */}
             </div>
           )}
         </div>
