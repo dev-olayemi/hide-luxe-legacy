@@ -98,8 +98,8 @@ export const ProductCard = ({
 
   return (
     <Card className="relative overflow-hidden rounded-xl border bg-white shadow-sm">
-      {/* Image area - fixed height, no zoom */}
-      <div className="relative bg-white flex items-center justify-center border-b px-4 py-4 h-56">
+      {/* Image area - responsive height */}
+      <div className="relative bg-white flex items-center justify-center border-b px-3 sm:px-4 py-3 sm:py-4 h-40 sm:h-56">
         <Link
           to={`/product/${id}`}
           className="block w-full h-full flex items-center justify-center"
@@ -137,9 +137,9 @@ export const ProductCard = ({
         )}
       </div>
 
-      <CardContent className="p-4">
+      <CardContent className="p-3 sm:p-4">
         <Link to={`/product/${id}`}>
-          <h3 className="text-sm font-semibold mb-1 line-clamp-2 text-neutral-900">
+          <h3 className="text-xs sm:text-sm font-semibold mb-1 line-clamp-2 text-neutral-900">
             {name}
           </h3>
         </Link>
@@ -152,8 +152,8 @@ export const ProductCard = ({
 
         <div className="flex items-center justify-between mb-3">
           <div className="flex flex-col">
-            <div className="flex items-baseline gap-3">
-              <div className="text-lg font-bold text-neutral-900">
+            <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
+              <div className="text-base sm:text-lg font-bold text-neutral-900">
                 {formatPrice(discountedPrice)}
               </div>
               {discount && (
@@ -168,14 +168,19 @@ export const ProductCard = ({
               </div>
             )}
           </div>
-          <div className="text-xs text-muted-foreground">
-            {availableCount != null
-              ? `${availableCount} left`
-              : colors.length
-              ? `${colors.length} colors`
-              : ""}
-          </div>
+          {colors.length > 0 && (
+            <div className="text-xs text-muted-foreground">
+              {colors.length} colors
+            </div>
+          )}
         </div>
+
+        {/* Show unavailability reason when product is not available */}
+        {!isAvailable && availabilityReason && (
+          <div className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded mb-3 line-clamp-2">
+            {availabilityReason}
+          </div>
+        )}
 
         <div className="flex items-center gap-2 mb-3">
           {colors.slice(0, 3).map((c) => (
@@ -199,19 +204,19 @@ export const ProductCard = ({
           )}
         </div>
 
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-2 sm:gap-3 items-center flex-wrap">
           <Button 
             onClick={handleAddToCart} 
-            className="flex-1"
+            className="flex-1 min-w-0 text-xs sm:text-sm px-2 sm:px-4"
             disabled={!isAvailable}
             variant={isAvailable ? "default" : "secondary"}
           >
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            {isAvailable ? "Add" : "Unavailable"}
+            <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
+            <span className="truncate">{isAvailable ? "Add" : "Unavailable"}</span>
           </Button>
 
-          <Link to={`/product/${id}`} className="w-24">
-            <Button variant="outline" className="w-full">
+          <Link to={`/product/${id}`} className="w-16 sm:w-24 flex-shrink-0">
+            <Button variant="outline" className="w-full text-xs sm:text-sm px-2 sm:px-4">
               View
             </Button>
           </Link>
