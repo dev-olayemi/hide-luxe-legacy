@@ -113,6 +113,15 @@ export const ProductCard = ({
           />
         </Link>
 
+        {/* Unavailability overlay - shows availabilityReason, NOT hardcoded "Out of Stock" */}
+        {!isAvailable && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+            <span className="text-white font-semibold text-sm sm:text-base px-3 py-1 text-center">
+              {availabilityReason || "Unavailable"}
+            </span>
+          </div>
+        )}
+
         {/* wishlist button (visible) */}
         <button
           onClick={handleToggleWishlist}
