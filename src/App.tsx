@@ -11,6 +11,7 @@ import { WhatsAppChat } from "@/components/WhatsAppChat";
 import { BackToTop } from "@/components/BackToTop";
 import { ensureMobileViewport, setThemeColor, injectStructuredData } from "@/lib/seoUtils";
 import { SEO_CONFIG } from "@/config/seoConfig";
+import SiteLockGuard from "@/admin/SiteLockGuard";
 import Index from "./pages/Index";
 import NewArrivals from "./pages/NewArrivals";
 import Men from "./pages/Men";
@@ -36,6 +37,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Bespoke from "./pages/Bespoke";
 import Dashboard from "./pages/Dashboard";
 import Notifications from "./pages/Notifications";
+import Maintenance from "./pages/Maintenance";
 import NotFound from "./pages/NotFound";
 import CartDetails from "@/pages/CartDetails";
 import OrderSuccess from "@/pages/OrderSuccess";
@@ -77,10 +79,11 @@ const App = () => {
               <Toaster />
               <Sonner />
               <BrowserRouter>
-                <ScrollToTop />
-                <WhatsAppChat />
-                <BackToTop />
-                <Routes>
+                <SiteLockGuard>
+                  <ScrollToTop />
+                  <WhatsAppChat />
+                  <BackToTop />
+                  <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/new-arrivals" element={<NewArrivals />} />
                   <Route path="/men" element={<Men />} />
@@ -96,6 +99,7 @@ const App = () => {
                   {/* Support legacy/shared cart links like /cart/:cartId for sellers */}
                   <Route path="/cart/:cartId" element={<CartDetails />} />
                   <Route path="/wishlist" element={<Wishlist />} />
+                  <Route path="/we-locked" element={<Maintenance />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/about" element={<About />} />
@@ -116,6 +120,7 @@ const App = () => {
                   <Route path="/admin/*" element={<AdminRoutes />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                </SiteLockGuard>
               </BrowserRouter>
             </TooltipProvider>
           </CartProvider>

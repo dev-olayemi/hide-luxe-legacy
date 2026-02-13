@@ -1,7 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Footprints, Shirt, Backpack, Sparkles, Sofa, Zap, SortAsc, SortDesc, Star, MessageSquare, ShoppingBag, Tag } from 'lucide-react';
+import {
+  ArrowRight,
+  Footprints,
+  Shirt,
+  Backpack,
+  Sparkles,
+  Sofa,
+  Zap,
+  SortAsc,
+  SortDesc,
+  Star,
+  MessageSquare,
+  ShoppingBag,
+  Tag,
+} from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/firebase/firebaseConfig';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -20,44 +34,47 @@ interface CategoryItem {
 const categoryStyles: Record<string, { gradient: string; icon: React.ReactNode }> = {
   'footwear': {
     gradient: 'from-amber-600 to-yellow-500',
-    icon: <Footprints className="w-24 h-24 text-yellow-200 opacity-30" />
+    icon: <Footprints className="w-24 h-24 text-yellow-200 opacity-30" />,
   },
   'apparel-outerwear': {
     gradient: 'from-slate-700 to-slate-500',
-    icon: <Shirt className="w-24 h-24 text-slate-200 opacity-30" />
+    icon: <Shirt className="w-24 h-24 text-slate-200 opacity-30" />,
   },
   'bags-travel': {
     gradient: 'from-orange-700 to-orange-500',
-    icon: <Backpack className="w-24 h-24 text-orange-200 opacity-30" />
+    icon: <Backpack className="w-24 h-24 text-orange-200 opacity-30" />,
   },
   'accessories': {
     gradient: 'from-purple-600 to-pink-500',
-    icon: <Sparkles className="w-24 h-24 text-pink-200 opacity-30" />
+    icon: <Sparkles className="w-24 h-24 text-pink-200 opacity-30" />,
   },
   'leather-interiors': {
     gradient: 'from-green-700 to-green-500',
-    icon: <Sofa className="w-24 h-24 text-green-200 opacity-30" />
+    icon: <Sofa className="w-24 h-24 text-green-200 opacity-30" />,
   },
   'automotive': {
     gradient: 'from-red-700 to-red-500',
-    icon: <Zap className="w-24 h-24 text-red-200 opacity-30" />
+    icon: <Zap className="w-24 h-24 text-red-200 opacity-30" />,
   },
   'specialty': {
     gradient: 'from-purple-600 to-pink-500',
-    icon: <Sparkles className="w-24 h-24 text-pink-200 opacity-30" />
+    icon: <Sparkles className="w-24 h-24 text-pink-200 opacity-30" />,
   },
 };
 
-// Map category slugs to public collection image filenames (served from /collections)
-const collectionImageMap: Record<string, string> = {
-  'footwear': 'brown-men-shoe.jpg',
-  'apparel-outerwear': 'ladies.jpg',
-  'bags-travel': 'leather-bag.jpg',
-  'accessories': '4-in-1-leather-accessories.jpg',
-  'leather-interiors': 'deep-brown-bag.jpg',
-  'automotive': 'Back-bag-for-men.jpg',
-  'specialty': 'cool-brown-bag.jpg',
-};
+// Helper function to get image URL for a category - use CORS proxy for external images
+function getCategoryImageUrl(category: CategoryItem): string {
+  if (!category.image) return '';
+  
+  // Use CORS proxy for external images
+  const imageUrl = category.image;
+  if (imageUrl.startsWith('http')) {
+    // Use allorigins CORS proxy (free, no signup needed)
+    return `https://api.allorigins.win/raw?url=${encodeURIComponent(imageUrl)}`;
+  }
+  
+  return imageUrl;
+}
 
 const defaultCategories: CategoryItem[] = [
   {
@@ -118,7 +135,7 @@ function slugify(name: string) {
     .replace(/(^-|-$)/g, '');
 }
 
-// Reusable ProductCard component (now with proper keys & mobile-friendly design)
+// Reusable ProductCard component (unchanged)
 const ProductCard: React.FC<any> = ({
   id,
   name = 'Unnamed Product',
@@ -181,24 +198,20 @@ const ProductCard: React.FC<any> = ({
           {!isAvailable && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
               <span className="text-white font-bold text-lg">{availabilityReason}</span>
-              {/* <p className="text-xs text-red-600 mt-2"></p> */}
             </div>
           )}
         </div>
 
         {/* Card Content */}
         <div className="p-4 flex flex-col flex-grow">
-          {/* Category */}
           {category && (
             <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{category}</p>
           )}
 
-          {/* Name */}
           <h3 className="font-semibold text-gray-900 line-clamp-2 leading-tight mb-3 group-hover:text-gray-700 transition-colors">
             {name}
           </h3>
 
-          {/* Price */}
           <div className="mt-auto">
             <div className="flex items-end gap-2">
               <span className="text-lg font-bold text-gray-900">{formatPrice(finalPrice)}</span>
@@ -208,7 +221,6 @@ const ProductCard: React.FC<any> = ({
             </div>
           </div>
 
-          {/* Sizes / Colors Preview (with unique keys) */}
           {(sizes.length > 0 || colors.length > 0) && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {sizes.slice(0, 4).map((size: string, idx: number) => (
@@ -233,7 +245,6 @@ const ProductCard: React.FC<any> = ({
             </div>
           )}
 
-          {/* Availability Reason */}
           {!isAvailable && availabilityReason && (
             <p className="text-xs text-red-600 mt-2">{availabilityReason}</p>
           )}
@@ -256,43 +267,26 @@ export const CategoriesGrid = () => {
           const items: CategoryItem[] = collectionsSnap.docs.map((d) => {
             const data = d.data() as any;
             return {
-              id: data.slug || slugify(data.name || d.id),
-              name: data.name || data.title || d.id,
+              id: d.id,
+              name: data.name || d.id,
               title: data.title || data.name || d.id,
               description: data.description || '',
-              image: data.image,
+              image: data.image || '',
               featured: data.featured ?? true,
             };
           });
           items.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
           setCategories(items);
-          return;
-        }
-
-        const q = collection(db, 'categories');
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-          const items: CategoryItem[] = snap.docs.map((d) => {
-            const data = d.data() as any;
-            return {
-              id: d.id,
-              name: data.name || data.title || d.id,
-              title: data.title || data.name || d.id,
-              description: data.description || '',
-              image: data.image,
-              featured: data.featured ?? true,
-            };
-          });
-          setCategories(items);
         }
       } catch (err) {
-        console.error('Failed to load categories from DB, using fallback', err);
+        console.error('Failed to load categories from DB:', err);
       }
     };
 
     fetchCategories();
   }, []);
 
+  // Product fetch remains unchanged...
   React.useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -344,18 +338,25 @@ export const CategoriesGrid = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-12">
           {categories.filter((cat) => cat.featured).map((category, index) => {
             const slug = category.id || slugify(category.name);
-            const imageUrl = category.image || `/collections/${collectionImageMap[slug] || collectionImageMap['specialty']}`;
+            const imageUrl = getCategoryImageUrl(category);
+
             return (
               <Link
                 key={slug}
                 to={`/category/${slug}`}
                 className="group relative overflow-hidden rounded-2xl h-64 sm:h-72 md:h-80 lg:h-96 transform transition-all duration-500 hover:scale-105 hover:shadow-2xl"
               >
-                <img
-                  src={imageUrl}
-                  alt={category.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
+                {imageUrl && (
+                  <img
+                    src={imageUrl}
+                    alt={category.title}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                )}
+                <div className="absolute inset-0 bg-gray-500"></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20 group-hover:from-black/85 transition-all duration-300" />
                 <div className="absolute top-0 left-0 w-24 h-24 border-t-2 border-l-2 border-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
@@ -378,18 +379,25 @@ export const CategoriesGrid = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mb-16">
           {categories.filter((cat) => !cat.featured).map((category) => {
             const slug = category.id || slugify(category.name);
-            const imageUrl = category.image || `/collections/${collectionImageMap[slug] || collectionImageMap['specialty']}`;
+            const imageUrl = getCategoryImageUrl(category);
+
             return (
               <Link
                 key={slug}
                 to={`/category/${slug}`}
                 className="group relative overflow-hidden rounded-2xl h-48 sm:h-56 md:h-64 lg:h-72 transform transition-all duration-500 hover:scale-105 hover:shadow-xl"
               >
-                <img
-                  src={imageUrl}
-                  alt={category.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
+                {imageUrl && (
+                  <img
+                    src={imageUrl}
+                    alt={category.title}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                )}
+                <div className="absolute inset-0 bg-gray-500"></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent group-hover:from-black/85 transition-all duration-300" />
                 <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
                   <h3 className="text-xl md:text-2xl font-bold mb-2">{category.title}</h3>
@@ -403,7 +411,7 @@ export const CategoriesGrid = () => {
           })}
         </div>
 
-        {/* All Products Section */}
+        {/* All Products Section – unchanged */}
         <div className="mt-16">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
             <h3 className="text-2xl md:text-3xl font-bold text-gray-900">All Products</h3>
@@ -433,7 +441,6 @@ export const CategoriesGrid = () => {
             </div>
           </div>
 
-          {/* Product Grid - Highly Mobile Responsive */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-6">
             {products.map((p) => (
               <ProductCard

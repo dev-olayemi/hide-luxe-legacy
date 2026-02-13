@@ -25,6 +25,7 @@ import AdminNotifications from "./pages/AdminNotifications";
 import AdminCoupons from "./pages/AdminCoupons";
 import AdminCollections from "./pages/AdminCollections";
 import AdminContacts from "./pages/AdminContacts";
+import SiteLock from "./pages/SiteLock";
 
 const AdminRoutes: React.FC = () => (
   <Suspense fallback={<div className="flex items-center justify-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
@@ -58,6 +59,7 @@ const AdminRoutes: React.FC = () => (
         <Route path="messaging" element={<AdminMessaging />} />
         <Route path="notifications" element={<AdminNotifications />} />
         <Route path="coupons" element={<AdminCoupons />} />
+        <Route path="site-lock" element={<SiteLock />} />
         <Route path="*" element={<Admin404 />} />
       </Route>
     </Routes>

@@ -1197,6 +1197,73 @@ export async function getUnreadContactCount(): Promise<number> {
   }
 }
 
+// Site Lock Functions
+export async function getSiteLockStatus() {
+  try {
+    const docRef = doc(db, "settings", "siteLock");
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return {
+        isLocked: data.isLocked || false,
+        reason: data.reason || "",
+        expectedLiftTime: data.expectedLiftTime?.toDate?.() || null,
+        lockedBy: data.lockedBy || "",
+        lockedAt: data.lockedAt?.toDate?.() || null,
+      };
+    }
+    return {
+      isLocked: false,
+      reason: "",
+      expectedLiftTime: null,
+      lockedBy: "",
+      lockedAt: null,
+    };
+  } catch (error) {
+    console.error("Error fetching site lock status:", error);
+    return {
+      isLocked: false,
+      reason: "",
+      expectedLiftTime: null,
+      lockedBy: "",
+      lockedAt: null,
+    };
+  }
+}
+
+export async function lockSite(reason: string, expectedLiftTime: Date, adminEmail: string) {
+  try {
+    await setDoc(doc(db, "settings", "siteLock"), {
+      isLocked: true,
+      reason,
+      expectedLiftTime,
+      lockedBy: adminEmail,
+      lockedAt: serverTimestamp(),
+    });
+    return true;
+  } catch (error) {
+    console.error("Error locking site:", error);
+    return false;
+  }
+}
+
+export async function unlockSite() {
+  try {
+    await setDoc(doc(db, "settings", "siteLock"), {
+      isLocked: false,
+      reason: "",
+      expectedLiftTime: null,
+      lockedBy: "",
+      lockedAt: null,
+    });
+    return true;
+  } catch (error) {
+    console.error("Error unlocking site:", error);
+    return false;
+  }
+}
+
 // Type definitions
 interface DeliveryDetails {
   fullName: string;
