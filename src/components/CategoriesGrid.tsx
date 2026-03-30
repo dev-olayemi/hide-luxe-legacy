@@ -62,18 +62,8 @@ const categoryStyles: Record<string, { gradient: string; icon: React.ReactNode }
   },
 };
 
-// Helper function to get image URL for a category - use CORS proxy for external images
 function getCategoryImageUrl(category: CategoryItem): string {
-  if (!category.image) return '';
-  
-  // Use CORS proxy for external images
-  const imageUrl = category.image;
-  if (imageUrl.startsWith('http')) {
-    // Use allorigins CORS proxy (free, no signup needed)
-    return `https://api.allorigins.win/raw?url=${encodeURIComponent(imageUrl)}`;
-  }
-  
-  return imageUrl;
+  return category.image || '';
 }
 
 const defaultCategories: CategoryItem[] = [
@@ -346,6 +336,7 @@ export const CategoriesGrid = () => {
                 to={`/category/${slug}`}
                 className="group relative overflow-hidden rounded-2xl h-64 sm:h-72 md:h-80 lg:h-96 transform transition-all duration-500 hover:scale-105 hover:shadow-2xl"
               >
+                <div className={`absolute inset-0 bg-gray-500 ${imageUrl ? 'opacity-0' : 'opacity-100'}`}></div>
                 {imageUrl && (
                   <img
                     src={imageUrl}
@@ -356,7 +347,6 @@ export const CategoriesGrid = () => {
                     }}
                   />
                 )}
-                <div className="absolute inset-0 bg-gray-500"></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20 group-hover:from-black/85 transition-all duration-300" />
                 <div className="absolute top-0 left-0 w-24 h-24 border-t-2 border-l-2 border-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
@@ -387,6 +377,7 @@ export const CategoriesGrid = () => {
                 to={`/category/${slug}`}
                 className="group relative overflow-hidden rounded-2xl h-48 sm:h-56 md:h-64 lg:h-72 transform transition-all duration-500 hover:scale-105 hover:shadow-xl"
               >
+                <div className={`absolute inset-0 bg-gray-500 ${imageUrl ? 'opacity-0' : 'opacity-100'}`}></div>
                 {imageUrl && (
                   <img
                     src={imageUrl}
@@ -397,7 +388,6 @@ export const CategoriesGrid = () => {
                     }}
                   />
                 )}
-                <div className="absolute inset-0 bg-gray-500"></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent group-hover:from-black/85 transition-all duration-300" />
                 <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
                   <h3 className="text-xl md:text-2xl font-bold mb-2">{category.title}</h3>
