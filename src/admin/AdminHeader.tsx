@@ -23,7 +23,8 @@ import {
   Gift,
   Image,
   Mail,
-  Lock
+  Lock,
+  Tag,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -48,6 +49,7 @@ const AdminHeader = () => {
   // Secondary items in "More" dropdown
   const secondaryNavItems = [
     { path: "/admin/site-lock", label: "Site Lock", icon: Lock },
+    { path: "/admin/serials", label: "Serials & Tags", icon: Tag },
     { path: "/admin/collections", label: "Collections", icon: Image },
     { path: "/admin/contacts", label: "Contacts", icon: Mail },
     { path: "/admin/notifications", label: "Notifications", icon: Megaphone },

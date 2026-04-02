@@ -42,6 +42,7 @@ import NotFound from "./pages/NotFound";
 import CartDetails from "@/pages/CartDetails";
 import OrderSuccess from "@/pages/OrderSuccess";
 import ProjectDetail from "@/pages/ProjectDetail";
+import Verify from "./pages/Verify";
 import { AuthProvider } from "@/contexts/AuthContext";
 import AdminRoutes from "./admin/AdminRoutes";
 
@@ -117,6 +118,7 @@ const App = () => {
                   <Route path="/order-success/:orderId" element={<OrderSuccess />} />
                   <Route path="/order-success" element={<OrderSuccess />} />
                   <Route path="/project/:id" element={<ProjectDetail />} />
+                  <Route path="/verify" element={<Verify />} />
                   <Route path="/admin/*" element={<AdminRoutes />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
