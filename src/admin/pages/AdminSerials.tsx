@@ -214,6 +214,59 @@ async function buildTagDataUrl(product: any): Promise<string> {
   ctx.fillStyle = "#bbbbbb";
   ctx.font = "18px 'Helvetica Neue', Arial, sans-serif";
   ctx.fillText("www.28hideluxe.com/verify", textX, ty);
+  ty += 30;
+
+  // ── Extra info row: sizes | material | care ─────────────────────────────────
+  const sizes: string[] = Array.isArray(product.sizes) ? product.sizes : [];
+  const materials: string = product.materials || "";
+  const care: string = product.care || "";
+
+  // Sizes chips
+  if (sizes.length > 0) {
+    ctx.font = "bold 18px 'Helvetica Neue', Arial, sans-serif";
+    ctx.fillStyle = "#555555";
+    ctx.fillText("SIZE:", textX, ty);
+    let chipX = textX + ctx.measureText("SIZE: ").width + 4;
+    ctx.font = "bold 17px monospace";
+    sizes.slice(0, 6).forEach(s => {
+      const sw = ctx.measureText(s).width + 16;
+      ctx.fillStyle = "#f0f0f0";
+      ctx.strokeStyle = "#cccccc"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(chipX, ty - 18, sw, 24, 4); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#222222";
+      ctx.fillText(s, chipX + 8, ty);
+      chipX += sw + 6;
+    });
+    ty += 32;
+  }
+
+  // Material
+  if (materials) {
+    ctx.font = "bold 17px 'Helvetica Neue', Arial, sans-serif";
+    ctx.fillStyle = "#555555";
+    ctx.textAlign = "left";
+    const matLabel = "MATERIAL: ";
+    ctx.fillText(matLabel, textX, ty);
+    ctx.font = "17px 'Helvetica Neue', Arial, sans-serif";
+    ctx.fillStyle = "#222222";
+    const matX = textX + ctx.measureText(matLabel).width;
+    const matLines = wrapText(ctx, materials, textMaxW - ctx.measureText(matLabel).width);
+    ctx.fillText(matLines[0] || materials, matX, ty);
+    ty += 26;
+  }
+
+  // Care
+  if (care) {
+    ctx.font = "bold 17px 'Helvetica Neue', Arial, sans-serif";
+    ctx.fillStyle = "#555555";
+    const careLabel = "CARE: ";
+    ctx.fillText(careLabel, textX, ty);
+    ctx.font = "17px 'Helvetica Neue', Arial, sans-serif";
+    ctx.fillStyle = "#222222";
+    const careX = textX + ctx.measureText(careLabel).width;
+    const careLines = wrapText(ctx, care, textMaxW - ctx.measureText(careLabel).width);
+    ctx.fillText(careLines[0] || care, careX, ty);
+  }
 
   // ── DASHED DIVIDER RIGHT ────────────────────────────────────────────────────
   ctx.save();

@@ -17,7 +17,7 @@ import {
   Bell,
 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
-import { useCurrency } from "@/contexts/CurrencyContext";
+import { useCurrency, Currency } from "@/contexts/CurrencyContext";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -151,14 +151,17 @@ export const Header = () => {
             {/* Currency Selector */}
             <Select
               value={currency}
-              onValueChange={(value: "NGN" | "USD") => setCurrency(value)}
+              onValueChange={(value: Currency) => setCurrency(value)}
             >
-              <SelectTrigger className="w-24 h-9 hidden md:flex font-semibold border-accent/30 hover:border-accent transition-colors">
+              <SelectTrigger className="w-28 h-9 hidden md:flex font-semibold border-accent/30 hover:border-accent transition-colors">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="NGN">₦ NGN</SelectItem>
                 <SelectItem value="USD">$ USD</SelectItem>
+                <SelectItem value="GBP">£ GBP</SelectItem>
+                <SelectItem value="EUR">€ EUR</SelectItem>
+                <SelectItem value="CAD">CA$ CAD</SelectItem>
               </SelectContent>
             </Select>
 
@@ -336,15 +339,16 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
     <div className="flex h-full flex-col">
       <div className="border-b p-4">
         <div className="flex items-center justify-between">
-          <Select defaultValue="NGN">
+          <Select value={currency} onValueChange={(value: Currency) => setCurrency(value)}>
             <SelectTrigger className="w-28">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="NGN">NGN</SelectItem>
-              <SelectItem value="USD">USD</SelectItem>
-              <SelectItem value="GBP">GBP</SelectItem>
-              <SelectItem value="EUR">EUR</SelectItem>
+              <SelectItem value="NGN">₦ NGN</SelectItem>
+              <SelectItem value="USD">$ USD</SelectItem>
+              <SelectItem value="GBP">£ GBP</SelectItem>
+              <SelectItem value="EUR">€ EUR</SelectItem>
+              <SelectItem value="CAD">CA$ CAD</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="ghost" size="icon" onClick={onClose}>

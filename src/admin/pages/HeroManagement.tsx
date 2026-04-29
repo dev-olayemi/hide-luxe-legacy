@@ -77,11 +77,11 @@ const HeroManagement = () => {
   const saveHeroContent = async () => {
     setSaving(true);
     try {
-      await setDoc(doc(db, 'siteSettings', 'hero'), heroContent);
+      await setDoc(doc(db, 'siteSettings', 'hero'), heroContent, { merge: true });
       toast.success('Hero content updated successfully!');
-    } catch (error) {
-      console.error('Error saving hero content:', error);
-      toast.error('Failed to save hero content');
+    } catch (error: any) {
+      console.error('Error saving hero content:', error?.code, error?.message, error);
+      toast.error(`Failed to save hero content: ${error?.code || error?.message || 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
@@ -90,11 +90,11 @@ const HeroManagement = () => {
   const saveNoticeBoard = async () => {
     setSaving(true);
     try {
-      await setDoc(doc(db, 'siteSettings', 'noticeBoard'), noticeBoard);
+      await setDoc(doc(db, 'siteSettings', 'noticeBoard'), noticeBoard, { merge: true });
       toast.success('Notice board updated successfully!');
-    } catch (error) {
-      console.error('Error saving notice board:', error);
-      toast.error('Failed to save notice board');
+    } catch (error: any) {
+      console.error('Error saving notice board:', error?.code, error?.message, error);
+      toast.error(`Failed to save notice board: ${error?.code || error?.message || 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
