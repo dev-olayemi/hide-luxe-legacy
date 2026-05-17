@@ -20,6 +20,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/firebase/firebaseConfig';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import OptimizedImage from './OptimizedImage';
+import ArtBanner from './ArtBanner';
 
 interface CategoryItem {
   id: string; // slug
@@ -248,6 +249,18 @@ export const CategoriesGrid = () => {
   const [categories, setCategories] = React.useState<CategoryItem[]>(defaultCategories);
   const [products, setProducts] = React.useState<any[]>([]);
   const [sortBy, setSortBy] = React.useState<'name' | 'price-low' | 'price-high' | 'rating' | 'popularity' | 'orders' | 'category'>('name');
+  const [artEnabled, setArtEnabled] = React.useState(false);
+
+  React.useEffect(() => {
+    // Check if art section is enabled
+    import('firebase/firestore').then(({ doc, getDoc }) => {
+      import('@/firebase/firebaseConfig').then(({ db }) => {
+        getDoc(doc(db, 'siteSettings', 'artSection')).then((snap) => {
+          if (snap.exists()) setArtEnabled(snap.data().enabled ?? false);
+        }).catch(() => {});
+      });
+    });
+  }, []);
 
   React.useEffect(() => {
     const fetchCategories = async () => {
@@ -400,6 +413,9 @@ export const CategoriesGrid = () => {
             );
           })}
         </div>
+
+        {/* Art Banner — always visible */}
+        <ArtBanner />
 
         {/* All Products Section – unchanged */}
         <div className="mt-16">

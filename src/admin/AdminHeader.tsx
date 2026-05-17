@@ -50,6 +50,7 @@ const AdminHeader = () => {
   const secondaryNavItems = [
     { path: "/admin/site-lock", label: "Site Lock", icon: Lock },
     { path: "/admin/serials", label: "Serials & Tags", icon: Tag },
+    { path: "/admin/art", label: "Art", icon: Palette },
     { path: "/admin/collections", label: "Collections", icon: Image },
     { path: "/admin/contacts", label: "Contacts", icon: Mail },
     { path: "/admin/notifications", label: "Notifications", icon: Megaphone },

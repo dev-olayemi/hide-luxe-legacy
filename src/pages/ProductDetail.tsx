@@ -23,6 +23,7 @@ import { ProductCard } from "@/components/ProductCard";
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
+  const { formatPrice } = useCurrency();
   const { toast } = useToast();
 
   const [product, setProduct] = useState<any | null>(null);
@@ -99,8 +100,6 @@ const ProductDetail = () => {
   }
 
   const inWishlist = isInWishlist(product.id);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { formatPrice } = useCurrency();
 
   // Compute discounted price when discount exists
   const discountedPrice = product?.discount

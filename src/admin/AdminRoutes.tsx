@@ -27,6 +27,7 @@ import AdminCollections from "./pages/AdminCollections";
 import AdminContacts from "./pages/AdminContacts";
 import SiteLock from "./pages/SiteLock";
 import AdminSerials from "./pages/AdminSerials";
+import AdminArt from "./pages/AdminArt";
 
 const AdminRoutes: React.FC = () => (
   <Suspense fallback={<div className="flex items-center justify-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
@@ -62,6 +63,7 @@ const AdminRoutes: React.FC = () => (
         <Route path="coupons" element={<AdminCoupons />} />
         <Route path="site-lock" element={<SiteLock />} />
         <Route path="serials" element={<AdminSerials />} />
+        <Route path="art" element={<AdminArt />} />
         <Route path="*" element={<Admin404 />} />
       </Route>
     </Routes>

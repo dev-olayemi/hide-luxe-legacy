@@ -29,6 +29,8 @@ dist-ssr
 *.sln
 *.sw?
 *.env
-*hide-luxe-firebase-adminsdk-fbsvc-5619a30c86.json
+# Firebase service account keys — never commit these
+*firebase-adminsdk*.json
 hide-luxe-firebase-adminsdk-fbsvc-5619a30c86.json
-firestore.rules
+# firestore.rules is tracked in git
+# firestore.rules

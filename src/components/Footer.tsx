@@ -154,6 +154,14 @@ export const Footer = () => {
                   Contact Us
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/artwork"
+                  className="text-foreground hover:text-accent transition-colors"
+                >
+                  Artwork
+                </Link>
+              </li>
             </ul>
           </div>
 

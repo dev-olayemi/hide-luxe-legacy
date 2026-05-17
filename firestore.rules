@@ -1,0 +1,130 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ────────────────────── HELPERS ──────────────────────
+    function isSignedIn() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+        || request.auth.token.email == 'muhammednetr@gmail.com'
+        || request.auth.token.email == 'muhammedt3ch@gmail.com'
+        || request.auth.token.email == '28hideluxe@gmail.com'
+      );
+    }
+
+    // ────────────────────── USERS ──────────────────────
+    match /users/{userId} {
+      allow read:   if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ────────────────── PUBLIC READ-ONLY ──────────────────
+    match /products/{productId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /projects/{projectId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /collections/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ────────────────── SITE SETTINGS (hero, notices, art toggle, etc.) ──────────────────
+    match /siteSettings/{docId} {
+      allow read: if true;           // public — needed for hero, notice board, art toggle on frontend
+      allow write: if isAdmin();
+    }
+
+    // ────────────────── SETTINGS (store config, lock status) ──────────────────
+    match /settings/{docId} {
+      allow read: if true || resource == null;
+      allow write: if isAdmin();
+    }
+
+    // ────────────────── USER-SPECIFIC DATA ──────────────────
+    match /carts/{userId} {
+      allow read, write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+
+    match /sharedCarts/{cartId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    match /wishlists/{userId} {
+      allow read, write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+
+    match /orders/{orderId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    match /bespokeRequests/{requestId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // ──────────────── NOTIFICATIONS ────────────────
+    match /notifications/{notificationId} {
+      allow read, list, create, update, delete: if isAdmin();
+      allow read, list, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // ──────────────── COUPONS & REDEMPTIONS ────────────────
+    match /storePointCoupons/{couponId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /storePointCouponRedemptions/{redemptionId} {
+      allow create: if isSignedIn();
+      allow read, list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // ────────────────────── REFUNDS ──────────────────────
+    match /refunds/{refundId} {
+      allow create: if isSignedIn();
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+
+    // ──────────────────── MISC ────────────────────
+    match /subscriptions/{subscriptionId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /newsletterSubscriptions/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /contactSubmissions/{submissionId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ────────────────────── DENY ALL OTHER PATHS ──────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

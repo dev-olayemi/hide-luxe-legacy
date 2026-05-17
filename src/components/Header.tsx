@@ -55,6 +55,7 @@ export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
+  const [artEnabled, setArtEnabled] = useState(false);
   const { cartItems, wishlistItems } = useCart();
   const { user } = useAuth();
   const { currency, setCurrency } = useCurrency();
@@ -74,6 +75,13 @@ export const Header = () => {
       }
     };
     fetchCategories();
+
+    // Check art section toggle
+    import('firebase/firestore').then(({ doc, getDoc }) => {
+      getDoc(doc(db, 'siteSettings', 'artSection'))
+        .then((snap) => { if (snap.exists()) setArtEnabled(snap.data().enabled ?? false); })
+        .catch(() => {});
+    });
   }, []);
 
   // build nav items dynamically from database only
@@ -122,6 +130,15 @@ export const Header = () => {
                 {item.label}
               </Link>
             ))}
+
+            {artEnabled && (
+              <Link
+                to="/artwork"
+                className="text-xs lg:text-sm font-semibold px-2 py-1 rounded hover:text-accent transition-colors whitespace-nowrap text-yellow-600 hover:text-yellow-500"
+              >
+                ARTWORK
+              </Link>
+            )}
 
             {overflowNav.length > 0 && (
               <DropdownMenu>
@@ -317,6 +334,7 @@ const MobileSidebar = ({ onClose }: { onClose: () => void }) => {
   const { cartItems, wishlistItems } = useCart();
   const { user } = useAuth();
   const { unreadCount } = useNotifications();
+  const { currency, setCurrency } = useCurrency();
   const [searchQuery, setSearchQuery] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
