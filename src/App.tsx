@@ -46,6 +46,7 @@ import Verify from "./pages/Verify";
 import Artwork from "./pages/Artwork";
 import { AuthProvider } from "@/contexts/AuthContext";
 import AdminRoutes from "./admin/AdminRoutes";
+import OfflineBanner from "@/components/OfflineBanner";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const App = () => {
               <Sonner />
               <BrowserRouter>
                 <SiteLockGuard>
+                  <OfflineBanner />
                   <ScrollToTop />
                   <WhatsAppChat />
                   <BackToTop />

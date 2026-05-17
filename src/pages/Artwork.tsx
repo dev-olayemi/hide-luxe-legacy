@@ -6,31 +6,34 @@ import { db } from "@/firebase/firebaseConfig";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useCurrency } from "@/contexts/CurrencyContext";
-import { ShoppingBag, Loader2 } from "lucide-react";
+import { ShoppingBag, Loader2, WifiOff, RefreshCw } from "lucide-react";
 import OptimizedImage from "@/components/OptimizedImage";
+import { isNetworkError } from "@/hooks/useNetworkStatus";
 
 const Artwork = () => {
   const [artworks, setArtworks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<'network' | 'other' | null>(null);
   const { formatPrice } = useCurrency();
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const snap = await getDocs(collection(db, "products"));
-        const items = snap.docs
-          .map((d) => ({ id: d.id, ...d.data() as any }))
-          .filter((p) => p.type === "art");
-        items.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-        setArtworks(items);
-      } catch (e) {
-        console.error("Failed to load artworks", e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetch();
-  }, []);
+  const loadArtworks = async () => {
+    setLoading(true);
+    setFetchError(null);
+    try {
+      const snap = await getDocs(collection(db, "products"));
+      const items = snap.docs
+        .map((d) => ({ id: d.id, ...d.data() as any }))
+        .filter((p) => p.type === "art");
+      items.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+      setArtworks(items);
+    } catch (e) {
+      setFetchError(isNetworkError(e) ? 'network' : 'other');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { loadArtworks(); }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -57,6 +60,24 @@ const Artwork = () => {
             {loading ? (
               <div className="flex justify-center py-20">
                 <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+              </div>
+            ) : fetchError === 'network' ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+                <WifiOff className="w-12 h-12 text-gray-300" />
+                <div>
+                  <p className="text-gray-700 font-semibold text-lg">You're offline</p>
+                  <p className="text-gray-500 text-sm mt-1">Check your connection and try again.</p>
+                </div>
+                <button onClick={loadArtworks} className="flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors">
+                  <RefreshCw className="w-4 h-4" /> Retry
+                </button>
+              </div>
+            ) : fetchError === 'other' ? (
+              <div className="text-center py-20">
+                <p className="text-gray-500 mb-3">Something went wrong loading artworks.</p>
+                <button onClick={loadArtworks} className="flex items-center gap-2 mx-auto px-5 py-2.5 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors">
+                  <RefreshCw className="w-4 h-4" /> Try Again
+                </button>
               </div>
             ) : artworks.length === 0 ? (
               <div className="text-center py-20 text-gray-400">
