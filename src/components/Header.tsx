@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebase/firebaseUtils";
 import { SearchDialog } from "@/components/SearchDialog";
 import {
@@ -77,11 +77,9 @@ export const Header = () => {
     fetchCategories();
 
     // Check art section toggle
-    import('firebase/firestore').then(({ doc, getDoc }) => {
-      getDoc(doc(db, 'siteSettings', 'artSection'))
-        .then((snap) => { if (snap.exists()) setArtEnabled(snap.data().enabled ?? false); })
-        .catch(() => {});
-    });
+    getDoc(doc(db, 'siteSettings', 'artSection'))
+      .then((snap) => { if (snap.exists()) setArtEnabled(snap.data().enabled ?? false); })
+      .catch(() => {});
   }, []);
 
   // build nav items dynamically from database only
@@ -93,8 +91,9 @@ export const Header = () => {
     length: c.name.length,
   }));
 
-  const MAX_VISIBLE = 4;
+  const MAX_VISIBLE = 3;
   const visibleNav = navItems.filter((item) => item.length <= 12).slice(0, MAX_VISIBLE);
+  // Everything not in visibleNav goes to overflow — including ARTWORK if art is enabled
   const overflowNav = navItems.filter((item) => !visibleNav.includes(item));
 
   return (
@@ -108,7 +107,7 @@ export const Header = () => {
               alt="28th Hide Luxe"
               className="h-10 md:h-14 w-auto rounded-full object-cover ring-accent/20 group-hover:ring-accent/40 transition-all"
             />
-            <div className="hidden md:flex flex-col leading-tight">
+            <div className="hidden lg:flex flex-col leading-tight">
               <span className="font-playfair text-base md:text-lg lg:text-xl font-bold tracking-tight leading-[1]">
                 <span className="inline-block num-fix">28TH</span>{" "}
                 <span className="inline-block">HIDE LUXE</span>
@@ -119,8 +118,8 @@ export const Header = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation - Center (with overflow menu) */}
-          <nav className="hidden md:flex items-center gap-2 lg:gap-4">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
             {visibleNav.map((item) => (
               <Link
                 key={item.id ?? item.to}
@@ -131,46 +130,52 @@ export const Header = () => {
               </Link>
             ))}
 
-            {artEnabled && (
-              <Link
-                to="/artwork"
-                className="text-xs lg:text-sm font-semibold px-2 py-1 rounded hover:text-accent transition-colors whitespace-nowrap text-yellow-600 hover:text-yellow-500"
-              >
-                ARTWORK
-              </Link>
-            )}
-
-            {overflowNav.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 text-xs lg:text-sm font-semibold px-2 py-1 rounded bg-background hover:bg-accent/10 transition-all shadow-sm border border-accent/20">
-                    More
-                    <ChevronDown className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56 animate-fade-in shadow-lg rounded-md border border-accent/30">
-                  <DropdownMenuLabel className="font-bold text-accent">More Categories</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {overflowNav.map((item) => (
-                    <DropdownMenuItem key={item.id ?? item.to} asChild>
-                      <Link to={item.to} className="w-full block text-xs lg:text-sm py-2 px-3 hover:bg-accent/10 rounded transition-colors">
-                        {item.label}
+            {/* More dropdown — includes overflow categories + ARTWORK if enabled */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-1 text-xs lg:text-sm font-semibold px-2 py-1 rounded bg-background hover:bg-accent/10 transition-all shadow-sm border border-accent/20 whitespace-nowrap">
+                  More
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-52 shadow-lg rounded-md border border-accent/30">
+                {artEnabled && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/artwork" className="w-full flex items-center gap-2 py-2 px-3 font-semibold text-yellow-600 hover:bg-yellow-50 rounded transition-colors">
+                        🎨 ARTWORK
                       </Link>
                     </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+                    {overflowNav.length > 0 && <DropdownMenuSeparator />}
+                  </>
+                )}
+                {overflowNav.length > 0 && (
+                  <>
+                    <DropdownMenuLabel className="font-bold text-accent text-xs">More Categories</DropdownMenuLabel>
+                    {overflowNav.map((item) => (
+                      <DropdownMenuItem key={item.id ?? item.to} asChild>
+                        <Link to={item.to} className="w-full block text-xs lg:text-sm py-2 px-3 hover:bg-accent/10 rounded transition-colors">
+                          {item.label}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </>
+                )}
+                {!artEnabled && overflowNav.length === 0 && (
+                  <DropdownMenuItem disabled>No more categories</DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
 
           {/* Actions - Right */}
-          <div className="flex items-center gap-3">
-            {/* Currency Selector */}
+          <div className="flex items-center gap-1 md:gap-2 lg:gap-3">
+            {/* Currency Selector — symbol only on md, full label on lg+ */}
             <Select
               value={currency}
               onValueChange={(value: Currency) => setCurrency(value)}
             >
-              <SelectTrigger className="w-28 h-9 hidden md:flex font-semibold border-accent/30 hover:border-accent transition-colors">
+              <SelectTrigger className="h-9 hidden md:flex font-semibold border-accent/30 hover:border-accent transition-colors w-16 lg:w-24">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
