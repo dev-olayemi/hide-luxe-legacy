@@ -167,7 +167,10 @@ export const CategoriesGrid = () => {
     setProductsError(null);
     try {
       const snap = await getDocs(collection(db, 'products'));
-      const items = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+      const items = snap.docs
+        .map((d) => ({ id: d.id, ...(d.data() as any) }))
+        // Exclude hidden products (isLive === false) and art products (shown on /artwork only)
+        .filter((p: any) => p.isLive !== false && p.type !== 'art');
       const sorted = [...items];
       if (sortBy === 'name') sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
       else if (sortBy === 'price-low') sorted.sort((a, b) => (a.price || 0) - (b.price || 0));

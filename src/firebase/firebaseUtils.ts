@@ -137,12 +137,18 @@ async function getAllProducts(options?: { liveOnly?: boolean; adminView?: boolea
     const q = query(collection(db, "products"));
     const snapshot = await getDocs(q);
     let products = snapshot.docs.map((doc) => ({ ...(doc.data() as any), id: doc.id }));
-    
-    // Filter for live products only if not admin view
-    if (options?.liveOnly && !options?.adminView) {
+
+    // Admin view: show everything
+    if (options?.adminView) return products;
+
+    // Public view: always exclude art products (they have their own /artwork page)
+    products = products.filter((p: any) => p.type !== 'art');
+
+    // Filter hidden products when liveOnly is requested
+    if (options?.liveOnly) {
       products = products.filter((product: any) => product.isLive !== false);
     }
-    
+
     return products;
   } catch (error: any) {
     throw new Error(error.message);

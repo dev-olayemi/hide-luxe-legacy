@@ -46,7 +46,7 @@ const ProductDetail = () => {
           // Fetch all products to find related ones
           const allProducts = await getAllProducts({ liveOnly: true });
           const related = allProducts
-            .filter((p: any) => p.id !== id && p.category === data.category)
+            .filter((p: any) => p.id !== id && p.category === data.category && p.type !== 'art')
             .slice(0, 6);
           setRelatedProducts(related);
         }

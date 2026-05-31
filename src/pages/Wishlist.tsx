@@ -16,7 +16,7 @@ const Wishlist = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getAllProducts().then((data) => {
+    getAllProducts({ liveOnly: true }).then((data) => {
       setAllProducts(data);
       setLoading(false);
     });
