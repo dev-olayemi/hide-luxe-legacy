@@ -33,7 +33,7 @@ interface SEOHeadProps {
 export const SEOHead = ({
   title = "HLX - Premium Leather Luxury | Footwear, Apparel & Accessories",
   description = "Discover HLX's exquisite collection of premium leather goods including footwear, apparel, bags, accessories, furniture and automotive leather. Luxury crafted with genuine hide.",
-  image = "https://www.28hideluxe.com/logo.png",
+  image = "https://www.28hideluxe.com/hide-luxe.png",
   url = "https://www.28hideluxe.com",
   type = "website",
   canonical,
@@ -68,14 +68,18 @@ export const SEOHead = ({
     updateMetaTag('og:title', title);
     updateMetaTag('og:description', description);
     updateMetaTag('og:image', image);
+    updateMetaTag('og:image:width', '1200');
+    updateMetaTag('og:image:height', '630');
+    updateMetaTag('og:image:alt', title);
     updateMetaTag('og:url', url);
     updateMetaTag('og:type', type);
     updateMetaTag('og:site_name', 'HLX - 28th Hide Luxe');
-    
+
     // Twitter Card Tags
     updateMetaTag('twitter:title', title);
     updateMetaTag('twitter:description', description);
     updateMetaTag('twitter:image', image);
+    updateMetaTag('twitter:image:alt', title);
     updateMetaTag('twitter:card', 'summary_large_image');
     updateMetaTag('twitter:site', '@hideluxe');
     
