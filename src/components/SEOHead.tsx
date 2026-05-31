@@ -33,7 +33,7 @@ interface SEOHeadProps {
 export const SEOHead = ({
   title = "HLX - Premium Leather Luxury | Footwear, Apparel & Accessories",
   description = "Discover HLX's exquisite collection of premium leather goods including footwear, apparel, bags, accessories, furniture and automotive leather. Luxury crafted with genuine hide.",
-  image = "https://www.28hideluxe.com/hide-luxe.png",
+  image = "https://www.28hideluxe.com/og-image.jpg",
   url = "https://www.28hideluxe.com",
   type = "website",
   canonical,
