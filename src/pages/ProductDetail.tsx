@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -22,6 +22,7 @@ import { ProductCard } from "@/components/ProductCard";
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const { formatPrice } = useCurrency();
   const { toast } = useToast();
@@ -31,7 +32,9 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(
+    (location.state as any)?.selectedImageIndex ?? 0
+  );
   const [colorHexMap, setColorHexMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -60,9 +63,10 @@ const ProductDetail = () => {
     fetchProduct();
   }, [id]);
 
-  // reset selected image when product changes
+  // reset selected image when product changes (but honour navigation state if it arrived for this product)
   useEffect(() => {
-    setSelectedImageIndex(0);
+    const navIndex = (location.state as any)?.selectedImageIndex ?? 0;
+    setSelectedImageIndex(navIndex);
   }, [product?.id]);
 
   // Fetch color hex values when product colors change
@@ -469,6 +473,7 @@ const ProductDetail = () => {
                   price={p.price}
                   discount={p.discount}
                   image={p.image || p.thumbnail || (p.images && p.images[0])}
+                  images={Array.isArray(p.images) ? p.images : undefined}
                   category={p.category || p.subcategory}
                   isNew={p.isNew}
                   isAvailable={p.isAvailable !== false}

@@ -38,6 +38,7 @@ const ProductList = () => {
               ? p.images[0]
               : "/placeholder.png"
           }
+          images={Array.isArray(p.images) ? p.images : undefined}
           category={p.category}
           isNew={p.isNew}
           isAvailable={p.isAvailable !== false}

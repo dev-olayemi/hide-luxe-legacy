@@ -232,6 +232,7 @@ export const NewArrivalsShowcase: React.FC<NewArrivalsShowcaseProps> = ({ catego
                         ? product.images[0]
                         : product.image || '/placeholder.png'
                     }
+                    images={Array.isArray(product.images) ? product.images : undefined}
                     category={product.category}
                     isNew={product.isNew}
                     discount={product.discount}

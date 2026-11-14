@@ -32,7 +32,8 @@ const Accessories = () => {
                 id={product.id}
                 name={product.name}
                 price={product.price}
-                image={product.image}
+                image={product.image || (Array.isArray(product.images) && product.images[0]) || "/placeholder.png"}
+                images={Array.isArray(product.images) ? product.images : undefined}
                 category={product.category}
                 isNew={product.isNew}
               />

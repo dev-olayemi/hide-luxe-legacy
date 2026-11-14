@@ -7,7 +7,6 @@ import { CartProvider } from "@/contexts/CartContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { WhatsAppChat } from "@/components/WhatsAppChat";
 import { BackToTop } from "@/components/BackToTop";
 import { ensureMobileViewport, setThemeColor, injectStructuredData } from "@/lib/seoUtils";
 import { SEO_CONFIG } from "@/config/seoConfig";
@@ -85,7 +84,6 @@ const App = () => {
                 <SiteLockGuard>
                   <OfflineBanner />
                   <ScrollToTop />
-                  <WhatsAppChat />
                   <BackToTop />
                   <Routes>
                   <Route path="/" element={<Index />} />

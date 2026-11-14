@@ -1,13 +1,14 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, ShoppingCart } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Heart, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { cn } from "@/lib/utils";
 import OptimizedImage from "./OptimizedImage";
+import { useState, useCallback } from "react";
 
 interface ColorOption {
   label: string;
@@ -21,6 +22,7 @@ interface ProductCardProps {
   price: number;
   discount?: number;
   image: string;
+  images?: string[];
   category?: string;
   isNew?: boolean;
   sizes?: string[];
@@ -36,6 +38,7 @@ export const ProductCard = ({
   price,
   discount,
   image,
+  images,
   category,
   isNew,
   sizes = [],
@@ -47,7 +50,43 @@ export const ProductCard = ({
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const { toast } = useToast();
   const { formatPrice } = useCurrency();
+  const navigate = useNavigate();
   const inWishlist = isInWishlist(id);
+
+  // Build the full image list
+  const allImages: string[] = (() => {
+    if (Array.isArray(images) && images.length > 0) return images;
+    return [image].filter(Boolean);
+  })();
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  const hasMultiple = allImages.length > 1;
+
+  const prev = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setActiveIndex((i) => (i - 1 + allImages.length) % allImages.length);
+    },
+    [allImages.length]
+  );
+
+  const next = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setActiveIndex((i) => (i + 1) % allImages.length);
+    },
+    [allImages.length]
+  );
+
+  // Navigate to product page with the clicked image pre-selected
+  const handleImageClick = useCallback(
+    (idx: number) => {
+      navigate(`/product/${id}`, { state: { selectedImageIndex: idx } });
+    },
+    [id, navigate]
+  );
 
   // Calculate discounted price
   const discountedPrice = discount ? price - (price * discount) / 100 : price;
@@ -64,12 +103,11 @@ export const ProductCard = ({
       return;
     }
     try {
-      // addToCart expects the item object without `quantity` (CartContext handles quantities)
       addToCart({
         id,
         name,
         price: discountedPrice,
-        image,
+        image: allImages[0] || image,
         category: category || "",
       });
       toast({
@@ -98,22 +136,44 @@ export const ProductCard = ({
 
   return (
     <Card className="relative overflow-hidden rounded-xl border bg-white shadow-sm">
-      {/* Image area - responsive height */}
+      {/* ── Main image area ── */}
       <div className="relative bg-white flex items-center justify-center border-b px-3 sm:px-4 py-3 sm:py-4 h-40 sm:h-56">
-        <Link
-          to={`/product/${id}`}
-          className="block w-full h-full flex items-center justify-center"
+        {/* Clicking the main image goes to the product page */}
+        <button
+          onClick={() => handleImageClick(activeIndex)}
+          className="block w-full h-full flex items-center justify-center focus:outline-none"
+          aria-label={`View ${name}`}
         >
           <OptimizedImage
-            src={image}
+            src={allImages[activeIndex] || image}
             alt={name}
             className="max-h-full max-w-full object-contain"
             width={560}
             height={560}
           />
-        </Link>
+        </button>
 
-        {/* Unavailability overlay - shows availabilityReason, NOT hardcoded "Out of Stock" */}
+        {/* Prev / Next arrows */}
+        {hasMultiple && (
+          <>
+            <button
+              onClick={prev}
+              aria-label="Previous image"
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/90 shadow p-1 hover:bg-white transition"
+            >
+              <ChevronLeft className="h-4 w-4 text-neutral-700" />
+            </button>
+            <button
+              onClick={next}
+              aria-label="Next image"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/90 shadow p-1 hover:bg-white transition"
+            >
+              <ChevronRight className="h-4 w-4 text-neutral-700" />
+            </button>
+          </>
+        )}
+
+        {/* Unavailability overlay */}
         {!isAvailable && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
             <span className="text-white font-semibold text-sm sm:text-base px-3 py-1 text-center">
@@ -122,15 +182,13 @@ export const ProductCard = ({
           </div>
         )}
 
-        {/* wishlist button (visible) */}
+        {/* Wishlist button */}
         <button
           onClick={handleToggleWishlist}
           aria-label="Toggle wishlist"
           className="absolute right-3 top-3 z-20 rounded-full bg-white/95 p-2 shadow hover:bg-white"
         >
-          <Heart
-            className={cn("h-4 w-4", inWishlist && "fill-accent text-accent")}
-          />
+          <Heart className={cn("h-4 w-4", inWishlist && "fill-accent text-accent")} />
         </button>
 
         {isNew && (
@@ -159,6 +217,7 @@ export const ProductCard = ({
           </p>
         )}
 
+        {/* Price */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex flex-col">
             <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
@@ -184,27 +243,25 @@ export const ProductCard = ({
           )}
         </div>
 
-        {/* Show unavailability reason when product is not available */}
+        {/* Unavailability reason */}
         {!isAvailable && availabilityReason && (
           <div className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded mb-3 line-clamp-2">
             {availabilityReason}
           </div>
         )}
 
+        {/* Sizes + color swatches */}
         <div className="flex items-center gap-2 mb-3">
           {colors.slice(0, 3).map((c) => (
-            <div key={c.value} className="flex flex-col items-center gap-1">
-              <span
-                className="w-6 h-6 rounded-full border"
-                style={{ backgroundColor: c.hex || undefined }}
-                title={c.label}
-              />
-            </div>
+            <span
+              key={c.value}
+              className="w-6 h-6 rounded-full border flex-shrink-0"
+              style={{ backgroundColor: c.hex || undefined }}
+              title={c.label}
+            />
           ))}
           {colors.length > 3 && (
-            <span className="text-xs text-muted-foreground">
-              +{colors.length - 3}
-            </span>
+            <span className="text-xs text-muted-foreground">+{colors.length - 3}</span>
           )}
           {sizes.length > 0 && (
             <span className="text-xs text-muted-foreground ml-auto">
@@ -213,9 +270,37 @@ export const ProductCard = ({
           )}
         </div>
 
+        {/* ── Extra image thumbnails (shown when product has more than 1 image) ── */}
+        {hasMultiple && (
+          <div className="flex gap-1.5 mb-3 flex-wrap">
+            {allImages.map((src, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleImageClick(idx)}
+                aria-label={`View image ${idx + 1}`}
+                className={cn(
+                  "w-10 h-10 rounded-md border overflow-hidden flex-shrink-0 transition-all",
+                  idx === activeIndex
+                    ? "border-neutral-800 ring-1 ring-neutral-800"
+                    : "border-neutral-200 hover:border-neutral-500"
+                )}
+                onMouseEnter={() => setActiveIndex(idx)}
+              >
+                <img
+                  src={src}
+                  alt={`${name} ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Action buttons */}
         <div className="flex gap-2 sm:gap-3 items-center flex-wrap">
-          <Button 
-            onClick={handleAddToCart} 
+          <Button
+            onClick={handleAddToCart}
             className="flex-1 min-w-0 text-xs sm:text-sm px-2 sm:px-4"
             disabled={!isAvailable}
             variant={isAvailable ? "default" : "secondary"}
@@ -248,8 +333,6 @@ export const ProductCard = ({
               <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </Button>
-
-          {/* PalmPay button intentionally removed from product cards; PalmPay flow is available from Cart page */}
         </div>
       </CardContent>
     </Card>

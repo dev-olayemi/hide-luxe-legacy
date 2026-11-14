@@ -65,6 +65,7 @@ const Wishlist = () => {
                     ? product.images[0]
                     : "/placeholder.png"
                 }
+                images={Array.isArray(product.images) ? product.images : undefined}
                 category={product.category}
                 isNew={product.isNew}
                 isAvailable={product.isAvailable !== false}

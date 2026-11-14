@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowRight, Footprints, Shirt, Backpack, Sparkles, Sofa, Zap,
   SortAsc, SortDesc, Star, MessageSquare, ShoppingBag, Tag,
-  WifiOff, RefreshCw,
+  WifiOff, RefreshCw, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/firebase/firebaseConfig';
@@ -64,25 +64,54 @@ const OfflineBanner = ({ onRetry }: { onRetry: () => void }) => (
 
 // ── ProductCard ───────────────────────────────────────────────────────────────
 const ProductCard: React.FC<any> = ({
-  id, name = 'Unnamed Product', price = 0, discount, image, category,
+  id, name = 'Unnamed Product', price = 0, discount, image, images, category,
   isNew = false, isAvailable = true, availabilityReason,
   sizes = [], colors = [], availableCount,
 }) => {
   const { formatPrice } = useCurrency();
+  const navigate = useNavigate();
   const finalPrice = discount ? price * (1 - discount / 100) : price;
   const hasDiscount = discount && discount > 0;
 
+  // Build the full image list
+  const allImages: string[] = (() => {
+    if (Array.isArray(images) && images.length > 0) return images;
+    return [image].filter(Boolean);
+  })();
+  const hasMultiple = allImages.length > 1;
+  const [activeIndex, setActiveIndex] = React.useState(0);
+
+  const prev = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); setActiveIndex(i => (i - 1 + allImages.length) % allImages.length); };
+  const next = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); setActiveIndex(i => (i + 1) % allImages.length); };
+  const handleImageClick = (idx: number) => navigate(`/product/${id}`, { state: { selectedImageIndex: idx } });
+
   return (
-    <Link to={`/product/${id}`} className="group block w-full h-full transform transition-all duration-300 hover:-translate-y-2">
+    <div className="group block w-full h-full transform transition-all duration-300 hover:-translate-y-2">
       <div className="relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">
+        {/* Main image */}
         <div className="relative aspect-square overflow-hidden bg-gray-50">
-          {image ? (
-            <OptimizedImage src={image} alt={name} className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-100">
-              <ShoppingBag className="w-16 h-16 text-gray-300" />
-            </div>
+          <button onClick={() => handleImageClick(activeIndex)} className="w-full h-full focus:outline-none" aria-label={`View ${name}`}>
+            {allImages[activeIndex] ? (
+              <OptimizedImage src={allImages[activeIndex]} alt={name} className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                <ShoppingBag className="w-16 h-16 text-gray-300" />
+              </div>
+            )}
+          </button>
+
+          {/* Prev / Next arrows */}
+          {hasMultiple && (
+            <>
+              <button onClick={prev} aria-label="Previous image" className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/90 shadow p-1 hover:bg-white transition opacity-0 group-hover:opacity-100">
+                <ChevronLeft className="w-4 h-4 text-neutral-700" />
+              </button>
+              <button onClick={next} aria-label="Next image" className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 rounded-full bg-white/90 shadow p-1 hover:bg-white transition opacity-0 group-hover:opacity-100">
+                <ChevronRight className="w-4 h-4 text-neutral-700" />
+              </button>
+            </>
           )}
+
           <div className="absolute top-3 left-3 flex flex-col gap-2">
             {isNew && <span className="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold rounded-full shadow-md">NEW</span>}
             {hasDiscount && <span className="px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full shadow-md">-{discount}%</span>}
@@ -98,6 +127,8 @@ const ProductCard: React.FC<any> = ({
             </div>
           )}
         </div>
+
+        {/* Card body */}
         <div className="p-4 flex flex-col flex-grow">
           {category && <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{category}</p>}
           <h3 className="font-semibold text-gray-900 line-clamp-2 leading-tight mb-3 group-hover:text-gray-700 transition-colors">{name}</h3>
@@ -107,6 +138,8 @@ const ProductCard: React.FC<any> = ({
               {hasDiscount && <span className="text-sm text-gray-500 line-through">{formatPrice(price)}</span>}
             </div>
           </div>
+
+          {/* Sizes + color swatches */}
           {(sizes.length > 0 || colors.length > 0) && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {sizes.slice(0, 4).map((size: string, idx: number) => (
@@ -118,10 +151,32 @@ const ProductCard: React.FC<any> = ({
               {(sizes.length > 4 || colors.length > 5) && <span className="text-xs text-gray-500 self-center">+ more</span>}
             </div>
           )}
+
+          {/* ── Extra image thumbnails ── */}
+          {hasMultiple && (
+            <div className="mt-3 flex gap-1.5 flex-wrap">
+              {allImages.map((src: string, idx: number) => (
+                <button
+                  key={idx}
+                  onClick={() => handleImageClick(idx)}
+                  aria-label={`View image ${idx + 1}`}
+                  onMouseEnter={() => setActiveIndex(idx)}
+                  className={`w-10 h-10 rounded-md border overflow-hidden flex-shrink-0 transition-all ${
+                    idx === activeIndex
+                      ? 'border-neutral-800 ring-1 ring-neutral-800'
+                      : 'border-neutral-200 hover:border-neutral-500'
+                  }`}
+                >
+                  <img src={src} alt={`${name} ${idx + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                </button>
+              ))}
+            </div>
+          )}
+
           {!isAvailable && availabilityReason && <p className="text-xs text-red-600 mt-2">{availabilityReason}</p>}
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 
@@ -317,6 +372,7 @@ export const CategoriesGrid = () => {
                     price={p.price || 0}
                     discount={p.discount}
                     image={p.image || p.thumbnail || (p.images && p.images[0])}
+                    images={Array.isArray(p.images) ? p.images : undefined}
                     category={p.category || p.subcategory}
                     isNew={p.isNew || p.new}
                     isAvailable={p.isAvailable !== false}
