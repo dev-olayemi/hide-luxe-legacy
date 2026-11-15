@@ -141,7 +141,7 @@ export const ProductCard = ({
         {/* Clicking the main image goes to the product page */}
         <button
           onClick={() => handleImageClick(activeIndex)}
-          className="block w-full h-full flex items-center justify-center focus:outline-none"
+          className="w-full h-full flex items-center justify-center focus:outline-none"
           aria-label={`View ${name}`}
         >
           <OptimizedImage
@@ -252,11 +252,11 @@ export const ProductCard = ({
 
         {/* Sizes + color swatches */}
         <div className="flex items-center gap-2 mb-3">
-          {colors.slice(0, 3).map((c) => (
+          {colors.filter((c) => c.hex).slice(0, 3).map((c) => (
             <span
               key={c.value}
               className="w-6 h-6 rounded-full border flex-shrink-0"
-              style={{ backgroundColor: c.hex || undefined }}
+              style={{ backgroundColor: c.hex }}
               title={c.label}
             />
           ))}

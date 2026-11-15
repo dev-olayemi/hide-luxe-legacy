@@ -145,10 +145,10 @@ const ProductCard: React.FC<any> = ({
               {sizes.slice(0, 4).map((size: string, idx: number) => (
                 <span key={`${id}-size-${size}-${idx}`} className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-700">{size}</span>
               ))}
-              {colors.slice(0, 5).map((color: { name: string; hex: string }, idx: number) => (
+              {colors.filter((color: { name: string; hex: string }) => color.hex).slice(0, 5).map((color: { name: string; hex: string }, idx: number) => (
                 <div key={`${id}-color-${color.hex}-${idx}`} className="w-6 h-6 rounded-full border-2 border-white shadow-sm ring-1 ring-gray-300" style={{ backgroundColor: color.hex }} title={color.name} />
               ))}
-              {(sizes.length > 4 || colors.length > 5) && <span className="text-xs text-gray-500 self-center">+ more</span>}
+              {(sizes.length > 4 || colors.filter((c: { hex: string }) => c.hex).length > 5) && <span className="text-xs text-gray-500 self-center">+ more</span>}
             </div>
           )}
 
